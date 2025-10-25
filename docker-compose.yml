@@ -8,11 +8,11 @@ services:
       dockerfile: Dockerfile
     container_name: sql-monitor-api
     ports:
-      - "${ASPNETCORE_URLS:-5000}:5000"
+      - "5000:5000"
     environment:
       - ConnectionStrings__MonitoringDB=${DB_CONNECTION_STRING}
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
-      - ApiKey=${API_KEY}
+      - ASPNETCORE_URLS=http://+:5000
     restart: unless-stopped
     networks:
       - sql-monitor-network
