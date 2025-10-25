@@ -1,0 +1,72 @@
+# SQL Server Monitor - .gitignore
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Database backup files
+*.bak
+*.trn
+
+# SQL Server files
+*.mdf
+*.ldf
+*.ndf
+
+# ASP.NET Core
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.dll
+*.exe
+*.pdb
+appsettings.Development.json
+appsettings.Production.json
+
+# Docker
+docker-compose.override.yml
+
+# Grafana
+dashboards/grafana/data/
+dashboards/grafana/plugins/
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Test results
+TestResults/
+*.trx
+coverage/
+
+# NuGet
+*.nupkg
+packages/
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
