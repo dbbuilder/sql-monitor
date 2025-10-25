@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SqlMonitor.Api.csproj" />
+    <ProjectReference Include="..\api\SqlMonitor.Api.csproj" />
   </ItemGroup>
 
 </Project>
