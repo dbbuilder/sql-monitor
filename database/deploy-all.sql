@@ -37,12 +37,21 @@ GO
 -- =====================================================
 
 PRINT '';
-PRINT 'Step 3/4: Creating tables...';
+PRINT 'Step 3/5: Creating tables...';
 :r 02-create-tables.sql
 GO
 
 -- =====================================================
--- Step 4: Deployment Summary
+-- Step 4: Create Stored Procedures
+-- =====================================================
+
+PRINT '';
+PRINT 'Step 4/5: Creating stored procedures...';
+:r 04-create-procedures.sql
+GO
+
+-- =====================================================
+-- Step 5: Deployment Summary
 -- =====================================================
 
 USE MonitoringDB;
@@ -58,6 +67,10 @@ PRINT '';
 SELECT 'Tables' AS ObjectType, COUNT(*) AS Count
 FROM sys.tables
 WHERE name IN ('Servers', 'PerformanceMetrics')
+UNION ALL
+SELECT 'Stored Procedures', COUNT(*)
+FROM sys.procedures
+WHERE name IN ('usp_GetServers', 'usp_InsertMetrics', 'usp_GetMetrics')
 UNION ALL
 SELECT 'Partition Functions', COUNT(*)
 FROM sys.partition_functions
@@ -83,11 +96,22 @@ PRINT '   Download from https://tsqlt.org/downloads/';
 PRINT '   :r 00-install-tsqlt.sql';
 PRINT '   :r path\to\tSQLt.class.sql';
 PRINT '';
-PRINT '2. Run tests to verify GREEN phase:';
+PRINT '2. Load test suites:';
 PRINT '   :r database/tests/test_Servers.sql';
 PRINT '   :r database/tests/test_PerformanceMetrics.sql';
+PRINT '   :r database/tests/test_usp_GetServers.sql';
+PRINT '   :r database/tests/test_usp_InsertMetrics.sql';
+PRINT '   :r database/tests/test_usp_GetMetrics.sql';
+PRINT '';
+PRINT '3. Run all tests:';
 PRINT '   EXEC tSQLt.RunAll;';
 PRINT '';
-PRINT '3. Expected Result: ALL TESTS PASS ✓';
+PRINT '4. Expected Result: ALL TESTS PASS ✓';
+PRINT '   - ServerTests: 10 tests';
+PRINT '   - PerformanceMetricsTests: 10 tests';
+PRINT '   - usp_GetServersTests: 7 tests';
+PRINT '   - usp_InsertMetricsTests: 7 tests';
+PRINT '   - usp_GetMetricsTests: 7 tests';
+PRINT '   TOTAL: 41 tests';
 PRINT '========================================================';
 GO
