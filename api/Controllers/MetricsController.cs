@@ -99,4 +99,155 @@ public class MetricsController : ControllerBase
             return StatusCode(500, new { error = ex.Message });
         }
     }
+
+    /// <summary>
+    /// Trigger on-demand metrics collection (for Grafana 30-second refresh)
+    /// </summary>
+    /// <param name="serverId">Server ID to collect metrics for (default: 1)</param>
+    /// <param name="includeAdvanced">Include advanced metrics (blocking, index analysis, etc.) - slower</param>
+    /// <returns>Collection status</returns>
+    [HttpPost("collect")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> TriggerCollection(
+        [FromQuery] int serverId = 1,
+        [FromQuery] bool includeAdvanced = false)
+    {
+        try
+        {
+            var startTime = DateTime.UtcNow;
+
+            _logger.LogInformation(
+                "Triggering metrics collection for server {ServerId}, includeAdvanced: {IncludeAdvanced}",
+                serverId, includeAdvanced);
+
+            // Call the main collection procedure
+            await _sqlService.CollectMetricsAsync(serverId, includeAdvanced);
+
+            var duration = (DateTime.UtcNow - startTime).TotalMilliseconds;
+
+            _logger.LogInformation(
+                "Metrics collection completed in {Duration}ms for server {ServerId}",
+                duration, serverId);
+
+            return Ok(new
+            {
+                success = true,
+                serverId = serverId,
+                includeAdvanced = includeAdvanced,
+                durationMs = duration,
+                collectedAt = DateTime.UtcNow,
+                message = includeAdvanced
+                    ? "Complete metrics collection (server + drill-down + advanced) completed successfully"
+                    : "Fast metrics collection (server + drill-down) completed successfully"
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error collecting metrics for server {ServerId}", serverId);
+            return StatusCode(500, new
+            {
+                success = false,
+                error = ex.Message,
+                serverId = serverId
+            });
+        }
+    }
+
+    /// <summary>
+    /// Get last collection time for a server
+    /// </summary>
+    /// <param name="serverId">Server ID</param>
+    /// <returns>Last collection timestamp</returns>
+    [HttpGet("last-collection/{serverId}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> GetLastCollectionTime(int serverId)
+    {
+        try
+        {
+            var lastCollection = await _sqlService.GetLastCollectionTimeAsync(serverId);
+
+            if (lastCollection == null)
+            {
+                return NotFound(new
+                {
+                    serverId = serverId,
+                    message = "No collections found for this server"
+                });
+            }
+
+            var timeSinceCollection = DateTime.UtcNow - lastCollection.Value;
+
+            return Ok(new
+            {
+                serverId = serverId,
+                lastCollectionTime = lastCollection.Value,
+                secondsSinceCollection = timeSinceCollection.TotalSeconds,
+                isStale = timeSinceCollection.TotalMinutes > 10 // Flag if no collection in 10 minutes
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving last collection time for server {ServerId}", serverId);
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Health check endpoint to verify metrics collection is working
+    /// </summary>
+    [HttpGet("health")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
+    public async Task<ActionResult> GetHealthStatus()
+    {
+        try
+        {
+            var lastCollection = await _sqlService.GetLastCollectionTimeAsync(1);
+
+            if (lastCollection == null)
+            {
+                return StatusCode(503, new
+                {
+                    status = "Unhealthy",
+                    reason = "No metrics have been collected yet",
+                    recommendation = "Run: POST /api/metrics/collect to start collection"
+                });
+            }
+
+            var timeSinceCollection = DateTime.UtcNow - lastCollection.Value;
+            var isHealthy = timeSinceCollection.TotalMinutes < 10;
+
+            if (!isHealthy)
+            {
+                return StatusCode(503, new
+                {
+                    status = "Degraded",
+                    lastCollectionTime = lastCollection.Value,
+                    minutesSinceCollection = timeSinceCollection.TotalMinutes,
+                    reason = "No recent collections (expected every 5 minutes)",
+                    recommendation = "Check SQL Agent job status"
+                });
+            }
+
+            return Ok(new
+            {
+                status = "Healthy",
+                lastCollectionTime = lastCollection.Value,
+                secondsSinceCollection = timeSinceCollection.TotalSeconds,
+                nextExpectedCollection = lastCollection.Value.AddMinutes(5)
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error checking metrics health");
+            return StatusCode(503, new
+            {
+                status = "Error",
+                error = ex.Message
+            });
+        }
+    }
 }

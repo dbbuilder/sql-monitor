@@ -215,6 +215,51 @@ curl -X POST http://localhost:5000/api/metrics \
 
 ## Troubleshooting
 
+### Database Deployment Issues
+
+**Problem**: Database deployment reports success but MonitoringDB doesn't exist
+
+This happens when sqlcmd exits with code 0 but the database wasn't created due to:
+- User lacks CREATE DATABASE permissions
+- Database file paths are invalid/inaccessible
+- Errors occurred but were suppressed
+
+**Solution 1**: Check deployment log for actual errors
+```powershell
+cat D:\Dev2\sql-monitor\scripts\deployment.log
+```
+
+**Solution 2**: Verify CREATE DATABASE permissions
+```powershell
+sqlcmd -S sqltest.schoolvision.net,14333 -U sv -P Gv51076! -C -Q "SELECT HAS_PERMS_BY_NAME(null, null, 'CREATE DATABASE') AS HasPermission"
+# Should return 1 if user has permission
+```
+
+**Solution 3**: List existing databases to check if created with different name
+```powershell
+sqlcmd -S sqltest.schoolvision.net,14333 -U sv -P Gv51076! -C -Q "SELECT name FROM sys.databases ORDER BY name"
+```
+
+**Solution 4**: Run database creation script manually
+```powershell
+sqlcmd -S sqltest.schoolvision.net,14333 -U sv -P Gv51076! -C -i D:\Dev2\sql-monitor\database\01-create-database.sql
+```
+
+**Solution 5**: If user lacks permissions, ask DBA to create database first
+```sql
+-- DBA runs this as sa or sysadmin
+CREATE DATABASE MonitoringDB;
+GO
+
+-- Grant permissions to sv user
+USE MonitoringDB;
+GO
+ALTER AUTHORIZATION ON DATABASE::MonitoringDB TO sv;
+GO
+```
+
+Then re-run deployment script - it will skip database creation and deploy schema.
+
 ### Connection Issues
 
 **Problem**: Cannot connect to SQL Server from Docker container

@@ -1,0 +1,284 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "MonitoringDB"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "RowCount"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 1000000
+                    },
+                    {
+                      "color": "red",
+                      "value": 10000000
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "TotalSizeMB"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "decmbytes"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 1000
+                    },
+                    {
+                      "color": "orange",
+                      "value": 5000
+                    },
+                    {
+                      "color": "red",
+                      "value": 10000
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 20,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "TotalSizeMB"
+          }
+        ]
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "MonitoringDB"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    s.ServerName,\n    tm.DatabaseName,\n    tm.SchemaName,\n    tm.TableName,\n    tm.[RowCount],\n    tm.TotalSizeMB,\n    tm.DataSizeMB,\n    tm.IndexSizeMB,\n    tm.ColumnCount,\n    tm.IndexCount,\n    CASE WHEN tm.IsPartitioned = 1 THEN 'Yes' ELSE 'No' END AS IsPartitioned,\n    tm.CompressionType,\n    tm.ModifiedDate\nFROM dbo.TableMetadata tm\nINNER JOIN dbo.Servers s ON tm.ServerID = s.ServerID\nWHERE 1=1\n  AND (${DatabaseName:sqlstring} = 'All' OR tm.DatabaseName = ${DatabaseName:sqlstring})\n  AND (${SchemaName:sqlstring} = 'All' OR tm.SchemaName = ${SchemaName:sqlstring})\n  AND (${TableName:sqlstring} = '' OR tm.TableName LIKE '%' + ${TableName:sqlstring} + '%')\nORDER BY tm.TotalSizeMB DESC;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Table Browser",
+      "type": "table"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["SQL Monitor", "Schema Browser", "Tables"],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "MonitoringDB",
+          "value": "MonitoringDB"
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "MonitoringDB"
+        },
+        "definition": "SELECT DISTINCT DatabaseName FROM dbo.TableMetadata ORDER BY DatabaseName",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Database",
+        "multi": false,
+        "name": "DatabaseName",
+        "options": [],
+        "query": "SELECT DISTINCT DatabaseName FROM dbo.TableMetadata ORDER BY DatabaseName",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "All"
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "MonitoringDB"
+        },
+        "definition": "SELECT 'All' UNION SELECT DISTINCT SchemaName FROM dbo.TableMetadata WHERE DatabaseName = ${DatabaseName:sqlstring} ORDER BY 1",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Schema",
+        "multi": false,
+        "name": "SchemaName",
+        "options": [],
+        "query": "SELECT 'All' UNION SELECT DISTINCT SchemaName FROM dbo.TableMetadata WHERE DatabaseName = ${DatabaseName:sqlstring} ORDER BY 1",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "hide": 0,
+        "label": "Table Name (search)",
+        "name": "TableName",
+        "options": [
+          {
+            "selected": true,
+            "text": "",
+            "value": ""
+          }
+        ],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "SQL Monitor - Table Browser",
+  "uid": "sql-monitor-table-browser",
+  "version": 0,
+  "weekStart": ""
+}

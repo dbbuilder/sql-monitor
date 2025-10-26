@@ -1,0 +1,272 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "MonitoringDB"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "LineCount"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 100
+                    },
+                    {
+                      "color": "orange",
+                      "value": 300
+                    },
+                    {
+                      "color": "red",
+                      "value": 500
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "LineCount"
+          }
+        ]
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "MonitoringDB"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    s.ServerName,\n    co.DatabaseName,\n    co.SchemaName,\n    co.ObjectName,\n    co.ObjectType,\n    co.LineCount,\n    co.CharacterCount,\n    co.DependencyCount,\n    co.CreatedDate,\n    co.ModifiedDate\nFROM dbo.CodeObjectMetadata co\nINNER JOIN dbo.Servers s ON co.ServerID = s.ServerID\nWHERE 1=1\n  AND (${DatabaseName:sqlstring} = 'All' OR co.DatabaseName = ${DatabaseName:sqlstring})\n  AND (${ObjectType:sqlstring} = 'All' OR co.ObjectType = ${ObjectType:sqlstring})\n  AND (${ObjectName:sqlstring} = '' OR co.ObjectName LIKE '%' + ${ObjectName:sqlstring} + '%')\nORDER BY co.LineCount DESC;",
+          "refId": "A"
+        }
+      ],
+      "title": "Code Objects",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "MonitoringDB"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "id": 2,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "MonitoringDB"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "-- Dependencies for selected object (what does this object depend on?)\nSELECT\n    dm.ReferencingSchemaName + '.' + dm.ReferencingObjectName AS [From],\n    dm.ReferencingObjectType AS [From Type],\n    dm.ReferencedSchemaName + '.' + dm.ReferencedObjectName AS [To],\n    dm.ReferencedObjectType AS [To Type],\n    CASE WHEN dm.IsSchemaDependent = 1 THEN 'Yes' ELSE 'No' END AS IsSchemaDependent,\n    CASE WHEN dm.IsAmbiguous = 1 THEN 'Yes' ELSE 'No' END AS IsAmbiguous\nFROM dbo.DependencyMetadata dm\nWHERE dm.DatabaseName = ${DatabaseName:sqlstring}\n  AND (${ObjectName:sqlstring} = '' OR dm.ReferencingObjectName LIKE '%' + ${ObjectName:sqlstring} + '%')\nORDER BY dm.ReferencingObjectName, dm.ReferencedObjectName;",
+          "refId": "A"
+        }
+      ],
+      "title": "Dependencies (What does this object call?)",
+      "type": "table"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["SQL Monitor", "Schema Browser", "Code Objects"],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "MonitoringDB",
+          "value": "MonitoringDB"
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "MonitoringDB"
+        },
+        "definition": "SELECT DISTINCT DatabaseName FROM dbo.CodeObjectMetadata ORDER BY DatabaseName",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Database",
+        "multi": false,
+        "name": "DatabaseName",
+        "options": [],
+        "query": "SELECT DISTINCT DatabaseName FROM dbo.CodeObjectMetadata ORDER BY DatabaseName",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "All"
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "MonitoringDB"
+        },
+        "definition": "SELECT 'All' UNION SELECT DISTINCT ObjectType FROM dbo.CodeObjectMetadata WHERE DatabaseName = ${DatabaseName:sqlstring} ORDER BY 1",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Object Type",
+        "multi": false,
+        "name": "ObjectType",
+        "options": [],
+        "query": "SELECT 'All' UNION SELECT DISTINCT ObjectType FROM dbo.CodeObjectMetadata WHERE DatabaseName = ${DatabaseName:sqlstring} ORDER BY 1",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "hide": 0,
+        "label": "Object Name (search)",
+        "name": "ObjectName",
+        "options": [
+          {
+            "selected": true,
+            "text": "",
+            "value": ""
+          }
+        ],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "SQL Monitor - Code Browser",
+  "uid": "sql-monitor-code-browser",
+  "version": 0,
+  "weekStart": ""
+}

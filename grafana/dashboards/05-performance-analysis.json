@@ -1,0 +1,636 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 10,
+      "panels": [],
+      "title": "Query Performance",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "monitoringdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AvgDurationMs"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 100
+                    },
+                    {
+                      "color": "orange",
+                      "value": 500
+                    },
+                    {
+                      "color": "red",
+                      "value": 1000
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "MaxDurationMs"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 200
+                    },
+                    {
+                      "color": "orange",
+                      "value": 1000
+                    },
+                    {
+                      "color": "red",
+                      "value": 5000
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AvgCPUMs"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 1
+      },
+      "id": 1,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "enablePagination": true,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "AvgDurationMs"
+          }
+        ]
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "monitoringdb"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    DatabaseName,\n    CAST(QueryText AS NVARCHAR(300)) AS QueryPreview,\n    ExecutionCount,\n    CAST(AvgDurationMs AS DECIMAL(10,2)) AS AvgDurationMs,\n    CAST(MaxDurationMs AS DECIMAL(10,2)) AS MaxDurationMs,\n    CAST(AvgCPUMs AS DECIMAL(10,2)) AS AvgCPUMs,\n    CAST(AvgLogicalReads AS DECIMAL(10,0)) AS AvgLogicalReads\nFROM (\n    SELECT\n        DatabaseName,\n        QueryText,\n        AVG(ExecutionCount) AS ExecutionCount,\n        AVG(AvgDurationMs) AS AvgDurationMs,\n        MAX(MaxDurationMs) AS MaxDurationMs,\n        AVG(AvgCPUMs) AS AvgCPUMs,\n        AVG(AvgLogicalReads) AS AvgLogicalReads,\n        ROW_NUMBER() OVER (ORDER BY AVG(AvgDurationMs) DESC) AS rn\n    FROM dbo.QueryMetrics\n    WHERE ServerID = 1\n      AND DatabaseName LIKE CASE WHEN '$database' = 'All' THEN '%' ELSE '$database' END\n      AND CollectionTime >= $__timeFrom()\n      AND CollectionTime <= $__timeTo()\n    GROUP BY DatabaseName, QueryText, QueryHash\n) AS ranked\nWHERE rn <= 100\nORDER BY AvgDurationMs DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "Long-Running Queries (Sortable & Filterable)",
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 11
+      },
+      "id": 11,
+      "panels": [],
+      "title": "Stored Procedure Performance",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "monitoringdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ExecutionCount"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 100
+                    },
+                    {
+                      "color": "orange",
+                      "value": 500
+                    },
+                    {
+                      "color": "red",
+                      "value": 1000
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AvgDurationMs"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 100
+                    },
+                    {
+                      "color": "orange",
+                      "value": 500
+                    },
+                    {
+                      "color": "red",
+                      "value": 1000
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AvgCPUMs"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 50
+                    },
+                    {
+                      "color": "orange",
+                      "value": 200
+                    },
+                    {
+                      "color": "red",
+                      "value": 500
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "id": 2,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "enablePagination": true,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "AvgDurationMs"
+          }
+        ]
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "monitoringdb"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    DatabaseName,\n    ProcedureName,\n    ExecutionCount,\n    CAST(AvgCPUMs AS DECIMAL(10,2)) AS AvgCPUMs,\n    CAST(AvgDurationMs AS DECIMAL(10,2)) AS AvgDurationMs,\n    CAST(AvgLogicalReads AS DECIMAL(10,0)) AS AvgLogicalReads\nFROM (\n    SELECT\n        DatabaseName,\n        SchemaName + '.' + ProcedureName AS ProcedureName,\n        AVG(ExecutionCount) AS ExecutionCount,\n        AVG(AvgCPUMs) AS AvgCPUMs,\n        AVG(AvgDurationMs) AS AvgDurationMs,\n        AVG(AvgLogicalReads) AS AvgLogicalReads,\n        ROW_NUMBER() OVER (ORDER BY AVG(AvgDurationMs) DESC) AS rn\n    FROM dbo.ProcedureMetrics\n    WHERE ServerID = 1\n      AND DatabaseName LIKE CASE WHEN '$database' = 'All' THEN '%' ELSE '$database' END\n      AND CollectionTime >= $__timeFrom()\n      AND CollectionTime <= $__timeTo()\n    GROUP BY DatabaseName, SchemaName, ProcedureName\n) AS ranked\nWHERE rn <= 100\nORDER BY AvgDurationMs DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "Stored Procedure Performance (Sortable & Filterable)",
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "id": 12,
+      "panels": [],
+      "title": "Performance Trends",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "monitoringdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Duration (ms)",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 23
+      },
+      "id": 3,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "max", "lastNotNull"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "monitoringdb"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    CollectionTime AS time,\n    DatabaseName + ' - ' + LEFT(CAST(QueryText AS NVARCHAR(50)), 30) AS metric,\n    AvgDurationMs AS value\nFROM (\n    SELECT\n        DatabaseName,\n        QueryText,\n        CollectionTime,\n        AvgDurationMs,\n        ROW_NUMBER() OVER (PARTITION BY CollectionTime ORDER BY AvgDurationMs DESC) AS rn\n    FROM dbo.QueryMetrics\n    WHERE ServerID = 1\n      AND DatabaseName LIKE CASE WHEN '$database' = 'All' THEN '%' ELSE '$database' END\n      AND CollectionTime >= $__timeFrom()\n      AND CollectionTime <= $__timeTo()\n) AS ranked\nWHERE rn <= 5\nORDER BY time ASC",
+          "refId": "A"
+        }
+      ],
+      "title": "Query Duration Trend (Top 5)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "monitoringdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Duration (ms)",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 23
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "max", "lastNotNull"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "monitoringdb"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    CollectionTime AS time,\n    DatabaseName + ' - ' + ProcedureName AS metric,\n    AvgDurationMs AS value\nFROM (\n    SELECT\n        DatabaseName,\n        SchemaName + '.' + ProcedureName AS ProcedureName,\n        CollectionTime,\n        AvgDurationMs,\n        ROW_NUMBER() OVER (PARTITION BY CollectionTime ORDER BY AvgDurationMs DESC) AS rn\n    FROM dbo.ProcedureMetrics\n    WHERE ServerID = 1\n      AND DatabaseName LIKE CASE WHEN '$database' = 'All' THEN '%' ELSE '$database' END\n      AND CollectionTime >= $__timeFrom()\n      AND CollectionTime <= $__timeTo()\n) AS ranked\nWHERE rn <= 5\nORDER BY time ASC",
+          "refId": "A"
+        }
+      ],
+      "title": "Procedure Duration Trend (Top 5)",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["sql-monitor", "performance"],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "All"
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "monitoringdb"
+        },
+        "definition": "SELECT 'All' AS DatabaseName UNION SELECT DISTINCT DatabaseName FROM dbo.QueryMetrics WHERE ServerID = 1 UNION SELECT DISTINCT DatabaseName FROM dbo.ProcedureMetrics WHERE ServerID = 1 ORDER BY DatabaseName",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Database",
+        "multi": false,
+        "name": "database",
+        "options": [],
+        "query": "SELECT 'All' AS DatabaseName UNION SELECT DISTINCT DatabaseName FROM dbo.QueryMetrics WHERE ServerID = 1 UNION SELECT DISTINCT DatabaseName FROM dbo.ProcedureMetrics WHERE ServerID = 1 ORDER BY DatabaseName",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Performance Analysis",
+  "uid": "performance-analysis",
+  "version": 1,
+  "weekStart": ""
+}

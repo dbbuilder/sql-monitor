@@ -14,23 +14,8 @@ IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = N'MonitoringDB')
 BEGIN
     PRINT 'Creating MonitoringDB database...';
 
-    CREATE DATABASE MonitoringDB
-    ON PRIMARY
-    (
-        NAME = N'MonitoringDB_Data',
-        FILENAME = N'MonitoringDB_Data.mdf',
-        SIZE = 512MB,
-        MAXSIZE = UNLIMITED,
-        FILEGROWTH = 256MB
-    )
-    LOG ON
-    (
-        NAME = N'MonitoringDB_Log',
-        FILENAME = N'MonitoringDB_Log.ldf',
-        SIZE = 256MB,
-        MAXSIZE = UNLIMITED,
-        FILEGROWTH = 128MB
-    );
+    -- Let SQL Server use default file locations
+    CREATE DATABASE MonitoringDB;
 
     PRINT 'MonitoringDB database created successfully.';
 END

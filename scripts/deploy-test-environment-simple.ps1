@@ -43,22 +43,60 @@ try {
 Write-Host ""
 Write-Host "Step 2/4: Deploying MonitoringDB database..." -ForegroundColor Green
 
-$deployScript = Join-Path $DatabasePath "deploy-all.sql"
-if (!(Test-Path $deployScript)) {
-    Write-Host "  [ERROR] deploy-all.sql not found at: $deployScript" -ForegroundColor Red
-    exit 1
+# Run each SQL file individually in correct order
+$sqlFiles = @(
+    "01-create-database.sql",
+    "03-create-partitions.sql",
+    "02-create-tables.sql",
+    "04-create-procedures.sql"
+)
+
+$logFile = "$PSScriptRoot\deployment.log"
+Set-Content -Path $logFile -Value "========================================================`r`n"
+Add-Content -Path $logFile -Value "SQL Server Monitor - Database Deployment`r`n"
+Add-Content -Path $logFile -Value "Started: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')`r`n"
+Add-Content -Path $logFile -Value "========================================================`r`n`r`n"
+
+$deploymentSuccess = $true
+
+foreach ($sqlFile in $sqlFiles) {
+    $fullPath = Join-Path $DatabasePath $sqlFile
+
+    if (!(Test-Path $fullPath)) {
+        Write-Host "  [ERROR] $sqlFile not found at: $fullPath" -ForegroundColor Red
+        $deploymentSuccess = $false
+        break
+    }
+
+    Write-Host "  Deploying $sqlFile..." -ForegroundColor Gray
+    Add-Content -Path $logFile -Value "Deploying: $sqlFile`r`n"
+
+    try {
+        $output = sqlcmd -S $Server -U $User -P $Password -C -i $fullPath 2>&1
+        Add-Content -Path $logFile -Value $output
+
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "  [ERROR] $sqlFile failed with exit code $LASTEXITCODE" -ForegroundColor Red
+            $deploymentSuccess = $false
+            break
+        }
+    } catch {
+        Write-Host "  [ERROR] $sqlFile failed: $_" -ForegroundColor Red
+        Add-Content -Path $logFile -Value "ERROR: $_`r`n"
+        $deploymentSuccess = $false
+        break
+    }
 }
 
-try {
-    sqlcmd -S $Server -U $User -P $Password -C -i $deployScript -o "$PSScriptRoot\deployment.log"
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "  [OK] Database deployed successfully" -ForegroundColor Green
-        Write-Host "  [INFO] See deployment.log for details" -ForegroundColor Gray
-    } else {
-        throw "Database deployment failed with exit code $LASTEXITCODE"
-    }
-} catch {
-    Write-Host "  [ERROR] Database deployment failed: $_" -ForegroundColor Red
+Add-Content -Path $logFile -Value "`r`n========================================================`r`n"
+Add-Content -Path $logFile -Value "Finished: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')`r`n"
+Add-Content -Path $logFile -Value "========================================================`r`n"
+
+if ($deploymentSuccess) {
+    Write-Host "  [OK] Database deployed successfully" -ForegroundColor Green
+    Write-Host "  [INFO] See deployment.log for details" -ForegroundColor Gray
+} else {
+    Write-Host "  [ERROR] Database deployment failed" -ForegroundColor Red
     Write-Host "  [INFO] Check deployment.log for details" -ForegroundColor Yellow
     exit 1
 }

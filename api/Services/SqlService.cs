@@ -65,6 +65,72 @@ public class SqlService : ISqlService
             },
             commandType: CommandType.StoredProcedure);
     }
+
+    public async Task<Server?> GetServerByIdAsync(int serverId)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        var servers = await connection.QueryAsync<Server>(
+            "SELECT ServerID, ServerName, Environment, IsActive, CreatedDate, ModifiedDate FROM dbo.Servers WHERE ServerID = @ServerId",
+            new { ServerId = serverId });
+
+        return servers.FirstOrDefault();
+    }
+
+    public async Task<ObjectCode?> GetObjectCodeAsync(int serverId, string database, string schema, string objectName)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        var result = await connection.QueryAsync<ObjectCode>(
+            "dbo.usp_GetObjectCode",
+            new
+            {
+                ServerID = serverId,
+                DatabaseName = database,
+                SchemaName = schema,
+                ObjectName = objectName
+            },
+            commandType: CommandType.StoredProcedure);
+
+        return result.FirstOrDefault();
+    }
+
+    public async Task CollectMetricsAsync(int serverId, bool includeAdvanced = false)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        if (includeAdvanced)
+        {
+            // Call usp_CollectAllAdvancedMetrics (includes server + drill-down + advanced)
+            await connection.ExecuteAsync(
+                "dbo.usp_CollectAllAdvancedMetrics",
+                new { ServerID = serverId },
+                commandType: CommandType.StoredProcedure,
+                commandTimeout: 300); // 5 minute timeout for advanced metrics
+        }
+        else
+        {
+            // Call usp_CollectAllMetrics (server + drill-down only, fast)
+            await connection.ExecuteAsync(
+                "dbo.usp_CollectAllMetrics",
+                new { ServerID = serverId },
+                commandType: CommandType.StoredProcedure,
+                commandTimeout: 60); // 1 minute timeout for fast collection
+        }
+    }
+
+    public async Task<DateTime?> GetLastCollectionTimeAsync(int serverId)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        var result = await connection.QueryFirstOrDefaultAsync<DateTime?>(
+            @"SELECT MAX(CollectionTime)
+              FROM dbo.PerformanceMetrics
+              WHERE ServerID = @ServerId",
+            new { ServerId = serverId });
+
+        return result;
+    }
 }
 
 /// <summary>

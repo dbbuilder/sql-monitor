@@ -1,0 +1,25 @@
+# Grafana Data Source Provisioning
+# Automatically configures MonitoringDB as MSSQL data source
+# Documentation: https://grafana.com/docs/grafana/latest/administration/provisioning/#data-sources
+
+apiVersion: 1
+
+datasources:
+  - name: MonitoringDB
+    type: mssql
+    access: proxy
+    uid: monitoringdb
+    url: sqltest.schoolvision.net:14333
+    database: MonitoringDB
+    user: sv
+    secureJsonData:
+      password: 'Gv51076!'
+    jsonData:
+      maxOpenConns: 10
+      maxIdleConns: 5
+      connMaxLifetime: 14400
+      encrypt: 'false'
+      tlsSkipVerify: true
+    isDefault: true
+    editable: false
+    version: 1

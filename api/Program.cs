@@ -34,6 +34,12 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Configure Kestrel to use port 9000
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.ListenLocalhost(9000);
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline

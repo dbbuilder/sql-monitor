@@ -1,0 +1,402 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "MonitoringDB"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "MonitoringDB"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    cm.ColumnName,\n    cm.DataType,\n    cm.MaxLength,\n    cm.Precision,\n    cm.Scale,\n    CASE WHEN cm.IsNullable = 1 THEN 'Yes' ELSE 'No' END AS IsNullable,\n    CASE WHEN cm.IsPrimaryKey = 1 THEN 'Yes' ELSE 'No' END AS IsPrimaryKey,\n    CASE WHEN cm.IsForeignKey = 1 THEN 'Yes' ELSE 'No' END AS IsForeignKey,\n    CASE WHEN cm.IsIdentity = 1 THEN 'Yes' ELSE 'No' END AS IsIdentity,\n    cm.DefaultConstraint\nFROM dbo.ColumnMetadata cm\nWHERE cm.DatabaseName = ${DatabaseName:sqlstring}\n  AND cm.SchemaName = ${SchemaName:sqlstring}\n  AND cm.TableName = ${TableName:sqlstring}\nORDER BY cm.OrdinalPosition;",
+          "refId": "A"
+        }
+      ],
+      "title": "Columns",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "MonitoringDB"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "FragmentationPercent"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 10
+                    },
+                    {
+                      "color": "orange",
+                      "value": 30
+                    },
+                    {
+                      "color": "red",
+                      "value": 50
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "MonitoringDB"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    im.IndexName,\n    im.IndexType,\n    im.KeyColumns,\n    im.IncludedColumns,\n    im.FragmentationPercent,\n    im.[FillFactor],\n    CASE WHEN im.IsUnique = 1 THEN 'Yes' ELSE 'No' END AS IsUnique,\n    CASE WHEN im.IsPrimaryKey = 1 THEN 'Yes' ELSE 'No' END AS IsPrimaryKey,\n    CASE WHEN im.IsDisabled = 1 THEN 'Yes' ELSE 'No' END AS IsDisabled\nFROM dbo.IndexMetadata im\nWHERE im.DatabaseName = ${DatabaseName:sqlstring}\n  AND im.SchemaName = ${SchemaName:sqlstring}\n  AND im.TableName = ${TableName:sqlstring}\nORDER BY im.IndexName;",
+          "refId": "A"
+        }
+      ],
+      "title": "Indexes",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "MonitoringDB"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 10
+      },
+      "id": 3,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "MonitoringDB"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    fk.ConstraintName,\n    fk.ReferencedSchema,\n    fk.ReferencedTable,\n    fk.ColumnNames,\n    fk.ReferencedColumns,\n    fk.DeleteAction,\n    fk.UpdateAction,\n    CASE WHEN fk.IsDisabled = 1 THEN 'Yes' ELSE 'No' END AS IsDisabled\nFROM dbo.ForeignKeyMetadata fk\nWHERE fk.DatabaseName = ${DatabaseName:sqlstring}\n  AND fk.SchemaName = ${SchemaName:sqlstring}\n  AND fk.TableName = ${TableName:sqlstring}\nORDER BY fk.ConstraintName;",
+          "refId": "A"
+        }
+      ],
+      "title": "Foreign Keys",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "MonitoringDB"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 10
+      },
+      "id": 4,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "MonitoringDB"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    pm.PartitionNumber,\n    pm.PartitionScheme,\n    pm.PartitionFunction,\n    pm.BoundaryValue,\n    pm.[RowCount],\n    pm.DataCompressionType\nFROM dbo.PartitionMetadata pm\nWHERE pm.DatabaseName = ${DatabaseName:sqlstring}\n  AND pm.SchemaName = ${SchemaName:sqlstring}\n  AND pm.TableName = ${TableName:sqlstring}\nORDER BY pm.PartitionNumber;",
+          "refId": "A"
+        }
+      ],
+      "title": "Partitions",
+      "type": "table"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["SQL Monitor", "Schema Browser", "Table Details"],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "MonitoringDB",
+          "value": "MonitoringDB"
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "MonitoringDB"
+        },
+        "definition": "SELECT DISTINCT DatabaseName FROM dbo.TableMetadata ORDER BY DatabaseName",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Database",
+        "multi": false,
+        "name": "DatabaseName",
+        "options": [],
+        "query": "SELECT DISTINCT DatabaseName FROM dbo.TableMetadata ORDER BY DatabaseName",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "dbo",
+          "value": "dbo"
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "MonitoringDB"
+        },
+        "definition": "SELECT DISTINCT SchemaName FROM dbo.TableMetadata WHERE DatabaseName = ${DatabaseName:sqlstring} ORDER BY SchemaName",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Schema",
+        "multi": false,
+        "name": "SchemaName",
+        "options": [],
+        "query": "SELECT DISTINCT SchemaName FROM dbo.TableMetadata WHERE DatabaseName = ${DatabaseName:sqlstring} ORDER BY SchemaName",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "Servers",
+          "value": "Servers"
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "MonitoringDB"
+        },
+        "definition": "SELECT DISTINCT TableName FROM dbo.TableMetadata WHERE DatabaseName = ${DatabaseName:sqlstring} AND SchemaName = ${SchemaName:sqlstring} ORDER BY TableName",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Table",
+        "multi": false,
+        "name": "TableName",
+        "options": [],
+        "query": "SELECT DISTINCT TableName FROM dbo.TableMetadata WHERE DatabaseName = ${DatabaseName:sqlstring} AND SchemaName = ${SchemaName:sqlstring} ORDER BY TableName",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "SQL Monitor - Table Details",
+  "uid": "sql-monitor-table-details",
+  "version": 0,
+  "weekStart": ""
+}

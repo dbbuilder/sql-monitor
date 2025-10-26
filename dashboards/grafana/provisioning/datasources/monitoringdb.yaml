@@ -1,0 +1,21 @@
+# Grafana Datasource Configuration
+# SQL Server MonitoringDB
+
+apiVersion: 1
+
+datasources:
+  - name: MonitoringDB
+    type: mssql
+    access: proxy
+    url: sqltest.schoolvision.net:14333
+    database: MonitoringDB
+    user: sv
+    jsonData:
+      encrypt: 'true'
+      sslmode: 'disable'
+      tlsSkipVerify: true
+      authenticator: 'SQL Server Authentication'
+    secureJsonData:
+      password: 'Gv51076!'
+    isDefault: true
+    editable: false

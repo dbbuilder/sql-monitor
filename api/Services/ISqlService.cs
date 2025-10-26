@@ -26,4 +26,24 @@ public interface ISqlService
         DateTime? endTime = null,
         string? metricCategory = null,
         string? metricName = null);
+
+    /// <summary>
+    /// Gets server by ID
+    /// </summary>
+    Task<Server?> GetServerByIdAsync(int serverId);
+
+    /// <summary>
+    /// Gets database object code (cached or retrieves and caches)
+    /// </summary>
+    Task<ObjectCode?> GetObjectCodeAsync(int serverId, string database, string schema, string objectName);
+
+    /// <summary>
+    /// Triggers metrics collection for a server
+    /// </summary>
+    Task CollectMetricsAsync(int serverId, bool includeAdvanced = false);
+
+    /// <summary>
+    /// Gets the last collection time for a server
+    /// </summary>
+    Task<DateTime?> GetLastCollectionTimeAsync(int serverId);
 }
