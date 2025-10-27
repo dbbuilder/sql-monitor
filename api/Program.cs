@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using SqlMonitor.Api.Middleware;
 using SqlMonitor.Api.Services;
 
@@ -17,6 +20,8 @@ builder.Services.AddSwaggerGen(c =>
 
 // Register services
 builder.Services.AddScoped<ISqlService, SqlService>();
+builder.Services.AddScoped<IPasswordService, PasswordService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddMemoryCache(); // For permission caching
 
 // Configure connection string
@@ -24,6 +29,32 @@ var connectionString = builder.Configuration.GetConnectionString("MonitoringDB")
     ?? throw new InvalidOperationException("Connection string 'MonitoringDB' not found.");
 
 builder.Services.AddSingleton(new SqlConnectionFactory(connectionString));
+
+// Configure JWT Authentication
+var jwtSecretKey = builder.Configuration["Jwt:SecretKey"]
+    ?? throw new InvalidOperationException("JWT SecretKey not configured");
+var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "SqlMonitor.Api";
+var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "SqlMonitor.Client";
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey)),
+        ValidateIssuer = true,
+        ValidIssuer = jwtIssuer,
+        ValidateAudience = true,
+        ValidAudience = jwtAudience,
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.FromMinutes(5)
+    };
+});
 
 // Add CORS
 builder.Services.AddCors(options =>
@@ -55,7 +86,10 @@ if (app.Environment.IsDevelopment())
 // This ensures all requests are logged, even unauthorized ones
 app.UseMiddleware<AuditMiddleware>();
 
-// Register authorization middleware (AFTER audit, BEFORE controllers)
+// Add authentication middleware (JWT validation)
+app.UseAuthentication();
+
+// Register authorization middleware (AFTER authentication, BEFORE controllers)
 // This enforces permission-based access control
 app.UseMiddleware<AuthorizationMiddleware>();
 

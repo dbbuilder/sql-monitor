@@ -202,6 +202,42 @@ public class SqlService : ISqlService
 
         return parameters.Get<bool>("@HasPermission");
     }
+
+    public async Task<UserAuthInfo?> GetUserByUserNameOrEmailAsync(string userNameOrEmail)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        // Try username first
+        var users = await connection.QueryAsync<UserAuthInfo>(
+            "dbo.usp_GetUserByUserName",
+            new { UserName = userNameOrEmail },
+            commandType: CommandType.StoredProcedure);
+
+        var user = users.FirstOrDefault();
+
+        // If not found by username, try email
+        if (user == null)
+        {
+            var usersByEmail = await connection.QueryAsync<UserAuthInfo>(
+                "dbo.usp_GetUserByEmail",
+                new { Email = userNameOrEmail },
+                commandType: CommandType.StoredProcedure);
+
+            user = usersByEmail.FirstOrDefault();
+        }
+
+        return user;
+    }
+
+    public async Task UpdateUserLastLoginAsync(int userId, string ipAddress)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        await connection.ExecuteAsync(
+            "dbo.usp_UpdateUserLastLogin",
+            new { UserID = userId, IPAddress = ipAddress },
+            commandType: CommandType.StoredProcedure);
+    }
 }
 
 /// <summary>

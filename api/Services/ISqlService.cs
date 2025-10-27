@@ -80,4 +80,16 @@ public interface ISqlService
     /// <param name="actionType">Action type (e.g., "Read", "Write", "Delete")</param>
     /// <returns>True if user has permission, false otherwise</returns>
     Task<bool> CheckPermissionAsync(int userId, string resourceType, string actionType);
+
+    /// <summary>
+    /// Gets user by username or email (Phase 2.0 Week 2 - Authentication)
+    /// </summary>
+    /// <param name="userNameOrEmail">Username or email</param>
+    /// <returns>User information including password hash and salt</returns>
+    Task<UserAuthInfo?> GetUserByUserNameOrEmailAsync(string userNameOrEmail);
+
+    /// <summary>
+    /// Updates user last login time and IP (Phase 2.0 Week 2 - Authentication)
+    /// </summary>
+    Task UpdateUserLastLoginAsync(int userId, string ipAddress);
 }
