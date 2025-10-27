@@ -1,3 +1,4 @@
+using SqlMonitor.Api.Middleware;
 using SqlMonitor.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -48,6 +49,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// Register audit middleware (BEFORE authentication/authorization)
+// This ensures all requests are logged, even unauthorized ones
+app.UseMiddleware<AuditMiddleware>();
 
 app.UseCors();
 app.UseAuthorization();

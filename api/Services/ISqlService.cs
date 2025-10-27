@@ -46,4 +46,29 @@ public interface ISqlService
     /// Gets the last collection time for a server
     /// </summary>
     Task<DateTime?> GetLastCollectionTimeAsync(int serverId);
+
+    /// <summary>
+    /// Logs an audit event (Phase 2.0 - SOC 2 compliance)
+    /// </summary>
+    Task LogAuditEventAsync(
+        string eventType,
+        string userName,
+        string? applicationName = null,
+        string? hostName = null,
+        string? ipAddress = null,
+        string? databaseName = null,
+        string? schemaName = null,
+        string? objectName = null,
+        string? objectType = null,
+        string? actionType = null,
+        string? oldValue = null,
+        string? newValue = null,
+        int? affectedRows = null,
+        string? sqlText = null,
+        int? errorNumber = null,
+        string? errorMessage = null,
+        string? severity = "Information",
+        string? dataClassification = "Internal",
+        string? complianceFlag = "SOC2",
+        int retentionDays = 2555);
 }

@@ -131,6 +131,59 @@ public class SqlService : ISqlService
 
         return result;
     }
+
+    public async Task LogAuditEventAsync(
+        string eventType,
+        string userName,
+        string? applicationName = null,
+        string? hostName = null,
+        string? ipAddress = null,
+        string? databaseName = null,
+        string? schemaName = null,
+        string? objectName = null,
+        string? objectType = null,
+        string? actionType = null,
+        string? oldValue = null,
+        string? newValue = null,
+        int? affectedRows = null,
+        string? sqlText = null,
+        int? errorNumber = null,
+        string? errorMessage = null,
+        string? severity = "Information",
+        string? dataClassification = "Internal",
+        string? complianceFlag = "SOC2",
+        int retentionDays = 2555)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        await connection.ExecuteAsync(
+            "dbo.usp_LogAuditEvent",
+            new
+            {
+                EventType = eventType,
+                UserName = userName,
+                ApplicationName = applicationName,
+                HostName = hostName,
+                IPAddress = ipAddress,
+                DatabaseName = databaseName,
+                SchemaName = schemaName,
+                ObjectName = objectName,
+                ObjectType = objectType,
+                ActionType = actionType,
+                OldValue = oldValue,
+                NewValue = newValue,
+                AffectedRows = affectedRows,
+                SqlText = sqlText,
+                ErrorNumber = errorNumber,
+                ErrorMessage = errorMessage,
+                Severity = severity,
+                DataClassification = dataClassification,
+                ComplianceFlag = complianceFlag,
+                RetentionDays = retentionDays
+            },
+            commandType: CommandType.StoredProcedure,
+            commandTimeout: 5); // Short timeout for audit logging
+    }
 }
 
 /// <summary>
