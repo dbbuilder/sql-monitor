@@ -92,4 +92,34 @@ public interface ISqlService
     /// Updates user last login time and IP (Phase 2.0 Week 2 - Authentication)
     /// </summary>
     Task UpdateUserLastLoginAsync(int userId, string ipAddress);
+
+    /// <summary>
+    /// Gets MFA settings for a user (Phase 2.0 Week 3 - MFA)
+    /// </summary>
+    Task<UserMFA?> GetUserMFAAsync(int userId);
+
+    /// <summary>
+    /// Enables MFA for a user (Phase 2.0 Week 3 - MFA)
+    /// </summary>
+    Task EnableMFAAsync(int userId, string mfaType, byte[]? totpSecret, string? totpSecretPlain, string? phoneNumber, string modifiedBy);
+
+    /// <summary>
+    /// Disables MFA for a user (Phase 2.0 Week 3 - MFA)
+    /// </summary>
+    Task DisableMFAAsync(int userId, string modifiedBy);
+
+    /// <summary>
+    /// Inserts a hashed backup code (Phase 2.0 Week 3 - MFA)
+    /// </summary>
+    Task InsertBackupCodeAsync(int userId, byte[] codeHash, byte[] codeSalt);
+
+    /// <summary>
+    /// Gets remaining backup codes count (Phase 2.0 Week 3 - MFA)
+    /// </summary>
+    Task<int> GetRemainingBackupCodesAsync(int userId);
+
+    /// <summary>
+    /// Logs MFA verification attempt (Phase 2.0 Week 3 - MFA)
+    /// </summary>
+    Task LogMFAAttemptAsync(int userId, string mfaType, bool isSuccess, string? failureReason, string? ipAddress, string? userAgent);
 }

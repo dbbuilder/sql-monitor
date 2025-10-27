@@ -238,6 +238,90 @@ public class SqlService : ISqlService
             new { UserID = userId, IPAddress = ipAddress },
             commandType: CommandType.StoredProcedure);
     }
+
+    public async Task<UserMFA?> GetUserMFAAsync(int userId)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        var result = await connection.QueryAsync<UserMFA>(
+            "dbo.usp_GetUserMFA",
+            new { UserID = userId },
+            commandType: CommandType.StoredProcedure);
+
+        return result.FirstOrDefault();
+    }
+
+    public async Task EnableMFAAsync(int userId, string mfaType, byte[]? totpSecret, string? totpSecretPlain, string? phoneNumber, string modifiedBy)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        await connection.ExecuteAsync(
+            "dbo.usp_EnableMFA",
+            new
+            {
+                UserID = userId,
+                MFAType = mfaType,
+                TOTPSecret = totpSecret,
+                TOTPSecretPlain = totpSecretPlain,
+                PhoneNumber = phoneNumber,
+                ModifiedBy = modifiedBy
+            },
+            commandType: CommandType.StoredProcedure);
+    }
+
+    public async Task DisableMFAAsync(int userId, string modifiedBy)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        await connection.ExecuteAsync(
+            "dbo.usp_DisableMFA",
+            new { UserID = userId, ModifiedBy = modifiedBy },
+            commandType: CommandType.StoredProcedure);
+    }
+
+    public async Task InsertBackupCodeAsync(int userId, byte[] codeHash, byte[] codeSalt)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        await connection.ExecuteAsync(
+            "dbo.usp_InsertBackupCode",
+            new { UserID = userId, CodeHash = codeHash, CodeSalt = codeSalt },
+            commandType: CommandType.StoredProcedure);
+    }
+
+    public async Task<int> GetRemainingBackupCodesAsync(int userId)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        var parameters = new DynamicParameters();
+        parameters.Add("@UserID", userId);
+        parameters.Add("@RemainingCount", dbType: DbType.Int32, direction: ParameterDirection.Output);
+
+        await connection.ExecuteAsync(
+            "dbo.usp_GetRemainingBackupCodes",
+            parameters,
+            commandType: CommandType.StoredProcedure);
+
+        return parameters.Get<int>("@RemainingCount");
+    }
+
+    public async Task LogMFAAttemptAsync(int userId, string mfaType, bool isSuccess, string? failureReason, string? ipAddress, string? userAgent)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        await connection.ExecuteAsync(
+            "dbo.usp_LogMFAAttempt",
+            new
+            {
+                UserID = userId,
+                MFAType = mfaType,
+                IsSuccess = isSuccess,
+                FailureReason = failureReason,
+                IPAddress = ipAddress,
+                UserAgent = userAgent
+            },
+            commandType: CommandType.StoredProcedure);
+    }
 }
 
 /// <summary>

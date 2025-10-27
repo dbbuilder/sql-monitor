@@ -22,6 +22,8 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddScoped<ISqlService, SqlService>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<ITotpService, TotpService>();
+builder.Services.AddScoped<IBackupCodeService, BackupCodeService>();
 builder.Services.AddMemoryCache(); // For permission caching
 
 // Configure connection string
