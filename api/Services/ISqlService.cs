@@ -71,4 +71,13 @@ public interface ISqlService
         string? dataClassification = "Internal",
         string? complianceFlag = "SOC2",
         int retentionDays = 2555);
+
+    /// <summary>
+    /// Checks if a user has a specific permission (Phase 2.0 - RBAC)
+    /// </summary>
+    /// <param name="userId">User ID</param>
+    /// <param name="resourceType">Resource type (e.g., "Servers", "Metrics")</param>
+    /// <param name="actionType">Action type (e.g., "Read", "Write", "Delete")</param>
+    /// <returns>True if user has permission, false otherwise</returns>
+    Task<bool> CheckPermissionAsync(int userId, string resourceType, string actionType);
 }

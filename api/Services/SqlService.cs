@@ -184,6 +184,24 @@ public class SqlService : ISqlService
             commandType: CommandType.StoredProcedure,
             commandTimeout: 5); // Short timeout for audit logging
     }
+
+    public async Task<bool> CheckPermissionAsync(int userId, string resourceType, string actionType)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        var parameters = new DynamicParameters();
+        parameters.Add("@UserID", userId);
+        parameters.Add("@ResourceType", resourceType);
+        parameters.Add("@ActionType", actionType);
+        parameters.Add("@HasPermission", dbType: DbType.Boolean, direction: ParameterDirection.Output);
+
+        await connection.ExecuteAsync(
+            "dbo.usp_CheckPermission",
+            parameters,
+            commandType: CommandType.StoredProcedure);
+
+        return parameters.Get<bool>("@HasPermission");
+    }
 }
 
 /// <summary>

@@ -17,6 +17,7 @@ builder.Services.AddSwaggerGen(c =>
 
 // Register services
 builder.Services.AddScoped<ISqlService, SqlService>();
+builder.Services.AddMemoryCache(); // For permission caching
 
 // Configure connection string
 var connectionString = builder.Configuration.GetConnectionString("MonitoringDB")
@@ -53,6 +54,10 @@ if (app.Environment.IsDevelopment())
 // Register audit middleware (BEFORE authentication/authorization)
 // This ensures all requests are logged, even unauthorized ones
 app.UseMiddleware<AuditMiddleware>();
+
+// Register authorization middleware (AFTER audit, BEFORE controllers)
+// This enforces permission-based access control
+app.UseMiddleware<AuthorizationMiddleware>();
 
 app.UseCors();
 app.UseAuthorization();
