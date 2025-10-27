@@ -122,4 +122,54 @@ public interface ISqlService
     /// Logs MFA verification attempt (Phase 2.0 Week 3 - MFA)
     /// </summary>
     Task LogMFAAttemptAsync(int userId, string mfaType, bool isSuccess, string? failureReason, string? ipAddress, string? userAgent);
+
+    /// <summary>
+    /// Creates a new user session (Phase 2.0 Week 3 Days 13-14 - Session Management)
+    /// </summary>
+    Task<Guid> CreateSessionAsync(CreateSessionRequest request);
+
+    /// <summary>
+    /// Gets all sessions for a user (Phase 2.0 Week 3 Days 13-14 - Session Management)
+    /// </summary>
+    Task<IEnumerable<UserSession>> GetUserSessionsAsync(int userId, bool includeInactive = false);
+
+    /// <summary>
+    /// Gets session by token (Phase 2.0 Week 3 Days 13-14 - Session Management)
+    /// </summary>
+    Task<UserSession?> GetSessionByTokenAsync(string sessionToken);
+
+    /// <summary>
+    /// Updates session last activity time (Phase 2.0 Week 3 Days 13-14 - Session Management)
+    /// </summary>
+    Task UpdateSessionActivityAsync(Guid sessionId, string? ipAddress, string? userAgent, string? endpoint, string? httpMethod, int? responseStatus);
+
+    /// <summary>
+    /// Refreshes session with new tokens (Phase 2.0 Week 3 Days 13-14 - Session Management)
+    /// </summary>
+    Task<Guid> RefreshSessionAsync(byte[] refreshTokenHash, string newSessionToken, string? newRefreshToken, byte[]? newRefreshTokenHash, string ipAddress);
+
+    /// <summary>
+    /// Logs out a session (Phase 2.0 Week 3 Days 13-14 - Session Management)
+    /// </summary>
+    Task LogoutSessionAsync(Guid sessionId, string logoutReason = "Manual", string? ipAddress = null);
+
+    /// <summary>
+    /// Force logout all sessions for a user (Phase 2.0 Week 3 Days 13-14 - Session Management)
+    /// </summary>
+    Task<int> ForceLogoutUserAsync(int userId, Guid? excludeSessionId = null, string? adminUserName = null);
+
+    /// <summary>
+    /// Enforces concurrent session limit for a user (Phase 2.0 Week 3 Days 13-14 - Session Management)
+    /// </summary>
+    Task EnforceConcurrentSessionLimitAsync(int userId, int maxSessions = 3, Guid? currentSessionId = null);
+
+    /// <summary>
+    /// Cleans up expired sessions (Phase 2.0 Week 3 Days 13-14 - Session Management)
+    /// </summary>
+    Task<int> CleanupExpiredSessionsAsync();
+
+    /// <summary>
+    /// Gets session statistics (Phase 2.0 Week 3 Days 13-14 - Session Management)
+    /// </summary>
+    Task<SessionStatistics?> GetSessionStatisticsAsync(int timeRangeHours = 24);
 }

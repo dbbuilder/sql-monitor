@@ -322,6 +322,166 @@ public class SqlService : ISqlService
             },
             commandType: CommandType.StoredProcedure);
     }
+
+    // =============================================
+    // Session Management Methods (Phase 2.0 Week 3 Days 13-14)
+    // =============================================
+
+    public async Task<Guid> CreateSessionAsync(CreateSessionRequest request)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        var parameters = new DynamicParameters();
+        parameters.Add("@UserID", request.UserID);
+        parameters.Add("@SessionToken", request.SessionToken);
+        parameters.Add("@RefreshToken", request.RefreshToken);
+        parameters.Add("@RefreshTokenHash", request.RefreshTokenHash);
+        parameters.Add("@IPAddress", request.IPAddress);
+        parameters.Add("@UserAgent", request.UserAgent);
+        parameters.Add("@DeviceType", request.DeviceType);
+        parameters.Add("@DeviceFingerprint", request.DeviceFingerprint);
+        parameters.Add("@LocationCity", request.LocationCity);
+        parameters.Add("@LocationCountry", request.LocationCountry);
+        parameters.Add("@RememberMe", request.RememberMe);
+        parameters.Add("@SessionID", dbType: DbType.Guid, direction: ParameterDirection.Output);
+
+        await connection.ExecuteAsync(
+            "dbo.usp_CreateSession",
+            parameters,
+            commandType: CommandType.StoredProcedure);
+
+        return parameters.Get<Guid>("@SessionID");
+    }
+
+    public async Task<IEnumerable<UserSession>> GetUserSessionsAsync(int userId, bool includeInactive = false)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        return await connection.QueryAsync<UserSession>(
+            "dbo.usp_GetUserSessions",
+            new { UserID = userId, IncludeInactive = includeInactive },
+            commandType: CommandType.StoredProcedure);
+    }
+
+    public async Task<UserSession?> GetSessionByTokenAsync(string sessionToken)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        var result = await connection.QueryAsync<UserSession>(
+            "dbo.usp_GetSessionByToken",
+            new { SessionToken = sessionToken },
+            commandType: CommandType.StoredProcedure);
+
+        return result.FirstOrDefault();
+    }
+
+    public async Task UpdateSessionActivityAsync(Guid sessionId, string? ipAddress, string? userAgent, string? endpoint, string? httpMethod, int? responseStatus)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        await connection.ExecuteAsync(
+            "dbo.usp_UpdateSessionActivity",
+            new
+            {
+                SessionID = sessionId,
+                IPAddress = ipAddress,
+                UserAgent = userAgent,
+                Endpoint = endpoint,
+                HttpMethod = httpMethod,
+                ResponseStatus = responseStatus
+            },
+            commandType: CommandType.StoredProcedure);
+    }
+
+    public async Task<Guid> RefreshSessionAsync(byte[] refreshTokenHash, string newSessionToken, string? newRefreshToken, byte[]? newRefreshTokenHash, string ipAddress)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        var parameters = new DynamicParameters();
+        parameters.Add("@RefreshTokenHash", refreshTokenHash);
+        parameters.Add("@NewSessionToken", newSessionToken);
+        parameters.Add("@NewRefreshToken", newRefreshToken);
+        parameters.Add("@NewRefreshTokenHash", newRefreshTokenHash);
+        parameters.Add("@IPAddress", ipAddress);
+        parameters.Add("@SessionID", dbType: DbType.Guid, direction: ParameterDirection.Output);
+
+        await connection.ExecuteAsync(
+            "dbo.usp_RefreshSession",
+            parameters,
+            commandType: CommandType.StoredProcedure);
+
+        return parameters.Get<Guid>("@SessionID");
+    }
+
+    public async Task LogoutSessionAsync(Guid sessionId, string logoutReason = "Manual", string? ipAddress = null)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        await connection.ExecuteAsync(
+            "dbo.usp_LogoutSession",
+            new
+            {
+                SessionID = sessionId,
+                LogoutReason = logoutReason,
+                IPAddress = ipAddress
+            },
+            commandType: CommandType.StoredProcedure);
+    }
+
+    public async Task<int> ForceLogoutUserAsync(int userId, Guid? excludeSessionId = null, string? adminUserName = null)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        var result = await connection.QueryAsync<int>(
+            "dbo.usp_ForceLogoutUser",
+            new
+            {
+                UserID = userId,
+                ExcludeSessionID = excludeSessionId,
+                AdminUserName = adminUserName
+            },
+            commandType: CommandType.StoredProcedure);
+
+        return result.FirstOrDefault();
+    }
+
+    public async Task EnforceConcurrentSessionLimitAsync(int userId, int maxSessions = 3, Guid? currentSessionId = null)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        await connection.ExecuteAsync(
+            "dbo.usp_EnforceConcurrentSessionLimit",
+            new
+            {
+                UserID = userId,
+                MaxSessions = maxSessions,
+                CurrentSessionID = currentSessionId
+            },
+            commandType: CommandType.StoredProcedure);
+    }
+
+    public async Task<int> CleanupExpiredSessionsAsync()
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        var result = await connection.QueryAsync<int>(
+            "dbo.usp_CleanupExpiredSessions",
+            commandType: CommandType.StoredProcedure);
+
+        return result.FirstOrDefault();
+    }
+
+    public async Task<SessionStatistics?> GetSessionStatisticsAsync(int timeRangeHours = 24)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        var result = await connection.QueryAsync<SessionStatistics>(
+            "dbo.usp_GetSessionStatistics",
+            new { TimeRangeHours = timeRangeHours },
+            commandType: CommandType.StoredProcedure);
+
+        return result.FirstOrDefault();
+    }
 }
 
 /// <summary>
