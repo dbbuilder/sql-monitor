@@ -1,0 +1,445 @@
+{
+  "dashboard": {
+    "title": "Audit Logging & Compliance (SOC 2)",
+    "uid": "audit-logging-soc2",
+    "tags": ["compliance", "soc2", "security", "audit"],
+    "timezone": "utc",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "type": "stat",
+        "title": "Total Audit Events (24h)",
+        "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4},
+        "targets": [{
+          "datasource": "MonitoringDB",
+          "rawSql": "SELECT COUNT(*) AS value FROM dbo.AuditLog WHERE EventTime >= DATEADD(HOUR, -24, GETUTCDATE())",
+          "format": "table"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "decimals": 0,
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 10000, "color": "yellow"},
+                {"value": 50000, "color": "red"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "graphMode": "area",
+          "colorMode": "background"
+        }
+      },
+      {
+        "id": 2,
+        "type": "stat",
+        "title": "Security Events (24h)",
+        "gridPos": {"x": 6, "y": 0, "w": 6, "h": 4},
+        "targets": [{
+          "datasource": "MonitoringDB",
+          "rawSql": "SELECT COUNT(*) AS value FROM dbo.AuditLog WHERE EventTime >= DATEADD(HOUR, -24, GETUTCDATE()) AND Severity IN ('Warning', 'Error', 'Critical')",
+          "format": "table"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "decimals": 0,
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 10, "color": "yellow"},
+                {"value": 100, "color": "red"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "graphMode": "area",
+          "colorMode": "background"
+        }
+      },
+      {
+        "id": 3,
+        "type": "stat",
+        "title": "Unique Users (24h)",
+        "gridPos": {"x": 12, "y": 0, "w": 6, "h": 4},
+        "targets": [{
+          "datasource": "MonitoringDB",
+          "rawSql": "SELECT COUNT(DISTINCT UserName) AS value FROM dbo.AuditLog WHERE EventTime >= DATEADD(HOUR, -24, GETUTCDATE()) AND UserName != 'Anonymous'",
+          "format": "table"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "decimals": 0,
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "blue"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "graphMode": "none",
+          "colorMode": "background"
+        }
+      },
+      {
+        "id": 4,
+        "type": "stat",
+        "title": "Failed Requests (24h)",
+        "gridPos": {"x": 18, "y": 0, "w": 6, "h": 4},
+        "targets": [{
+          "datasource": "MonitoringDB",
+          "rawSql": "SELECT COUNT(*) AS value FROM dbo.AuditLog WHERE EventTime >= DATEADD(HOUR, -24, GETUTCDATE()) AND EventType = 'HttpRequestError'",
+          "format": "table"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "decimals": 0,
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 1, "color": "yellow"},
+                {"value": 10, "color": "red"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "graphMode": "area",
+          "colorMode": "background"
+        }
+      },
+      {
+        "id": 5,
+        "type": "timeseries",
+        "title": "Audit Events by Type (Last 7 Days)",
+        "gridPos": {"x": 0, "y": 4, "w": 12, "h": 8},
+        "targets": [{
+          "datasource": "MonitoringDB",
+          "rawSql": "SELECT EventTime AS time, EventType AS metric, COUNT(*) AS value FROM dbo.AuditLog WHERE EventTime >= DATEADD(DAY, -7, GETUTCDATE()) GROUP BY EventTime, EventType ORDER BY EventTime",
+          "format": "time_series"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "lineWidth": 2,
+              "fillOpacity": 10,
+              "drawStyle": "line",
+              "showPoints": "never"
+            },
+            "unit": "short"
+          },
+          "overrides": []
+        },
+        "options": {
+          "tooltip": {"mode": "multi"},
+          "legend": {"displayMode": "list", "placement": "bottom"}
+        }
+      },
+      {
+        "id": 6,
+        "type": "timeseries",
+        "title": "Security Events Over Time",
+        "gridPos": {"x": 12, "y": 4, "w": 12, "h": 8},
+        "targets": [{
+          "datasource": "MonitoringDB",
+          "rawSql": "SELECT EventTime AS time, Severity AS metric, COUNT(*) AS value FROM dbo.AuditLog WHERE EventTime >= DATEADD(DAY, -7, GETUTCDATE()) AND Severity IN ('Warning', 'Error', 'Critical') GROUP BY EventTime, Severity ORDER BY EventTime",
+          "format": "time_series"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "lineWidth": 2,
+              "fillOpacity": 20,
+              "drawStyle": "line",
+              "showPoints": "auto"
+            },
+            "unit": "short"
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "Critical"},
+              "properties": [{"id": "color", "value": {"fixedColor": "red", "mode": "fixed"}}]
+            },
+            {
+              "matcher": {"id": "byName", "options": "Error"},
+              "properties": [{"id": "color", "value": {"fixedColor": "orange", "mode": "fixed"}}]
+            },
+            {
+              "matcher": {"id": "byName", "options": "Warning"},
+              "properties": [{"id": "color", "value": {"fixedColor": "yellow", "mode": "fixed"}}]
+            }
+          ]
+        },
+        "options": {
+          "tooltip": {"mode": "multi"},
+          "legend": {"displayMode": "list", "placement": "bottom"}
+        }
+      },
+      {
+        "id": 7,
+        "type": "table",
+        "title": "Recent Security Events",
+        "gridPos": {"x": 0, "y": 12, "w": 12, "h": 8},
+        "targets": [{
+          "datasource": "MonitoringDB",
+          "rawSql": "SELECT TOP 100 EventTime, EventType, Severity, UserName, ObjectName, ErrorMessage FROM dbo.AuditLog WHERE Severity IN ('Warning', 'Error', 'Critical') ORDER BY EventTime DESC",
+          "format": "table"
+        }],
+        "fieldConfig": {
+          "defaults": {},
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "Severity"},
+              "properties": [{
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {"type": "value", "value": "Critical", "result": {"color": "red"}},
+                  {"type": "value", "value": "Error", "result": {"color": "orange"}},
+                  {"type": "value", "value": "Warning", "result": {"color": "yellow"}}
+                ]
+              }]
+            }
+          ]
+        },
+        "options": {
+          "showHeader": true,
+          "sortBy": [{"displayName": "EventTime", "desc": true}]
+        }
+      },
+      {
+        "id": 8,
+        "type": "table",
+        "title": "User Activity Summary (Last 30 Days) - SOC 2 CC6.1",
+        "gridPos": {"x": 12, "y": 12, "w": 12, "h": 8},
+        "targets": [{
+          "datasource": "MonitoringDB",
+          "rawSql": "EXEC dbo.usp_GetSOC2_UserAccessReport @StartTime = DATEADD(DAY, -30, GETUTCDATE())",
+          "format": "table"
+        }],
+        "fieldConfig": {
+          "defaults": {},
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "ErrorCount"},
+              "properties": [{
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "gradient"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {"value": 0, "color": "green"},
+                    {"value": 1, "color": "yellow"},
+                    {"value": 10, "color": "red"}
+                  ]
+                }
+              }]
+            }
+          ]
+        },
+        "options": {
+          "showHeader": true,
+          "sortBy": [{"displayName": "TotalEvents", "desc": true}]
+        }
+      },
+      {
+        "id": 9,
+        "type": "table",
+        "title": "Configuration Changes (Last 90 Days) - SOC 2 CC8.1",
+        "gridPos": {"x": 0, "y": 20, "w": 12, "h": 8},
+        "targets": [{
+          "datasource": "MonitoringDB",
+          "rawSql": "EXEC dbo.usp_GetSOC2_ConfigChangesReport @StartTime = DATEADD(DAY, -90, GETUTCDATE())",
+          "format": "table"
+        }],
+        "fieldConfig": {
+          "defaults": {},
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "OldValue"},
+              "properties": [{"id": "custom.width", "value": 200}]
+            },
+            {
+              "matcher": {"id": "byName", "options": "NewValue"},
+              "properties": [{"id": "custom.width", "value": 200}]
+            }
+          ]
+        },
+        "options": {
+          "showHeader": true,
+          "sortBy": [{"displayName": "EventTime", "desc": true}]
+        }
+      },
+      {
+        "id": 10,
+        "type": "table",
+        "title": "Anomaly Detection - SOC 2 CC7.3",
+        "gridPos": {"x": 12, "y": 20, "w": 12, "h": 8},
+        "targets": [{
+          "datasource": "MonitoringDB",
+          "rawSql": "EXEC dbo.usp_GetSOC2_AnomalyDetectionSummary @StartTime = DATEADD(DAY, -7, GETUTCDATE())",
+          "format": "table"
+        }],
+        "fieldConfig": {
+          "defaults": {},
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "AnomalyFlag"},
+              "properties": [{
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {"type": "value", "value": "HIGH_ACTIVITY", "result": {"color": "red", "text": "⚠ High Activity"}},
+                  {"type": "value", "value": "MULTIPLE_IPS", "result": {"color": "orange", "text": "⚠ Multiple IPs"}},
+                  {"type": "value", "value": "HIGH_ERRORS", "result": {"color": "red", "text": "⚠ High Errors"}},
+                  {"type": "value", "value": "NORMAL", "result": {"color": "green", "text": "✓ Normal"}}
+                ]
+              }]
+            }
+          ]
+        },
+        "options": {
+          "showHeader": true,
+          "sortBy": [{"displayName": "TotalEvents", "desc": true}]
+        }
+      },
+      {
+        "id": 11,
+        "type": "piechart",
+        "title": "Events by Type (24h)",
+        "gridPos": {"x": 0, "y": 28, "w": 6, "h": 6},
+        "targets": [{
+          "datasource": "MonitoringDB",
+          "rawSql": "SELECT EventType AS metric, COUNT(*) AS value FROM dbo.AuditLog WHERE EventTime >= DATEADD(HOUR, -24, GETUTCDATE()) GROUP BY EventType",
+          "format": "table"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short"
+          }
+        },
+        "options": {
+          "legend": {"displayMode": "table", "placement": "right", "values": ["value", "percent"]},
+          "pieType": "pie",
+          "tooltip": {"mode": "single"}
+        }
+      },
+      {
+        "id": 12,
+        "type": "piechart",
+        "title": "Events by Severity (24h)",
+        "gridPos": {"x": 6, "y": 28, "w": 6, "h": 6},
+        "targets": [{
+          "datasource": "MonitoringDB",
+          "rawSql": "SELECT Severity AS metric, COUNT(*) AS value FROM dbo.AuditLog WHERE EventTime >= DATEADD(HOUR, -24, GETUTCDATE()) GROUP BY Severity",
+          "format": "table"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short"
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "Critical"},
+              "properties": [{"id": "color", "value": {"fixedColor": "red", "mode": "fixed"}}]
+            },
+            {
+              "matcher": {"id": "byName", "options": "Error"},
+              "properties": [{"id": "color", "value": {"fixedColor": "orange", "mode": "fixed"}}]
+            },
+            {
+              "matcher": {"id": "byName", "options": "Warning"},
+              "properties": [{"id": "color", "value": {"fixedColor": "yellow", "mode": "fixed"}}]
+            },
+            {
+              "matcher": {"id": "byName", "options": "Information"},
+              "properties": [{"id": "color", "value": {"fixedColor": "green", "mode": "fixed"}}]
+            }
+          ]
+        },
+        "options": {
+          "legend": {"displayMode": "table", "placement": "right", "values": ["value", "percent"]},
+          "pieType": "pie",
+          "tooltip": {"mode": "single"}
+        }
+      },
+      {
+        "id": 13,
+        "type": "barchart",
+        "title": "Top 10 Active Users (Last 7 Days)",
+        "gridPos": {"x": 12, "y": 28, "w": 12, "h": 6},
+        "targets": [{
+          "datasource": "MonitoringDB",
+          "rawSql": "SELECT TOP 10 UserName AS metric, COUNT(*) AS value FROM dbo.AuditLog WHERE EventTime >= DATEADD(DAY, -7, GETUTCDATE()) AND UserName != 'Anonymous' GROUP BY UserName ORDER BY COUNT(*) DESC",
+          "format": "table"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short"
+          }
+        },
+        "options": {
+          "orientation": "horizontal",
+          "legend": {"displayMode": "hidden"}
+        }
+      }
+    ],
+    "templating": {
+      "list": []
+    },
+    "time": {
+      "from": "now-7d",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": ["30s", "1m", "5m", "15m", "30m", "1h"]
+    },
+    "annotations": {
+      "list": [
+        {
+          "datasource": "MonitoringDB",
+          "enable": true,
+          "name": "Critical Events",
+          "rawQuery": "SELECT EventTime AS time, CONCAT(EventType, ': ', COALESCE(ErrorMessage, ObjectName)) AS text, 'Critical' AS tags FROM dbo.AuditLog WHERE Severity = 'Critical' AND EventTime >= $__timeFrom() AND EventTime <= $__timeTo()",
+          "iconColor": "red"
+        }
+      ]
+    }
+  }
+}
