@@ -81,6 +81,99 @@
                 ]
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ServerName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Server Overview",
+                    "url": "/d/sql-server-monitoring?var-ServerName=${__data.fields.ServerName}"
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Category"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Performance Analysis",
+                    "url": "/d/performance-analysis?var-server=${__data.fields.ServerName}&from=now-24h&to=now"
+                  },
+                  {
+                    "title": "SQL Server Overview",
+                    "url": "/d/sql-server-monitoring?var-ServerName=${__data.fields.ServerName}"
+                  },
+                  {
+                    "title": "Table Browser",
+                    "url": "/d/table-browser?var-server=${__data.fields.ServerName}"
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "purple"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Insight"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Investigate Performance",
+                    "url": "/d/performance-analysis?var-server=${__data.fields.ServerName}&from=now-24h&to=now"
+                  },
+                  {
+                    "title": "View Server Details",
+                    "url": "/d/sql-server-monitoring?var-ServerName=${__data.fields.ServerName}"
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 400
+              }
+            ]
           }
         ]
       },

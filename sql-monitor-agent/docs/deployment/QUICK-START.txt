@@ -1,0 +1,64 @@
+╔═══════════════════════════════════════════════════════════════╗
+║   SQL SERVER MONITORING SYSTEM - QUICK START                 ║
+╚═══════════════════════════════════════════════════════════════╝
+
+TWO DEPLOYMENT OPTIONS:
+
+┌─────────────────────────────────────────────────────────────┐
+│ OPTION 1: PowerShell Automated (FASTEST - 2-3 minutes)     │
+└─────────────────────────────────────────────────────────────┘
+
+  1. Open PowerShell
+  2. Navigate to folder: cd E:\Downloads\sql_monitor
+  3. Run ONE command:
+
+     .\Deploy-MonitoringSystem.ps1 `
+         -ServerName "your-server.com" `
+         -Username "sa" `
+         -Password "YourPassword" `
+         -TrustServerCertificate
+
+  Done! See POWERSHELL-DEPLOYMENT.md for details.
+
+┌─────────────────────────────────────────────────────────────┐
+│ OPTION 2: SSMS Manual (5-10 minutes)                       │
+└─────────────────────────────────────────────────────────────┘
+
+  1. Open SSMS
+  2. Connect to your SQL Server
+  3. Run these files in order (F5):
+
+     ✓ 01_create_DBATools_and_tables.sql
+     ✓ 02_create_DBA_LogEntry_Insert.sql
+     ✓ 13_create_config_table_and_functions.sql
+     ✓ 06_create_modular_collectors_P0_FIXED.sql
+     ✓ 07_create_modular_collectors_P1_FIXED.sql
+     ✓ 08_create_modular_collectors_P2_P3_FIXED.sql
+     ✓ 10_create_master_orchestrator_FIXED.sql
+     ✓ 11_create_purge_procedure_FIXED.sql
+     ✓ 04_create_agent_job_FIXED.sql
+
+  Done! See SSMS-DEPLOYMENT-GUIDE.md for details.
+
+═══════════════════════════════════════════════════════════════
+
+AFTER DEPLOYMENT:
+
+  ✓ SQL Agent job runs every 5 minutes automatically
+  ✓ Data stored in DBATools database
+  ✓ 30-day retention (configurable)
+
+VERIFY:
+  SELECT * FROM DBATools.dbo.PerfSnapshotRun
+  EXEC DBATools.dbo.DBA_ViewConfig
+
+═══════════════════════════════════════════════════════════════
+
+DOCUMENTATION:
+  README-START-HERE.md ........... Overview
+  POWERSHELL-DEPLOYMENT.md ....... PowerShell guide
+  SSMS-DEPLOYMENT-GUIDE.md ....... SSMS guide
+  DEPLOYMENT-CHECKLIST.txt ....... Quick checklist
+  CONFIGURATION-GUIDE.md ......... Configuration reference
+
+═══════════════════════════════════════════════════════════════

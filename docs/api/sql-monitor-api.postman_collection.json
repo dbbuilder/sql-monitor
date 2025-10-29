@@ -1,0 +1,450 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"name": "SQL Server Monitor API (Phase 1.9)",
+		"description": "Complete API collection for sql-monitor Phase 1.9 - Multi-server monitoring\n\n## Base URL\n- Development: http://localhost:5000\n- Production: https://your-api-domain.com\n\n## Authentication\nPhase 1.9: No authentication (Phase 2.0 will add JWT)\n\n## Features\n- Server management (CRUD operations)\n- Health monitoring (real-time + 24hr trends)\n- Resource trends (CPU, sessions, blocking)\n- Database summaries (size, backups)\n- Query performance analysis (top N queries)\n\n## Variables\nSet these in your environment:\n- `baseUrl`: http://localhost:5000\n- `serverId`: 1 (test server ID)\n- `databaseName`: master (test database)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Servers",
+			"item": [
+				{
+					"name": "Get All Servers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/servers",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "servers"]
+						},
+						"description": "Retrieve all active servers. Returns basic server information (ID, name, environment, active status)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Servers (Include Inactive)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/servers?includeInactive=true",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "servers"],
+							"query": [
+								{
+									"key": "includeInactive",
+									"value": "true",
+									"description": "Include inactive servers in results"
+								}
+							]
+						},
+						"description": "Retrieve all servers including inactive ones."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Servers by Environment",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/servers?environment=Production",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "servers"],
+							"query": [
+								{
+									"key": "environment",
+									"value": "Production",
+									"description": "Filter by environment (Production, Development, Testing, etc.)"
+								}
+							]
+						},
+						"description": "Filter servers by environment."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Server by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/servers/{{serverId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "servers", "{{serverId}}"]
+						},
+						"description": "Get detailed information for a specific server by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Register New Server",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"serverName\": \"SQL-NEW-01\",\n  \"environment\": \"Development\",\n  \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/servers",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "servers"]
+						},
+						"description": "Register a new SQL Server for monitoring.\n\n**Request Body:**\n- serverName (required, 1-128 chars)\n- environment (optional, max 50 chars)\n- isActive (optional, default: true)\n\n**Returns:** 201 Created with server details"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Server",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"environment\": \"Production\",\n  \"isActive\": false\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/servers/{{serverId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "servers", "{{serverId}}"]
+						},
+						"description": "Update server environment or active status.\n\n**Request Body:**\n- environment (optional)\n- isActive (optional)\n\nBoth fields are optional; only provided fields are updated."
+					},
+					"response": []
+				}
+			],
+			"description": "Server management endpoints (CRUD operations)"
+		},
+		{
+			"name": "Health Monitoring",
+			"item": [
+				{
+					"name": "Get All Servers Health",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/servers/health",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "servers", "health"]
+						},
+						"description": "Get health status for all servers with:\n- Latest collection metrics (CPU, sessions, blocking, wait stats)\n- 24-hour averages\n- Snapshot counts\n- Health status (Healthy, Stale, NoData)\n- Minutes since last collection"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Servers Health (by Environment)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/servers/health?environment=Production",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "servers", "health"],
+							"query": [
+								{
+									"key": "environment",
+									"value": "Production",
+									"description": "Filter by environment"
+								}
+							]
+						},
+						"description": "Get health status filtered by environment."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Server Health by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/servers/{{serverId}}/health",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "servers", "{{serverId}}", "health"]
+						},
+						"description": "Get detailed health status for a specific server."
+					},
+					"response": []
+				}
+			],
+			"description": "Real-time health monitoring with 24-hour trend data"
+		},
+		{
+			"name": "Resource Trends",
+			"item": [
+				{
+					"name": "Get Server Trends (7 days)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/servers/{{serverId}}/trends",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "servers", "{{serverId}}", "trends"]
+						},
+						"description": "Get daily resource trends for the last 7 days:\n- CPU metrics (avg, max, P95)\n- Session counts (avg, max)\n- Blocking counts (avg, max)\n- Data points per day"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Server Trends (30 days)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/servers/{{serverId}}/trends?days=30",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "servers", "{{serverId}}", "trends"],
+							"query": [
+								{
+									"key": "days",
+									"value": "30",
+									"description": "Number of days to retrieve (default: 7)"
+								}
+							]
+						},
+						"description": "Get daily resource trends for the last 30 days."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Servers Trends (7 days)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/servers/trends?days=7",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "servers", "trends"],
+							"query": [
+								{
+									"key": "days",
+									"value": "7"
+								}
+							]
+						},
+						"description": "Get trends for all servers (omit serverId path parameter).\n\nNote: This endpoint requires modifying the URL to remove the {serverId} segment."
+					},
+					"response": []
+				}
+			],
+			"description": "Historical resource trends (CPU, sessions, blocking)"
+		},
+		{
+			"name": "Database Summaries",
+			"item": [
+				{
+					"name": "Get Server Databases",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/servers/{{serverId}}/databases",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "servers", "{{serverId}}", "databases"]
+						},
+						"description": "Get all databases for a specific server with:\n- Database name\n- Size metrics (data, log, total)\n- Log usage percentage\n- Recovery model and state\n- Backup status (last full, last log)\n- Hours since last backup\n- Backup health status"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Specific Database Summary",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/servers/{{serverId}}/databases?databaseName={{databaseName}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "servers", "{{serverId}}", "databases"],
+							"query": [
+								{
+									"key": "databaseName",
+									"value": "{{databaseName}}",
+									"description": "Filter by database name (e.g., 'master', 'msdb')"
+								}
+							]
+						},
+						"description": "Get summary for a specific database on a server."
+					},
+					"response": []
+				}
+			],
+			"description": "Database size and backup status summaries"
+		},
+		{
+			"name": "Query Performance",
+			"item": [
+				{
+					"name": "Get Top Queries (Default: Top 50 by Total CPU)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/queries/top",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "queries", "top"]
+						},
+						"description": "Get top 50 queries ordered by total CPU time across all servers.\n\n**Default Parameters:**\n- orderBy: TotalCpu\n- topN: 50\n- minExecutionCount: 10"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Top Queries by Avg CPU",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/queries/top?orderBy=AvgCpu&topN=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "queries", "top"],
+							"query": [
+								{
+									"key": "orderBy",
+									"value": "AvgCpu",
+									"description": "Order by: TotalCpu, AvgCpu, TotalReads, AvgDuration"
+								},
+								{
+									"key": "topN",
+									"value": "20",
+									"description": "Number of queries (1-500)"
+								}
+							]
+						},
+						"description": "Get top 20 queries ordered by average CPU time."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Top Queries by Total Reads",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/queries/top?orderBy=TotalReads&topN=25",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "queries", "top"],
+							"query": [
+								{
+									"key": "orderBy",
+									"value": "TotalReads"
+								},
+								{
+									"key": "topN",
+									"value": "25"
+								}
+							]
+						},
+						"description": "Get top 25 queries ordered by total logical reads (I/O)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Top Queries by Avg Duration",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/queries/top?orderBy=AvgDuration&topN=10&minExecutionCount=100",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "queries", "top"],
+							"query": [
+								{
+									"key": "orderBy",
+									"value": "AvgDuration"
+								},
+								{
+									"key": "topN",
+									"value": "10"
+								},
+								{
+									"key": "minExecutionCount",
+									"value": "100",
+									"description": "Minimum execution count to include"
+								}
+							]
+						},
+						"description": "Get top 10 queries by average duration with at least 100 executions."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Top Queries for Specific Server",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/queries/top?serverId={{serverId}}&topN=30",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "queries", "top"],
+							"query": [
+								{
+									"key": "serverId",
+									"value": "{{serverId}}",
+									"description": "Filter by server ID"
+								},
+								{
+									"key": "topN",
+									"value": "30"
+								}
+							]
+						},
+						"description": "Get top queries for a specific server only."
+					},
+					"response": []
+				}
+			],
+			"description": "Query Store performance analysis (top N queries)"
+		},
+		{
+			"name": "Health Check",
+			"item": [
+				{
+					"name": "API Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/health",
+							"host": ["{{baseUrl}}"],
+							"path": ["health"]
+						},
+						"description": "Check API health status. Returns:\n- status: Healthy/Unhealthy\n- database: Connected/Disconnected\n- lastCollection: Timestamp of most recent data collection\n- serversMonitored: Count of active servers\n- staleServers: Count of servers with no recent data"
+					},
+					"response": []
+				}
+			],
+			"description": "API health check endpoint"
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5000",
+			"type": "string"
+		},
+		{
+			"key": "serverId",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "databaseName",
+			"value": "master",
+			"type": "string"
+		}
+	]
+}

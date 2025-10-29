@@ -1,0 +1,63 @@
+=====================================================
+SQL SERVER MONITORING SYSTEM - SSMS DEPLOYMENT
+=====================================================
+
+Run these files IN ORDER in SSMS:
+
+FOUNDATION
+----------
+[ ] 1. 01_create_DBATools_and_tables.sql
+[ ] 2. 02_create_DBA_LogEntry_Insert.sql
+
+CONFIGURATION
+-------------
+[ ] 3. 13_create_config_table_and_functions.sql
+
+ENHANCED TABLES
+---------------
+[ ] 4. 05_create_enhanced_tables.sql
+       (Creates 20+ monitoring tables for P0/P1/P2/P3 data)
+
+COLLECTORS
+----------
+[ ] 5. 06_create_modular_collectors_P0_FIXED.sql
+[ ] 6. 07_create_modular_collectors_P1_FIXED.sql
+[ ] 7. 08_create_modular_collectors_P2_P3_FIXED.sql
+
+REPORTING VIEWS
+---------------
+[ ] 8. 09_create_reporting_views.sql
+
+ORCHESTRATION
+-------------
+[ ] 9. 10_create_master_orchestrator_FIXED.sql
+[ ] 10. 11_create_purge_procedure_FIXED.sql
+
+AUTOMATION
+----------
+[ ] 11. 04_create_agent_job_FIXED.sql
+        (Requires SQL Agent running on Linux server)
+
+REPORTING (Recommended)
+-----------------------
+[ ] 12. 14_create_reporting_procedures.sql
+        (10 procedures to check if system is working)
+
+TESTING (Optional)
+------------------
+[ ] 13. 99_TEST_AND_VALIDATE.sql
+
+VERIFICATION
+------------
+[ ] Database DBATools exists
+[ ] 24 tables created
+[ ] 24 procedures created
+[ ] 5 functions created
+[ ] Config has 28 rows
+[ ] SQL Agent job enabled
+[ ] Test collection runs
+[ ] Data being collected
+
+DONE! Job runs every 5 minutes automatically.
+
+See SSMS-DEPLOYMENT-GUIDE.md for detailed instructions.

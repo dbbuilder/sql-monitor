@@ -1,0 +1,15 @@
+[Unit]
+Description=Local SQL HTTP Bridge
+After=network.target mssql-server.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /opt/sql-http-service/sql_http_service.py /etc/sql-http-service.conf
+Restart=on-failure
+RestartSec=5
+User=root
+Group=root
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/mssql-tools/bin"
+
+[Install]
+WantedBy=multi-user.target

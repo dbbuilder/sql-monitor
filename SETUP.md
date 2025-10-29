@@ -697,6 +697,275 @@ Panels:
 - Disk Space Remaining (gauge)
 - VLF Count (table)
 
+## Phase 3.5: API Integration & Phase 1.9 Features (15 minutes)
+
+**Phase 1.9** adds REST API endpoints, advanced aggregation procedures, load testing, and comprehensive documentation.
+
+### Step 3.5.1: Deploy Phase 1.9 Stored Procedures
+
+Phase 1.9 introduces cross-server aggregation procedures for API consumption.
+
+```bash
+# Connect to MonitoringDB
+sqlcmd -S SQL-PROD-03 -U sa -P YourPassword -C -d MonitoringDB
+
+# Deploy Phase 1.9 stored procedures
+:r database/26-create-aggregation-procedures.sql
+GO
+
+# Verify procedures created
+SELECT ROUTINE_NAME, CREATED
+FROM INFORMATION_SCHEMA.ROUTINES
+WHERE ROUTINE_NAME LIKE 'usp_Get%'
+ORDER BY ROUTINE_NAME;
+GO
+```
+
+**Expected Procedures**:
+- `usp_GetServerHealthStatus` - Server health with 24h metrics
+- `usp_GetMetricHistory` - Time-series metric aggregation
+- `usp_GetTopQueries` - Top N queries by CPU/Reads/Duration
+- `usp_GetDatabaseSummary` - Database size and backup status
+- `usp_GetResourceTrends` - Daily resource trend analysis
+
+**Note**: `usp_GetResourceTrends` may fail if `PerfSnapshotRun` table doesn't exist. This is expected and can be skipped for Phase 1.9.
+
+### Step 3.5.2: Import Phase 1.9 Dashboards
+
+Phase 1.9 includes three performance monitoring dashboards.
+
+```bash
+# Verify dashboard files present
+ls -la dashboards/grafana/dashboards/
+
+# Expected Phase 1.9 dashboards:
+# - sql-server-overview.json (CPU/Memory monitoring)
+# - detailed-metrics.json (All metrics table and time series)
+# - 05-performance-analysis.json (Query performance)
+
+# Dashboards are auto-loaded via provisioning (no manual import needed)
+# Just restart Grafana to pick up any new dashboards
+docker-compose restart grafana
+
+# Wait 10 seconds for Grafana to start
+sleep 10
+
+# Verify dashboards loaded
+curl -u admin:$GRAFANA_ADMIN_PASSWORD http://localhost:3000/api/search?query=sql | jq '.[] | .title'
+```
+
+**Expected Dashboard Output**:
+```json
+"SQL Server Performance Overview"
+"Detailed Metrics View"
+"Performance Analysis"
+"Table Browser"
+"Table Details"
+"Code Browser"
+"Audit Logging"
+```
+
+### Step 3.5.3: Configure API Service Users
+
+The ASP.NET Core API requires specific database permissions.
+
+```sql
+-- Run on MonitoringDB
+USE MonitoringDB;
+GO
+
+-- Grant API user access to Phase 1.9 procedures
+GRANT EXECUTE ON dbo.usp_GetServerHealthStatus TO monitor_api;
+GRANT EXECUTE ON dbo.usp_GetMetricHistory TO monitor_api;
+GRANT EXECUTE ON dbo.usp_GetTopQueries TO monitor_api;
+GRANT EXECUTE ON dbo.usp_GetDatabaseSummary TO monitor_api;
+GO
+
+-- Verify permissions
+SELECT
+    dp.name AS UserName,
+    p.permission_name,
+    OBJECT_NAME(p.major_id) AS ObjectName
+FROM sys.database_permissions p
+INNER JOIN sys.database_principals dp ON p.grantee_principal_id = dp.principal_id
+WHERE dp.name = 'monitor_api'
+  AND p.permission_name = 'EXECUTE'
+ORDER BY ObjectName;
+GO
+```
+
+### Step 3.5.4: Test API Endpoints
+
+Verify the REST API is working correctly.
+
+```bash
+# 1. Health check endpoint
+curl http://localhost:5000/health | jq
+
+# Expected output:
+# {
+#   "status": "Healthy",
+#   "database": "Connected",
+#   "lastCollection": "2025-10-28T10:35:00Z",
+#   "serversMonitored": 3,
+#   "staleServers": 0
+# }
+
+# 2. Get all servers
+curl http://localhost:5000/api/servers | jq
+
+# Expected: JSON array of servers
+
+# 3. Get server health (replace {id} with actual ServerID)
+curl http://localhost:5000/api/servers/1/health | jq
+
+# Expected: Server health with 24h metrics
+
+# 4. Get metric history
+curl "http://localhost:5000/api/metrics/history?serverId=1&category=CPU&hours=24" | jq
+
+# Expected: Array of CPU metrics
+
+# 5. Browse Swagger UI for full API documentation
+# Open browser: http://localhost:5000/swagger
+```
+
+### Step 3.5.5: Import Postman Collection (Optional)
+
+Phase 1.9 includes a comprehensive Postman collection for API testing.
+
+```bash
+# 1. Open Postman desktop app or https://postman.com
+
+# 2. Import collection
+# File → Import → Select File → docs/api/sql-monitor-api.postman_collection.json
+
+# 3. Import environment
+# File → Import → Select File → docs/api/sql-monitor-environments.postman_environment.json
+
+# 4. Set environment variables
+# Click "Environments" → "SQL Monitor - Development"
+# Edit variables:
+#   - baseUrl: http://localhost:5000
+#   - monitoringDbServer: SQL-PROD-03
+#   - monitoringDbName: MonitoringDB
+
+# 5. Test all endpoints
+# Collections → "SQL Server Monitor API (Phase 1.9)" → Right-click → "Run collection"
+# Expected: All tests pass (green checkmarks)
+```
+
+**Postman Collection Includes**:
+- 25+ API requests organized by feature
+- Pre-configured test scripts for validation
+- Environment variables for easy configuration
+- Examples of all API endpoints
+
+### Step 3.5.6: Run Load Tests with K6 (Optional)
+
+Phase 1.9 includes K6 performance testing scripts.
+
+**Install K6** (if not already installed):
+
+```bash
+# Ubuntu/Debian
+sudo gpg -k
+sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+sudo apt-get update
+sudo apt-get install k6
+
+# macOS
+brew install k6
+
+# Windows
+choco install k6
+```
+
+**Run Load Tests**:
+
+```bash
+# Navigate to scripts directory
+cd /path/to/sql-monitor/scripts
+
+# 1. Smoke test (quick validation, 1 minute)
+k6 run k6-smoke-test.js
+
+# Expected output:
+# ✓ Status is 200
+# ✓ Response time is acceptable
+# checks.........................: 100.00%
+
+# 2. Load test (realistic load, 12 minutes)
+k6 run k6-load-test.js
+
+# Expected output:
+# http_req_duration..........: avg=150ms  p(95)=300ms  p(99)=500ms
+# http_req_failed............: 0.00%
+
+# 3. Stress test (find breaking point, 15 minutes)
+k6 run k6-stress-test.js
+
+# Watch for:
+# - At what concurrency level does p95 exceed 500ms?
+# - At what point do errors start occurring?
+
+# 4. Soak test (endurance, 30 minutes)
+k6 run k6-soak-test.js
+
+# Verifies: No memory leaks, stable performance over time
+```
+
+**K6 Test Types**:
+- **Smoke Test**: Quick validation (1 VU, 1 minute)
+- **Load Test**: Realistic load (10-100 VUs, 12 minutes)
+- **Stress Test**: Find breaking point (10-200 VUs, 15 minutes)
+- **Soak Test**: Endurance testing (50 VUs, 30 minutes)
+
+**Performance Targets**:
+- **p95 latency**: < 500ms
+- **p99 latency**: < 1000ms
+- **Error rate**: < 1%
+- **Throughput**: > 100 requests/sec
+
+### Step 3.5.7: Review Phase 1.9 Documentation
+
+Phase 1.9 includes three comprehensive guides:
+
+**For DBAs**: `docs/guides/DBA-OPERATIONAL-GUIDE.md`
+- Daily health checks
+- Data collection troubleshooting
+- Performance optimization
+- Backup and recovery
+- Security best practices
+
+**For End Users**: `docs/guides/END-USER-DASHBOARD-GUIDE.md`
+- Grafana dashboard navigation
+- Interpreting metrics and thresholds
+- Common use cases (troubleshooting, capacity planning)
+- Exporting and sharing dashboards
+- FAQ and glossary
+
+**For Developers**: `docs/guides/DEVELOPER-ONBOARDING.md`
+- Development environment setup
+- TDD workflow (test-driven development)
+- Project structure and architecture
+- Common development tasks
+- Troubleshooting
+
+**Quick Links**:
+```bash
+# View guides in terminal
+cat docs/guides/DBA-OPERATIONAL-GUIDE.md | less
+cat docs/guides/END-USER-DASHBOARD-GUIDE.md | less
+cat docs/guides/DEVELOPER-ONBOARDING.md | less
+
+# Or open in browser/editor
+code docs/guides/DBA-OPERATIONAL-GUIDE.md
+```
+
+---
+
 ## Phase 4: Validation & Testing (10 minutes)
 
 ### Step 4.1: Verify Data Collection

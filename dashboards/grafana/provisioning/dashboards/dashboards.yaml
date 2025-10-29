@@ -1,14 +1,65 @@
 # Grafana Dashboard Provider Configuration
+# Organized by category for better navigation
 
 apiVersion: 1
 
 providers:
-  - name: 'SQL Monitor'
+  # Home / Landing Page
+  - name: 'Home'
     orgId: 1
-    folder: 'SQL Monitor'
+    folder: ''  # Root folder
     type: file
     disableDeletion: false
     updateIntervalSeconds: 10
     allowUiUpdates: true
     options:
-      path: /etc/grafana/provisioning/dashboards
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false
+
+  # Stats & Metrics Dashboards
+  - name: 'Stats & Metrics'
+    orgId: 1
+    folder: 'Stats & Metrics'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false
+
+  # Code & Schema Dashboards
+  - name: 'Code & Schema'
+    orgId: 1
+    folder: 'Code & Schema'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false
+
+  # Analysis & Insights Dashboards
+  - name: 'Analysis & Insights'
+    orgId: 1
+    folder: 'Analysis & Insights'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false
+
+  # Security & Compliance Dashboards
+  - name: 'Security & Compliance'
+    orgId: 1
+    folder: 'Security & Compliance'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false

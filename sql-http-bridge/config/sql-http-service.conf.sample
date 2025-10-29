@@ -1,0 +1,5 @@
+[service]
+sql_server=localhost
+database=YourAppDB
+port=8080
+allowed_procs=Inventory:dbo.Api_GetInventory,Balance:dbo.Api_GetBalance

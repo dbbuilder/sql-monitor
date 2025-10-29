@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Server Health Report - SVWeb\CLUBTRACK</title>
+    <style>
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .header {
+            background-color: #0078d4;
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0 0 10px 0;
+            font-size: 24px;
+        }
+        .header p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .section {
+            background-color: white;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .section-header {
+            background-color: #e8e8e8;
+            padding: 12px 15px;
+            font-weight: bold;
+            font-size: 16px;
+            border-bottom: 2px solid #ccc;
+        }
+        .field-guide {
+            background-color: #f9f9f9;
+            border-left: 4px solid #0078d4;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            background-color: #f0f0f0;
+            padding: 10px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            border-bottom: 2px solid #ddd;
+        }
+        td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+        tr:hover {
+            background-color: #fafafa;
+        }
+        .severity-INFO {
+            background-color: #e7f3ff;
+            border-left: 4px solid #0078d4;
+        }
+        .severity-ATTENTION {
+            background-color: #fff8e1;
+            border-left: 4px solid #ffc107;
+        }
+        .severity-WARNING {
+            background-color: #fff3e0;
+            border-left: 4px solid #ff9800;
+        }
+        .severity-CRITICAL {
+            background-color: #ffebee;
+            border-left: 4px solid #f44336;
+        }
+        .metric-value {
+            font-weight: 600;
+            color: #0078d4;
+        }
+        .analysis {
+            font-style: italic;
+            color: #555;
+        }
+        .recommendation {
+            color: #d32f2f;
+            font-weight: 500;
+        }
+        .null-value {
+            color: #999;
+            font-style: italic;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>SQL Server Daily Health Report</h1>
+        <p><strong>Server:</strong> SVWeb\CLUBTRACK</p>
+        <p><strong>Report Generated:</strong> 2025-10-28 00:56:46 UTC</p>
+        <p><strong>Parameters:</strong> Top 20 Slow Queries, Top 20 Missing Indexes, 48 hours lookback</p>
+    </div>
+<div class="section">
+    <div class="section-header">Report Header</div>
+    <table><tr><th>Field</th><th>Value</th></tr><tr><td>Server Name</td><td>SVWeb\CLUBTRACK</td></tr><tr><td>Snapshot Date (UTC)</td><td>2025-10-28 00:55:00</td></tr><tr><td>SQL Version</td><td>15.0.4445.1</td></tr><tr><td>Total Sessions</td><td class="metric-value">82</td></tr><tr><td>Total Requests</td><td class="metric-value">53</td></tr></table></div><div class="section">
+    <div class="section-header">Current System Health</div>
+    <table>
+        <tr>
+            <th>Metric</th>
+            <th>Value</th>
+            <th>Status</th>
+        </tr><tr class="severity-INFO"><td>CPU Signal Wait %</td><td class="metric-value">1.1340%</td><td>INFO - Normal</td></tr><tr class="severity-CRITICAL"><td>Blocking Sessions</td><td class="metric-value">53</td><td>CRITICAL - Severe blocking</td></tr><tr class="severity-INFO"><td>Recent Deadlocks (last 10 min)</td><td class="metric-value">0</td><td>INFO - None detected</td></tr><tr class="severity-INFO"><td>Memory Grant Warnings</td><td class="metric-value">0</td><td>INFO - None detected</td></tr><tr><td>Top Wait Type</td><td class="metric-value">SOS_WORK_DISPATCHER</td><td>82656.0000 ms/sec</td></tr></table></div><div class="section">
+    <div class="section-header">Summary Statistics (Last 48 Hours)</div>
+    <table>
+        <tr>
+            <th>Metric</th>
+            <th>Value</th>
+        </tr><tr><td>Total Snapshots</td><td class="metric-value">84</td></tr><tr><td>Avg CPU Signal Wait %</td><td class="metric-value">1.11%</td></tr><tr><td>Max CPU Signal Wait %</td><td class="metric-value">1.13%</td></tr><tr><td>Total Deadlocks</td><td class="metric-value">0</td></tr><tr><td>Snapshots with Blocking</td><td class="metric-value">84</td></tr><tr><td>Avg Sessions</td><td class="metric-value">80</td></tr><tr><td>Max Sessions</td><td class="metric-value">99</td></tr></table></div><div class="section">
+        <div class="section-header">Top 20 Slow Queries (by Total CPU)</div>
+        <table>
+            <tr>
+                <th>#</th>
+                <th>Database</th>
+                <th>SQL Text</th>
+                <th>Total CPU (ms)</th>
+                <th>Avg Duration (ms)</th>
+                <th>Execution Count</th>
+                <th>Avg Reads</th>
+            </tr><tr><td>1</td><td>SVDB_Merced</td><td style="font-family: monospace; font-size: 11px; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="SELECT @RemainingRecords = @RemainingRecords + COUNT(*)
+        FROM dbo.Merced_SISImport WITH (NOLOCK)
+        WHERE InProcessDateTime IS NULL 
+          AND ProcessedDateTime IS NULL
+          AND SISImportID IN (SELECT MAX(SISImportID) FROM Merced_SISImport GROUP BY IDNumber, EmailAddress)">SELECT @RemainingRecords = @RemainingRecords + COUNT(*)
+        FROM dbo.Merced_SISImport WITH (NOL...</td><td class="metric-value">1,170,645</td><td class="metric-value">1,200,947.26</td><td>1</td><td>22,129,307</td></tr><tr><td>2</td><td>SVDB_Merced</td><td style="font-family: monospace; font-size: 11px; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="UPDATE b
+        SET BadgeImageId_PersonImage = bi.BadgeImageId
+        FROM dbo.Badge AS b
+        INNER JOIN dbo.BadgeImage AS bi 
+            ON b.BadgeId = bi.BadgeId 
+            AND bi.BadgeImageTypeId = 1 
+        WHERE bi.BadgeImageId IN (
+            -- Get the max BadgeImageId for each badge where type = 1 and IsActive = 1
+            SELECT MAX(bi2.BadgeImageId) 
+            FROM dbo.BadgeImage AS bi2 
+            WHERE bi2.BadgeImageTypeId = 1 
+            AND bi2.IsActive = 1 
+            GROUP BY bi2.BadgeId
+        )
+        -- Only update if the current value is different
+        AND bi.BadgeImageId &lt;&gt; ISNULL(b.BadgeImageId_PersonImage, -1)
+        -- And the current value is not already the correct max active image
+        AND ISNULL(b.BadgeImageId_PersonImage, -1) NOT IN (
+            SELECT MAX(bi3.BadgeImageId) 
+            FROM dbo.BadgeImage AS bi3 
+            WHERE bi3.BadgeImageTypeId = 1 
+            AND bi3.IsActive = 1 
+            GROUP BY bi3.BadgeId
+        )">UPDATE b
+        SET BadgeImageId_PersonImage = bi.BadgeImageId
+        FROM dbo.Badge AS b
+     ...</td><td class="metric-value">522,010</td><td class="metric-value">44.09</td><td>12,801</td><td>1,525</td></tr><tr><td>3</td><td>SVDB_Merced</td><td style="font-family: monospace; font-size: 11px; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="SELECT @RemainingRecords = @RemainingRecords + COUNT(*)
+    FROM dbo.Merced_SISImport WITH (NOLOCK)
+    WHERE InProcessDateTime IS NULL 
+      AND ProcessedDateTime IS NULL
+      AND SISImportID IN (SELECT MAX(SISImportID) FROM Merced_SISImport GROUP BY IDNumber, EmailAddress)">SELECT @RemainingRecords = @RemainingRecords + COUNT(*)
+    FROM dbo.Merced_SISImport WITH (NOLOCK)...</td><td class="metric-value">472,771</td><td class="metric-value">473,460.70</td><td>1</td><td>10,713,233</td></tr><tr><td>4</td><td>TruckTrack_Fleet001</td><td style="font-family: monospace; font-size: 11px; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="SELECT DISTINCT
+       PRI.EnteredDate,
+       PRI.ProcedureInstanceID,
+	   PIS.ProcedureInstanceStepID,
+	   PISC.ProcedureInstanceStepComponentID,
+	   PISCI.ProcedureInstanceStepComponentInstructorID,
+       PRI.StudentID,
+       PISCI.Comment AS Comment,
+       PS.Name AS ProcedureSequenceName,
+	   PSC.Name as ProcedureStepComponentName
+FROM ProcedureInstance AS PRI
+INNER JOIN ProcedureInstanceStep as  PIS
+          ON PIS.ProcedureInstanceID=PRI.ProcedureInstanceID
+INNER JOIN ProcedureInstanceStepComponent as PISC
+		  ON PISC.ProcedureInstanceStepID = pis.ProcedureInstanceStepID
+INNER JOIN ProcedureInstanceStepComponent_Instructor as PISCI
+		  ON PISCI.ProcedureInstanceStepComponentID=pisc.ProcedureinstanceStepComponentID
+INNER JOIN ProcedureStepComponent as PSC
+		  ON PSC.ProcedureStepComponentID= PISC.ProcedureStepComponentID
+INNER JOIN ProcedureSequence AS PS
+          ON ps.ProcedureSequenceID=pri.ProcedureSequenceID
+WHERE PRI.StudentID=@StudentID AND ps.ProcedureSequenceID=@ProcedureSequenceID
+AND (@StartDate is null OR pri.EnteredDate &gt;= @StartDate) --hannah 7-9-24
+AND PRI.ProcedureInstanceStatusID&lt;&gt;10 --hannah 7-9-24 leave out removed
+AND not PISCI.Comment is null
+ORDER BY PRI.EnteredDate">SELECT DISTINCT
+       PRI.EnteredDate,
+       PRI.ProcedureInstanceID,
+	   PIS.ProcedureInstance...</td><td class="metric-value">436,674</td><td class="metric-value">429.46</td><td>1,308</td><td>37,358</td></tr><tr><td>5</td><td>SVDB_Westmoreland</td><td style="font-family: monospace; font-size: 11px; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="UPDATE account SET currentbalance = dbo.calculateaccountbalance(accountid), AmountDue = InitialAmountDue, LastBalanceSyncDateTime = DATEADD(ss, -60, GETDATE())
+WHERE (AccountID=@AccountID OR (ISNULL(@AccountID, -1)&lt;0 AND (accountid IN(SELECT accountid
+                                                                           FROM accounttransaction AS at) OR (isactive=1 AND accountid NOT IN(SELECT accountid
+                                                                                                                                              FROM accounttransaction)))))">UPDATE account SET currentbalance = dbo.calculateaccountbalance(accountid), AmountDue = InitialAmoun...</td><td class="metric-value">151,465</td><td class="metric-value">2,480.38</td><td>65</td><td>302,292</td></tr><tr><td>6</td><td>SVDB_AHEC_Conversion</td><td style="font-family: monospace; font-size: 11px; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="UPDATE account SET currentbalance = dbo.calculateaccountbalance(accountid), AmountDue = InitialAmountDue, LastBalanceSyncDateTime = DATEADD(ss, -60, GETDATE())
+WHERE (AccountID=@AccountID OR (ISNULL(@AccountID, -1)&lt;0 AND (accountid IN(SELECT accountid
+                                                                           FROM accounttransaction AS at) OR (isactive=1 AND accountid NOT IN(SELECT accountid
+                                                                                                                                              FROM accounttransaction)))))">UPDATE account SET currentbalance = dbo.calculateaccountbalance(accountid), AmountDue = InitialAmoun...</td><td class="metric-value">135,084</td><td class="metric-value">5,448.61</td><td>32</td><td>828,839</td></tr><tr><td>7</td><td>TruckTrack_Fleet001</td><td style="font-family: monospace; font-size: 11px; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="SELECT DISTINCT
+       P.PersonID,
+       P.DisplayName AS PersonName,
+       SL.LocationID,
+       L.Name AS LocationName,
+       PRD.PersonRoleID,
+       PRD.Name AS PersonRoleName,
+       SP.SecurityProfileID,
+       SP.Name AS SecurityProfileName,
+       CASE
+           WHEN COALESCE(IsPaid, 1)=1 THEN 'Paid'
+           ELSE 'Not Paid'
+       END AS PaidStatus,
+       CONVERT(BIT, ISNULL(CONVERT(INT, PS.IsAvailable), 0)) AS IsAvailable,
+       P.PersonRoleID_Default,
+       PR.IsStudent,
+       PRD.IsEmployee,
+       PPR.EmployeeId_Instructor
+      --PPR.PersonPersonRoleID,  ----- AT 04/27/2020 to remove duplicate lines
+      ----- AT 04/27/2020 Replaced commented out selection of ETC below with the case below to prevent sub query error  04/28/22 DROPPED ETCIID all together
+      --				CASE WHEN 	@RestrictToCheckedInToday = 0 AND @RestrictToClockedInNow = 0 THEN  NULL ELSE ETCI.EmployeeTimeCardItemID END AS TimecardItem  --AND @RestrictToNotClockedInNow = 0 
+      --(
+      --SELECT ETCI.EmployeeTimeCardItemID
+      --FROM EmployeeTimeCardItem AS ETCI
+      --WHERE ETCI.EmployeeID = P.PersonID
+      --	  AND ETCI.SalonID = L.LocationID
+      --	  AND DATEDIFF(d, ETCI.StartDateTime, GETDATE()) = 0
+      --	  AND ETCI.EndDateTime IS NULL
+      --) AS TimecardItem
+      --(
+      --SELECT ETCI.EmployeeTimeCardItemID
+      --FROM EmployeeTimeCardItem AS ETCI
+      --WHERE ETCI.EmployeeID = P.PersonID
+      --	  AND ETCI.SalonID = L.LocationID
+      --	  AND DATEDIFF(d, ETCI.StartDateTime, GETDATE()) = 0
+      --	  AND ETCI.EndDateTime IS NULL
+      --) AS TimecardItem
+      --AT 06/09/2022  The following are intended to return the employeejobID so we can then use it to run the clock out event SP
+      ,
+       (SELECT TOP 1
+               ETCI.EmployeeJobID
+        FROM EmployeeTimeCardItem AS ETCI
+        INNER JOIN EmployeeJob AS EJ2
+                  ON ETCI.EmployeeJobID=EJ2.EmployeeJobID
+        WHERE ETCI.EmployeeID=P.PersonID
+              AND ETCI.SalonID=L.LocationID
+              AND ETCI.EndDateTime IS NULL
+              --AND DATEDIFF(d, ETCI.StartDateTime, GETDATE()) = 0
+
+              AND EJ2.IsEvent=0
+        ORDER BY ETCI.StartDateTime DESC) AS PersonRoleID_Course,
+       (SELECT TOP 1
+               ETCI.EmployeeJobID
+        FROM EmployeeTimeCardItem AS ETCI
+        INNER JOIN EmployeeJob AS EJ2
+                  ON ETCI.EmployeeJobID=EJ2.EmployeeJobID
+        WHERE ETCI.EmployeeID=P.PersonID
+              AND ETCI.SalonID=L.LocationID
+              AND ETCI.EndDateTime IS NULL
+              --AND DATEDIFF(d, ETCI.StartDateTime, GETDATE()) = 0
+
+              AND EJ2.IsEvent=1
+        ORDER BY ETCI.StartDateTime DESC) AS PersonRoleID_Event,
+       ( --Hannah 5-30-23 also return the start date time for the course
+        SELECT TOP 1
+               ETCI.StartDateTime
+        FROM EmployeeTimeCardItem AS ETCI
+        INNER JOIN EmployeeJob AS EJ2
+                  ON ETCI.EmployeeJobID=EJ2.EmployeeJobID
+        WHERE ETCI.EmployeeID=P.PersonID
+              AND ETCI.SalonID=L.LocationID
+              AND ETCI.EndDateTime IS NULL
+              --AND DATEDIFF(d, ETCI.StartDateTime, GETDATE()) = 0
+
+              AND EJ2.IsEvent=0
+        ORDER BY ETCI.StartDateTime DESC) AS StartDateTime_Course,
+       CASE
+           WHEN OGS.ProcedureInstanceStatusID&gt;0 THEN 1
+           ELSE 0
+       END AS HasOpenGradeSheet,
+       P.IsActive AS Person_IsActive,
+       P.IsActive_Grading AS Person_IsActive_Grading,
+       P.PersonStatusID AS Person_EmployeeStatusID,
+       PPR.IsActive AS PPR_IsActive,
+       P.HireDate,
+       P.InitialHoursDate,
+	   P.PersonStatusID --hannah 11-14-23
+FROM PersonRole AS PR
+INNER JOIN Person_PersonRole AS PPR
+          ON PPR.PersonRoleID=PR.PersonRoleID AND PPR.IsActive=1 --AT 07/17/2022 adding IsActive check
+
+INNER JOIN Person AS P
+          ON P.PersonID=PPR.PersonID
+INNER JOIN PersonRole AS PRD
+          ON PRD.PersonRoleID=P.PersonRoleID_Default
+             --INNER JOIN Location AS L ON L.LocationID = P.LocationID_Primary  --AT 05/04/2022 Fixed join to join into person
+             --INNER JOIN Student_Location AS L ON L.LocationID = P.LocationID_Primary  --AT 06/26/2022 Fixed join person but into student location
+
+INNER JOIN Student_Location AS SL
+          ON SL.StudentID=PPR.PersonID  --AT 06/26/2022 Fixed join person but into student location
+
+INNER JOIN Location AS L
+          ON L.LocationID=SL.LocationID  --AT 06/26/2022 Fixed join person but into student location
+
+LEFT OUTER JOIN SecurityProfile AS SP
+          ON SP.SecurityProfileID=P.SecurityProfileID_Default
+INNER JOIN PersonStatus AS PS
+          ON PS.PersonStatusID=P.PersonStatusID
+             ----- AT 04/27/2020 Added in ETCI Join to prevent above sub query error
+
+LEFT OUTER JOIN EmployeeTimeCardItem AS ETCI
+          ON ETCI.EmployeeID=P.PersonID AND ETCI.SalonID=L.LocationID
+LEFT OUTER JOIN TruckTrack_OpenGradeSheets AS OGS
+          ON OGS.StudentID=P.PersonID AND OGS.LocationID=L.LocationID --AND OGS.InstructorID =PPR.EmployeeId_Instructor
+
+WHERE (P.PersonID=@PersonID
+        OR @PersonID&lt;0
+        OR @PersonID IS NULL)
+      --AND PPR.IsActive = 1
+      --AND (L.IsSchool = 0 OR PRD.IsStudent = 1 OR (PRD.IsInstructor = 1 AND P.PersonID = @PersonID_Monitor))
+
+      AND (SL.LocationID=@LocationID
+            OR @LocationID&lt;0
+            OR @LocationID IS NULL)  --AT 5/2/2022 This was commented out, added it back in as requested
+
+      AND ((@RestrictToCheckedInToday=1 AND DATEDIFF(d, ETCI.StartDateTime, GETDATE())=0)
+            OR (@RestrictToClockedInNow=1
+                AND DATEDIFF(d, ETCI.StartDateTime, GETDATE())=0
+                AND ETCI.EndDateTime IS NULL)
+            OR (@RestrictToNotClockedInNow=1
+                AND NOT EXISTS(SELECT EmployeeTimeCardItemID
+                               FROM EmployeeTimeCardItem
+                               WHERE EmployeeID=P.PersonID
+                                     AND SalonID=L.LocationID
+                                     AND DATEDIFF(d, StartDateTime, GETDATE())=0
+                                     AND EndDateTime IS NULL))
+            OR (@RestrictToCheckedInToday=0
+                AND @RestrictToClockedInNow=0
+                AND @RestrictToNotClockedInNow=0))
+      AND PR.IsStudent=1  --Changed this to only care if the job is marked as IsStudent = 1
+
+      AND P.PersonID NOT IN(SELECT InstructorID
+                            FROM Instructor)
+      AND (PPR.EmployeeId_Instructor=@PersonID_Instructor
+            OR @PersonID_Instructor IS NULL
+            OR @PersonID_Instructor IN(SELECT EmployeeID
+                                       FROM Employee_EmployeeJob AS EEJ3
+                                       INNER JOIN Instructor AS I
+                                                 ON EEJ3.EmployeeID=I.InstructorID
+                                       INNER JOIN EmployeeJob AS EJ3
+                                                 ON EEJ3.EmployeeJobID=EJ3.EmployeeJobID
+                                       WHERE EJ3.IsStudent=1 AND EEJ3.EmployeeJobID=PR.PersonRoleID))   --This should filter down the list by the Instructors ID if passed
+
+      AND (ETCI.EmployeeId_Instructor=@PersonID_WhoClockedIn OR @PersonID_WhoClockedIn IS NULL)   --This should filter down the list by the who clocked IN ID if passed
+
+      --AND P.PersonStatusID=1	--AT 06/26/2022 EmployeeStatusID (from Employee) =1 (Active) --HD 11-14-23 commented this out so all statuses that are ACTIVE will come through
+
+      AND P.IsActive=1  --AT 07/19/2022 IsActive flag from Employee
+
+      --AND P.IsActive_Grading=1 --AT 07/19/2022  Grading flag from Employee
+
+      AND (PR.PersonRoleID=@PersonRoleID OR @PersonRoleID IS NULL)  --AT 7/4/2022 
+
+ORDER BY P.HireDate, PersonName">SELECT DISTINCT
+       P.PersonID,
+       P.DisplayName AS PersonName,
+       SL.LocationID,
+   ...</td><td class="metric-value">127,827</td><td class="metric-value">153.79</td><td>1,011</td><td>23,809</td></tr><tr><td>8</td><td>TruckTrack_Fleet001</td><td style="font-family: monospace; font-size: 11px; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="SELECT P.ProcedureInstanceID,
+           P.StudentID,
+           P.StudentTypeID,
+           P.LocationID,
+           P.LocationStationID,
+           P.ProcedureSequenceID,
+           P.ProcedureEvaluationTypeID,
+           P.ProcedureInstanceStatusID,
+           P.PatientNumber,
+           P.Ordinal,
+           P.RequireEveryStepEvaluationByStudent,
+           P.RequireEveryStepEvaluationByInstructor,
+           P.NumberOfInstructorsRequired,
+           P.ProcedureInstanceID_Prior,
+           P.ProcedureStepID_LastCompleted,
+           P.WasOnlyPartiallyCompleted,
+           P.StudentComment,
+           P.EnteredDate,
+           P.Source,
+           P.Code,
+           S.DisplayName StudentDisplayName,
+           L.Name LocationName,
+           LS.StationNumber LocationStationNumber,
+           PIS.Name ProcedureInstanceStatusName,
+           PS.Name ProcedureSequenceName,
+           P.Submitted,
+           PIS.Name AS ProcedureInstanceStatusName_Instructor,
+           PIS.Name AS ProcedureInstanceStatusName_Student,
+           LS.StationCode,     --AT 06/03/2022
+          S.ProficientRoad,
+           S.ProficientRange --AT 07/17/2022
+          ,
+           S.ProficientHazmat --Hannah 10-19-23
+          ,
+           COALESCE(PS.IsUnique, 0) AS IsUnique,
+           COALESCE(PS.IsManualTime, 0) AS IsManualTime   --AT 11/21/2022
+          ,
+           I.InstructorID,
+           I.DisplayName --Hannah 10-12-23
+          ,
+           P.RouteNumber,
+           P.EvalBatchNumber --Hannah 10-16-23
+          ,
+           P.IsFailure --Hannah 11-147-23
+          ,
+           PS.ShowProficiency,   --Hannah 12-6-23
+          PS.Batch_ShowPreviousInstances, --Hannah 5-30-24
+		  P.TrailerNumber, 
+		  P.Miles
+
+    FROM ProcedureInstance P
+    INNER JOIN ProcedureSequence PS
+              ON PS.ProcedureSequenceID=P.ProcedureSequenceID
+    INNER JOIN ProcedureInstance_Instructor PII --hannah 2-24-25 changed joins to INNER for both PII and I (were LEFT OUTER and slowed it down)
+              ON PII.ProcedureInstanceID=P.ProcedureInstanceID
+                 AND (PII.InstructorID=@InstructorID OR @InstructorID IS NULL)
+                 AND PII.IsActive=1
+    INNER JOIN Instructor I
+              ON I.InstructorID=PII.InstructorID --Hannah 10-12-23
+
+    LEFT OUTER JOIN Student S
+              ON S.StudentID=P.StudentID
+    INNER JOIN Location L
+              ON L.LocationID=P.LocationID
+    LEFT OUTER JOIN LocationStation LS
+              ON LS.LocationStationID=P.LocationStationID
+    LEFT OUTER JOIN ProcedureInstanceStatus PIS
+              ON PIS.ProcedureInstanceStatusID=P.ProcedureInstanceStatusID
+    WHERE (--Hannah 10-31-23 include ALL incomplete if that flag is true------------
+           (@InstructorID IS NULL OR PII.InstructorID=@InstructorID)
+           AND PIS.IsCompleteStatus=0
+           AND @IncludeAllUnsubmitted=1
+           AND P.LocationID=@LocationID --hannah 1-18-24 open should still filter by location
+
+           AND (P.ProcedureSequenceID=@ProcedureSequenceID OR @ProcedureSequenceID IS NULL) --Hannah 1-23-24 filter by sequence
+
+           AND (S.StudentGroupID=@StudentGroupID OR @StudentGroupID IS NULL) --Hannah 2-15-24 filter by group
+           ------------------------------------------------------------------------------
+           )
+           OR ((P.StudentID=@StudentID
+                     OR IsNull(@StudentID,-1)&lt;0 )
+               AND (@InstructorID IS NULL OR PII.InstructorID=@InstructorID)
+               AND (P.LocationID=@LocationID
+                     OR IsNull(@LocationID,-1)&lt;0)
+               AND (P.ProcedureInstanceStatusID=@ProcedureInstanceStatusID
+                     OR IsNull(@ProcedureInstanceStatusID,-1)&lt;0  )
+               AND (P.ProcedureSequenceID=@ProcedureSequenceID OR @ProcedureSequenceID IS NULL) --Hannah 1-23-24 filter by sequence
+
+               AND (S.StudentGroupID=@StudentGroupID OR @StudentGroupID IS NULL) --Hannah 2-15-24 filter by group
+
+               AND (@StartDateTime IS NULL OR DATEDIFF(d, @StartDateTime, COALESCE(P.EditedDate, P.EnteredDate))&gt;=0)
+               AND (@EndDateTime IS NULL OR DATEDIFF(d, COALESCE(P.EditedDate, P.EnteredDate), @EndDateTime)&gt;=0)
+               AND (@IncludeOnlyActiveStatus=0 OR PIS.IsActiveStatus=1)
+               AND (((@IncludeOnlyCompleteStatus=0 OR PIS.IsCompleteStatus=1) AND (@IncludeOnlyIncompleteStatus=0 OR PIS.IsCompleteStatus=0)) OR (@IncludeOnlyCompleteStatus=1 AND @IncludeOnlyIncompleteStatus=1))
+               AND (@IncludeOnlyInitialStatus=0 OR PIS.IsInitialStatus=1)) 
+			   AND P.LocationStationID&lt;&gt;0 --hannah 9-24-24 to exclude ones added from time admin
+    ORDER BY CASE
+                 WHEN @NewestFirst=1 THEN P.EnteredDate
+             END DESC, CASE
+                           WHEN @NewestFirst=0 THEN P.EnteredDate
+                       END">SELECT P.ProcedureInstanceID,
+           P.StudentID,
+           P.StudentTypeID,
+           P.Lo...</td><td class="metric-value">112,541</td><td class="metric-value">122.88</td><td>1,223</td><td>50,191</td></tr><tr><td>9</td><td>TruckTrack_Fleet001</td><td style="font-family: monospace; font-size: 11px; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="SELECT TOP 1
+           PersonImageFileName
+    FROM BadgePersonInfoView AS P
+    WHERE PersonID=@PersonID
+          AND BadgeID=@BadgeID
+		  --Hannah 12-17-24 allow inactive badge images through
+          --AND IsActive=1
+          --AND IsExpired=0
+          --AND IsEffective=1
+    ORDER BY BadgeID DESC">SELECT TOP 1
+           PersonImageFileName
+    FROM BadgePersonInfoView AS P
+    WHERE PersonID=...</td><td class="metric-value">96,035</td><td class="metric-value">1.23</td><td>78,763</td><td>365</td></tr><tr><td>10</td><td>SVDB_Windermere</td><td style="font-family: monospace; font-size: 11px; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="INSERT #t0
+  (  
+     TicketID,
+     StartDateTime,
+     ScheduledStartDateTime,
+     ScheduledEndDateTime,
+     TicketStatusID,
+     EmployeeID_Current,
+     ServiceID_Primary,
+     EstimatedWaitTimeInMinutes,
+     InServiceDateTime,
+     WaitStartDateTime,
+     EndDateTime,
+     CallAheadDateTime,
+     ContainsRequest,
+     TicketPaymentID,
+     GuestID,
+     EstimatedDurationInMinutes,
+     HasMultipleEmployees,
+     Source
+  )
+  SELECT TicketID,
+         StartDateTime,
+         ScheduledStartDateTime,
+         ScheduledEndDateTime,
+         TicketStatusID,
+         EmployeeID_Current,
+         ServiceID_Primary,
+         EstimatedWaitTimeInMinutes,
+         InServiceDateTime,
+         WaitStartDateTime,
+         EndDateTime,
+         CallAheadDateTime,
+         ContainsRequest,
+         TicketPaymentID,
+         GuestID,
+         EstimatedDurationInMinutes,
+         HasMultipleEmployees,
+         T.Source
+  FROM Ticket AS T
+  WHERE SalonID=@SalonID AND ((DATEDIFF(d, ScheduledStartDateTime, GETDATE())=0
+                               --4/20/15 Andrew added @TicketStatusID_BlockOut to show Block Outs on the Check In list.
+                               AND TicketStatusID IN(@TicketStatusID_ScheduledAppointment, @TicketStatusID_ConfirmedAppointment, @TicketStatusID_CalledAppointment, @TicketStatusID_BlockOut)) OR (TicketStatusID IN(@TicketStatusID_Inservice, @TicketStatusID_Waiting, @TicketStatusID_CallAhead)))">INSERT #t0
+  (  
+     TicketID,
+     StartDateTime,
+     ScheduledStartDateTime,
+     Scheduled...</td><td class="metric-value">89,450</td><td class="metric-value">115.08</td><td>950</td><td>8,551</td></tr><tr><td>11</td><td>SVDB_Wiley</td><td style="font-family: monospace; font-size: 11px; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="UPDATE account SET currentbalance = dbo.calculateaccountbalance(accountid), AmountDue = InitialAmountDue, LastBalanceSyncDateTime = DATEADD(ss, -60, GETDATE())
+WHERE (AccountID=@AccountID OR (ISNULL(@AccountID, -1)&lt;0 AND (accountid IN(SELECT accountid
+                                                                           FROM accounttransaction AS at) OR (isactive=1 AND accountid NOT IN(SELECT accountid
+                                                                                                                                              FROM accounttransaction)))))">UPDATE account SET currentbalance = dbo.calculateaccountbalance(accountid), AmountDue = InitialAmoun...</td><td class="metric-value">86,169</td><td class="metric-value">3,087.38</td><td>34</td><td>495,462</td></tr><tr><td>12</td><td>SVDB_Windermere</td><td style="font-family: monospace; font-size: 11px; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="UPDATE Guest SET DisplayName = DisplayName + ' !' + CASE
+                                                        WHEN GS.EmployeeID_Stylist=-2 THEN 'M'
+                                                        WHEN GS.EmployeeID_Stylist=-3 THEN 'F'
+                                                        ELSE ''
+                                                    END + ':' + CASE
+                                                                    WHEN GS2.EmployeeID_Stylist=-2 THEN 'M'
+                                                                    WHEN GS2.EmployeeID_Stylist=-3 THEN 'F'
+                                                                    ELSE ''
+                                                                END
+FROM Guest AS G
+LEFT OUTER JOIN Guest_Stylist AS GS
+          ON GS.GuestID=G.GuestID
+             AND GS.EmployeeID_Stylist IN(-2, -3)
+             AND GS.Ordinal=1
+LEFT OUTER JOIN Guest_Stylist AS GS2
+          ON GS2.GuestID=G.GuestID
+             AND GS2.EmployeeID_Stylist IN(-2, -3)
+             AND GS2.Ordinal=2
+WHERE (@GuestID IS NULL OR @GuestID=G.GuestID)
+      AND (GS.EmployeeID_Stylist IN(-2, -3) OR GS2.EmployeeID_Stylist IN(-2, -3))
+      AND COALESCE(DisplayName, 'NULL')&lt;&gt;DisplayName + ' !' + CASE
+                                                                  WHEN GS.EmployeeID_Stylist=-2 THEN 'M'
+                                                                  WHEN GS.EmployeeID_Stylist=-3 THEN 'F'
+                                                                  ELSE ''
+                                                              END + ':' + CASE
+                                                                              WHEN GS2.EmployeeID_Stylist=-2 THEN 'M'
+                                                                              WHEN GS2.EmployeeID_Stylist=-3 THEN 'F
+'
+                                                                              ELSE ''
+                                                                          END">UPDATE Guest SET DisplayName = DisplayName + ' !' + CASE
+                                           ...</td><td class="metric-value">77,972</td><td class="metric-value">19.42</td><td>4,656</td><td>135</td></tr><tr><td>13</td><td>SVDB_Wiley</td><td style="font-family: monospace; font-size: 11px; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="SELECT @Total = ISNULL(@Total, 0) + ISNULL(SUM(COALESCE(AT.AccountAmount,AT.Amount,0) * IsNull(ATT.AffectsBalance,0)), 0)
+    FROM AccountTransaction AS AT
+    INNER JOIN AccountTransactionType AS ATT
+              ON ATT.AccountTransactionTypeID=AT.AccountTransactionTypeID
+    WHERE AT.AccountID=@AccountID
+          AND CommittedDateTime IS NOT NULL
+          AND VoidedDateTime IS NULL
+          AND ArchivedDateTime IS NULL">SELECT @Total = ISNULL(@Total, 0) + ISNULL(SUM(COALESCE(AT.AccountAmount,AT.Amount,0) * IsNull(ATT.A...</td><td class="metric-value">77,199</td><td class="metric-value">1.60</td><td>58,752</td><td>270</td></tr><tr><td>14</td><td>SVDB_Merced</td><td style="font-family: monospace; font-size: 11px; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="WITH EligibleRecords AS (
+                SELECT TOP (@BatchSize) SISImportID
+                FROM Merced_SISImport
+                WHERE InProcessDateTime IS NULL 
+                  AND ProcessedDateTime IS NULL
+                  AND SISImportID IN (SELECT MAX(SISImportID) FROM Merced_SISImport GROUP BY IDNumber, EmailAddress)
+                ORDER BY SISImportID
+            )
+            UPDATE s
+            SET InProcessDateTime = @batchProcessDate
+            FROM dbo.Merced_SISImport s WITH (ROWLOCK)
+            INNER JOIN EligibleRecords e ON s.SISImportID = e.SISImportID">WITH EligibleRecords AS (
+                SELECT TOP (@BatchSize) SISImportID
+                FROM...</td><td class="metric-value">77,033</td><td class="metric-value">77,194.64</td><td>1</td><td>1,078,557</td></tr><tr><td>15</td><td>SVDB_Wiley</td><td style="font-family: monospace; font-size: 11px; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="SELECT @TicketCount = ISNULL(COUNT(DISTINCT T.TicketID), 0)
+FROM TicketLineItem AS TLI
+INNER JOIN Ticket AS T
+          ON T.TicketID=TLI.TicketID
+INNER JOIN TicketStatus AS ts
+          ON ts.TicketStatusID=T.TicketStatusID
+WHERE T.SalonBusinessDayID=@SalonBusinessDayID
+      AND IncludeInTotal=1
+      AND IsPending=0">SELECT @TicketCount = ISNULL(COUNT(DISTINCT T.TicketID), 0)
+FROM TicketLineItem AS TLI
+INNER JOIN ...</td><td class="metric-value">77,023</td><td class="metric-value">165.87</td><td>563</td><td>1,245</td></tr><tr><td>16</td><td>SVDB_AHEC_Conversion</td><td style="font-family: monospace; font-size: 11px; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="UPDATE account SET currentbalance = IIF(AmountDue&gt;CurrentBalance, 0, CurrentBalance - AmountDue), AmountDue = IIF(AmountDue&gt;CurrentBalance, AmountDue - CurrentBalance, 0), LastBalanceSyncDateTime = DATEADD(ss, -60, GETDATE())
+WHERE (AccountID=@AccountID OR (ISNULL(@AccountID, -1)&lt;0 AND (accountid IN(SELECT accountid
+                                                                           FROM accounttransaction AS at) OR (isactive=1 AND accountid NOT IN(SELECT accountid
+                                                                                                                                              FROM accounttransaction)))))">UPDATE account SET currentbalance = IIF(AmountDue&gt;CurrentBalance, 0, CurrentBalance - AmountDue),...</td><td class="metric-value">75,671</td><td class="metric-value">2,464.73</td><td>32</td><td>486,373</td></tr><tr><td>17</td><td>TruckTrack_Fleet001</td><td style="font-family: monospace; font-size: 11px; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="SELECT P.ProcedureInstanceStepID,
+       I.InstructorID,
+       P.ProcedureInstanceStepInstructorID,
+       P.Grade,
+       P.Comment,
+       P.Ordinal,
+       P.EnteredDate,
+       P.EditedDate,
+       P.EditVersion,
+       P.RecordID_Source,
+       P.LocationID_Source,
+       P.Source,
+       P.Code,
+       I.DisplayName AS InstructorDisplayName,
+       PS.ProcedureInstanceID,
+       PS.ProcedureStepID,
+       PS2.ProcedureSequenceID,
+       PS2.Name AS ProcedureSequenceName
+FROM ProcedureInstance AS PIn
+INNER JOIN ProcedureInstanceStep AS PS
+          ON PS.ProcedureInstanceID=PIn.ProcedureInstanceID
+INNER JOIN ProcedureInstanceStep_Instructor AS P
+          ON P.ProcedureInstanceStepID=PS.ProcedureInstanceStepID
+LEFT OUTER JOIN ProcedureSequence AS PS2
+          ON PS2.ProcedureSequenceID=PS.ProcedureSequenceID
+INNER JOIN Instructor AS I
+          ON I.InstructorID=P.InstructorID
+INNER JOIN ProcedureInstance_Instructor AS PII
+          ON PII.ProcedureInstanceID=PIn.ProcedureInstanceID AND PII.InstructorID=I.InstructorID
+LEFT OUTER JOIN ProcedureInstanceStatus AS PIS
+          ON (PII.IsActive=1 AND PIS.ProcedureInstanceStatusID=PII.ProcedureInstanceStatusID) OR (PII.IsActive=0 AND PIS.ProcedureInstanceStatusID=PIn.ProcedureInstanceStatusID)
+WHERE PIn.ProcedureInstanceID=@ProcedureInstanceID AND (PII.IsActive=1 OR PIS.IsCompleteStatus=1)
+ORDER BY P.Ordinal, PS.ProcedureInstanceStepID">SELECT P.ProcedureInstanceStepID,
+       I.InstructorID,
+       P.ProcedureInstanceStepInstructorI...</td><td class="metric-value">67,609</td><td class="metric-value">68.05</td><td>1,246</td><td>4,463</td></tr><tr><td>18</td><td>SVDB_Windermere</td><td style="font-family: monospace; font-size: 11px; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="SELECT AccountTransactionID,
+           AT.Name,
+           Amount,
+           ReceivedDateTime,
+           CommittedDateTime,
+           VoidedDateTime,
+           EffectiveDateTime,
+           ExpirationDateTime,
+           ReversedDateTime,
+           AT.AccountID,
+           A.Name AS AcccountName,
+           PR.Name AS ProductName,
+           AT.Notes,
+		   ProductID, --Hannah 12-2-23
+		   AccountTransactionTypeID
+    FROM AccountTransaction AS AT
+    LEFT OUTER JOIN Account AS A
+              ON A.AccountID=AT.AccountID
+    LEFT OUTER JOIN Person AS P
+              ON P.PersonID=A.PersonID
+    LEFT OUTER JOIN Product AS PR
+              ON AT.POSProductGlobalKey=PR.ProductGlobalKey
+    WHERE (@PersonID=A.PersonID OR ISNULL(@PersonID, -1)&lt;0) AND (@RestrictToIsActive=0 OR AT.IsActive=1)">SELECT AccountTransactionID,
+           AT.Name,
+           Amount,
+           ReceivedDateTime,...</td><td class="metric-value">65,151</td><td class="metric-value">633.83</td><td>108</td><td>45,719</td></tr><tr><td>19</td><td>TruckTrack_Fleet001</td><td style="font-family: monospace; font-size: 11px; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="SELECT pi.procedureinstanceid,
+       p.displayname,
+       ps.name,
+       pi.EnteredDate,
+       pi.IsFailure,
+       pi.IsCriticalFailure,
+       p.PersonID,
+	   pis.Name as ProcedureInstanceStatusName,--hannah 8/13/24
+	   ES.IsWithdrawn,  --Hannah 12-17-24
+	   pi.SubmitTotalString, --hannah 6-5-25
+	   pi.RouteNumber, --hannah8-20-25
+	   p.Sponsor, -- hannah 8-21
+	   EI.DisplayName as InstructorName,
+	   p.StartDate,
+	   pi.StudentComment as Comment,
+	   ps.IsPracticeOnly, --hannah 9-25-25 get new flag
+       pi.SafetyConcernString --hannah 10-16-25
+FROM person AS p
+
+
+
+LEFT OUTER JOIN procedureinstance AS PI 
+          ON pi.StudentID=p.PersonID AND (pi.EnteredDate &gt;= @MondayDate OR pi.EnteredDate is null)--hannah 9-18-25 exclude pis at the join, so that a person can still get a record if have old pi's only
+LEFT OUTER JOIN proceduresequence AS ps
+          ON ps.ProcedureSequenceID=pi.ProcedureSequenceID
+LEFT OUTER JOIN procedureinstancestatus AS pis
+          ON pis.ProcedureInstanceStatusID=pi.ProcedureInstanceStatusID
+LEFT OUTER JOIN Employee as E on E.EmployeeID=p.PersonID
+LEFT OUTER JOIN EmployeeStatus as ES on ES.EmployeeStatusID = E.EmployeeStatusID
+LEFT OUTER JOIN ProcedureInstance_Instructor as PII on PII.ProcedureInstanceID = PI.ProcedureInstanceID
+LEFT OUTER JOIN Employee as EI on EI.EmployeeID=PII.InstructorID
+WHERE 
+       p.LocationID_Primary=@LocationID
+      AND (p.StudentGroupID=@StudentGroupID_Group2 OR @StudentGroupID_Group2 IS NULL)
+      AND (p.EmployeeStatusID=@StudentStatusID_Group2 OR @StudentStatusID_Group2 IS NULL)
+      --AND (pis.Name&lt;&gt;'removed' OR pis.Name is null) hannah 9-23-25 don't exclude removed, or people with only removed don't show. we'll weed them out in API
+	  AND (pi.EnteredDate &gt;= @MondayDate OR pi.EnteredDate is null)
+ORDER BY ES.IsWithdrawn, p.displayname, CAST(pi.entereddate AS DATE)">SELECT pi.procedureinstanceid,
+       p.displayname,
+       ps.name,
+       pi.EnteredDate,
+    ...</td><td class="metric-value">62,590</td><td class="metric-value">64.70</td><td>1,080</td><td>4,265</td></tr><tr><td>20</td><td>SVDB_Windermere</td><td style="font-family: monospace; font-size: 11px; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="SELECT @SalonID AS SalonID,
+         T.EmployeeID_Current,
+         COALESCE(MAX(CASE
+                          WHEN T.TicketStatusID=2 THEN InServiceDateTime
+                          ELSE NULL
+                      END), MAX(EndDateTime), '1/1/1900') AS LastTicketInServiceDateTime,
+         MAX(ISNULL(EndDateTime, '1/1/1900')) AS LastTicketEndDateTime,
+         CASE
+             WHEN COALESCE(MAX(CASE
+                                   WHEN T.TicketStatusID=2 AND EndDateTime IS NULL THEN InServiceDateTime
+                                   ELSE NULL
+                               END), '1/1/1900')&lt;&gt;'1/1/1900' THEN 1
+             ELSE 0
+         END AS InServiceExists --8/1/2011 Matt added the and EndDateTime is null clause so that if they stop the time for a guest, they won't show In Service
+        
+  INTO #T1
+  FROM Ticket AS T
+  WHERE T.TicketStatusID IN(1, 2, 3)
+        AND DATEDIFF(d, T.StartDateTime, GETDATE())=0
+        AND SalonID=@SalonID
+        AND ISNULL(T.ContainsService, 1)=1
+  GROUP BY EmployeeID_Current">SELECT @SalonID AS SalonID,
+         T.EmployeeID_Current,
+         COALESCE(MAX(CASE
+           ...</td><td class="metric-value">61,261</td><td class="metric-value">79.27</td><td>950</td><td>4,795</td></tr></table></div><div class="section">
+        <div class="section-header">Top 20 Missing Indexes</div>
+        <table>
+            <tr>
+                <th>#</th>
+                <th>Database</th>
+                <th>Table</th>
+                <th>Equality Columns</th>
+                <th>Inequality Columns</th>
+                <th>Included Columns</th>
+                <th>Avg Impact</th>
+                <th>User Seeks</th>
+                <th>Impact Score</th>
+            </tr><tr><td>1</td><td>SVDB_Wiley</td><td style="font-family: monospace; font-size: 11px;">dbo.AccountTransaction</td><td style="font-family: monospace; font-size: 11px;">[AccountID], [AccountTransactionTypeID], [VoidedDateTime], [ArchivedDateTime]</td><td style="font-family: monospace; font-size: 11px;">[CommittedDateTime]</td><td style="font-family: monospace; font-size: 11px;">[Amount], [AccountAmount]</td><td class="metric-value">99.60%</td><td>317,952</td><td class="metric-value">64,930,723</td></tr><tr><td>2</td><td>SVDB_Wiley</td><td style="font-family: monospace; font-size: 11px;">dbo.AccountTransaction</td><td style="font-family: monospace; font-size: 11px;">[AccountID], [VoidedDateTime], [ArchivedDateTime]</td><td style="font-family: monospace; font-size: 11px;">[CommittedDateTime]</td><td style="font-family: monospace; font-size: 11px;">[AccountTransactionTypeID], [Amount], [AccountAmount]</td><td class="metric-value">98.47%</td><td>317,952</td><td class="metric-value">64,194,059</td></tr><tr><td>3</td><td>SVDB_Windermere</td><td style="font-family: monospace; font-size: 11px;">dbo.AccountTransaction</td><td style="font-family: monospace; font-size: 11px;">[AccountID], [AccountTransactionTypeID], [VoidedDateTime], [ArchivedDateTime]</td><td style="font-family: monospace; font-size: 11px;">[CommittedDateTime]</td><td style="font-family: monospace; font-size: 11px;">[Amount], [AccountAmount]</td><td class="metric-value">99.31%</td><td>174,851</td><td class="metric-value">22,389,268</td></tr><tr><td>4</td><td>SVDB_Windermere</td><td style="font-family: monospace; font-size: 11px;">dbo.AccountTransaction</td><td style="font-family: monospace; font-size: 11px;">[AccountID], [VoidedDateTime], [ArchivedDateTime]</td><td style="font-family: monospace; font-size: 11px;">[CommittedDateTime]</td><td style="font-family: monospace; font-size: 11px;">[AccountTransactionTypeID], [Amount], [AccountAmount]</td><td class="metric-value">97.68%</td><td>174,851</td><td class="metric-value">22,021,787</td></tr><tr><td>5</td><td>SVDB_Windermere</td><td style="font-family: monospace; font-size: 11px;">dbo.Ticket</td><td style="font-family: monospace; font-size: 11px;">[GuestID], [TicketStatusID]</td><td style="font-family: monospace; font-size: 11px;"><span class="null-value">-</span></td><td style="font-family: monospace; font-size: 11px;">[SalonID], [EndDateTime]</td><td class="metric-value">28.76%</td><td>24,184</td><td class="metric-value">3,904,040</td></tr><tr><td>6</td><td>SVDB_Copiague</td><td style="font-family: monospace; font-size: 11px;">dbo.EmployeePeriodSchedule</td><td style="font-family: monospace; font-size: 11px;">[EmployeeID], [PeriodFrom], [PeriodTo], [DayPattern]</td><td style="font-family: monospace; font-size: 11px;"><span class="null-value">-</span></td><td style="font-family: monospace; font-size: 11px;"><span class="null-value">-</span></td><td class="metric-value">99.22%</td><td>65,181</td><td class="metric-value">3,219,902</td></tr><tr><td>7</td><td>SVDB_Windermere</td><td style="font-family: monospace; font-size: 11px;">dbo.Ticket</td><td style="font-family: monospace; font-size: 11px;">[GuestID], [TicketStatusID]</td><td style="font-family: monospace; font-size: 11px;"><span class="null-value">-</span></td><td style="font-family: monospace; font-size: 11px;">[NetProductAmount]</td><td class="metric-value">28.82%</td><td>21,750</td><td class="metric-value">3,177,742</td></tr><tr><td>8</td><td>SVDB_Windermere</td><td style="font-family: monospace; font-size: 11px;">dbo.Ticket</td><td style="font-family: monospace; font-size: 11px;">[GuestID], [TicketStatusID]</td><td style="font-family: monospace; font-size: 11px;"><span class="null-value">-</span></td><td style="font-family: monospace; font-size: 11px;">[NetServiceAmount]</td><td class="metric-value">28.82%</td><td>21,750</td><td class="metric-value">3,177,742</td></tr><tr><td>9</td><td>TruckTrack_Fleet001</td><td style="font-family: monospace; font-size: 11px;">dbo.Employee</td><td style="font-family: monospace; font-size: 11px;">[SalonID_Primary]</td><td style="font-family: monospace; font-size: 11px;">[HireDate]</td><td style="font-family: monospace; font-size: 11px;">[DisplayName], [Sponsor], [StudentGroupID]</td><td class="metric-value">19.55%</td><td>30,492</td><td class="metric-value">1,313,686</td></tr><tr><td>10</td><td>SVDB_Wiley</td><td style="font-family: monospace; font-size: 11px;">dbo.TicketLineItem</td><td style="font-family: monospace; font-size: 11px;"><span class="null-value">-</span></td><td style="font-family: monospace; font-size: 11px;">[EmployeeID]</td><td style="font-family: monospace; font-size: 11px;">[TicketID], [ServiceID], [EmployeeID_WaitingPool]</td><td class="metric-value">83.13%</td><td>649</td><td class="metric-value">613,434</td></tr><tr><td>11</td><td>SVDB_Wiley</td><td style="font-family: monospace; font-size: 11px;">dbo.TicketLineItem</td><td style="font-family: monospace; font-size: 11px;">[ServiceID]</td><td style="font-family: monospace; font-size: 11px;"><span class="null-value">-</span></td><td style="font-family: monospace; font-size: 11px;">[TicketID], [EmployeeID], [EmployeeID_WaitingPool]</td><td class="metric-value">80.39%</td><td>649</td><td class="metric-value">593,215</td></tr><tr><td>12</td><td>TruckTrack_Fleet001</td><td style="font-family: monospace; font-size: 11px;">dbo.ProcedureInstanceStepComponent_Instructor</td><td style="font-family: monospace; font-size: 11px;">[StudentID]</td><td style="font-family: monospace; font-size: 11px;">[Grade], [EnteredDate]</td><td style="font-family: monospace; font-size: 11px;">[ProcedureInstanceStepComponentID], [InstructorID], [EmployeeJobID]</td><td class="metric-value">71.71%</td><td>113</td><td class="metric-value">397,791</td></tr><tr><td>13</td><td>TruckTrack_Fleet001</td><td style="font-family: monospace; font-size: 11px;">dbo.ProcedureInstanceStepComponent_Instructor</td><td style="font-family: monospace; font-size: 11px;">[InstructorID]</td><td style="font-family: monospace; font-size: 11px;"><span class="null-value">-</span></td><td style="font-family: monospace; font-size: 11px;">[ProcedureInstanceStepComponentID], [Grade], [EnteredDate], [StudentID], [EmployeeJobID]</td><td class="metric-value">61.79%</td><td>113</td><td class="metric-value">369,885</td></tr><tr><td>14</td><td>TruckTrack_Fleet001</td><td style="font-family: monospace; font-size: 11px;">dbo.ProcedureInstanceStepComponent_Instructor</td><td style="font-family: monospace; font-size: 11px;"><span class="null-value">-</span></td><td style="font-family: monospace; font-size: 11px;">[Grade], [EnteredDate]</td><td style="font-family: monospace; font-size: 11px;">[ProcedureInstanceStepComponentID], [InstructorID], [StudentID], [EmployeeJobID]</td><td class="metric-value">60.69%</td><td>113</td><td class="metric-value">336,660</td></tr><tr><td>15</td><td>TruckTrack_Fleet001</td><td style="font-family: monospace; font-size: 11px;">dbo.LoginToken</td><td style="font-family: monospace; font-size: 11px;">[Token], [VoidedDateTime]</td><td style="font-family: monospace; font-size: 11px;">[EffectiveDateTime], [ExpirationDateTime]</td><td style="font-family: monospace; font-size: 11px;"><span class="null-value">-</span></td><td class="metric-value">99.55%</td><td>3,582</td><td class="metric-value">304,836</td></tr><tr><td>16</td><td>SVDB_Hope</td><td style="font-family: monospace; font-size: 11px;">dbo.Ticket</td><td style="font-family: monospace; font-size: 11px;">[GuestID], [TicketStatusID]</td><td style="font-family: monospace; font-size: 11px;"><span class="null-value">-</span></td><td style="font-family: monospace; font-size: 11px;">[SalonID], [EndDateTime]</td><td class="metric-value">25.33%</td><td>2,644</td><td class="metric-value">249,387</td></tr><tr><td>17</td><td>SVDB_Hope</td><td style="font-family: monospace; font-size: 11px;">dbo.Ticket</td><td style="font-family: monospace; font-size: 11px;">[GuestID], [TicketStatusID]</td><td style="font-family: monospace; font-size: 11px;"><span class="null-value">-</span></td><td style="font-family: monospace; font-size: 11px;">[NetProductAmount]</td><td class="metric-value">24.96%</td><td>2,644</td><td class="metric-value">245,744</td></tr><tr><td>18</td><td>SVDB_Hope</td><td style="font-family: monospace; font-size: 11px;">dbo.Ticket</td><td style="font-family: monospace; font-size: 11px;">[GuestID], [TicketStatusID]</td><td style="font-family: monospace; font-size: 11px;"><span class="null-value">-</span></td><td style="font-family: monospace; font-size: 11px;">[NetServiceAmount]</td><td class="metric-value">24.96%</td><td>2,644</td><td class="metric-value">245,744</td></tr><tr><td>19</td><td>SVDB_Windermere</td><td style="font-family: monospace; font-size: 11px;">dbo.SalonBusinessDayTerminal</td><td style="font-family: monospace; font-size: 11px;">[TerminalID]</td><td style="font-family: monospace; font-size: 11px;">[CloseDateTime]</td><td style="font-family: monospace; font-size: 11px;">[SalonBusinessDayID], [TotalSales_ToDate_Terminal]</td><td class="metric-value">37.56%</td><td>11,524</td><td class="metric-value">215,704</td></tr><tr><td>20</td><td>SVDB_Merced</td><td style="font-family: monospace; font-size: 11px;">dbo.Employee</td><td style="font-family: monospace; font-size: 11px;"><span class="null-value">-</span></td><td style="font-family: monospace; font-size: 11px;">[SSN]</td><td style="font-family: monospace; font-size: 11px;">[IsActive_Person]</td><td class="metric-value">17.17%</td><td>1,470</td><td class="metric-value">210,166</td></tr></table></div><div class="section">
+    <div class="section-header">Database Sizes</div>
+    <table>
+        <tr>
+            <th>Database</th>
+            <th>State</th>
+            <th>Recovery Model</th>
+            <th>Data Size (MB)</th>
+            <th>Log Size (MB)</th>
+            <th>Total Size (MB)</th>
+            <th>Log Reuse Wait</th>
+        </tr><tr><td>LogDB</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">36,102</td><td class="metric-value">58</td><td class="metric-value">36,160</td><td style="font-size: 11px;">ACTIVE_TRANSACTION</td></tr><tr><td>SVDB_Merced</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">8,966</td><td class="metric-value">116</td><td class="metric-value">9,082</td><td style="font-size: 11px;">OLDEST_PAGE</td></tr><tr><td>SVDB_Windermere</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">6,024</td><td class="metric-value">51</td><td class="metric-value">6,075</td><td style="font-size: 11px;">NOTHING</td></tr><tr><td>SVDB_WindermerePreImport07232025DONOTMOVE</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">6,024</td><td class="metric-value">51</td><td class="metric-value">6,075</td><td style="font-size: 11px;">NOTHING</td></tr><tr><td>SVDB_AHEC_Conversion090825TEST</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">5,822</td><td class="metric-value">50</td><td class="metric-value">5,872</td><td style="font-size: 11px;">NOTHING</td></tr><tr><td>TEST_SVDB_AHEC_20250903</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">5,822</td><td class="metric-value">50</td><td class="metric-value">5,872</td><td style="font-size: 11px;">NOTHING</td></tr><tr><td>SVDB_AHEC_Conversion</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">5,822</td><td class="metric-value">50</td><td class="metric-value">5,872</td><td style="font-size: 11px;">OLDEST_PAGE</td></tr><tr><td>SVDB_Hope</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">2,379</td><td class="metric-value">50</td><td class="metric-value">2,429</td><td style="font-size: 11px;">NOTHING</td></tr><tr><td>SVDB_Hope_20250901</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">2,379</td><td class="metric-value">50</td><td class="metric-value">2,429</td><td style="font-size: 11px;">NOTHING</td></tr><tr><td>TruckTrack_Fleet001</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">1,473</td><td class="metric-value">50</td><td class="metric-value">1,523</td><td style="font-size: 11px;">ACTIVE_TRANSACTION</td></tr><tr><td>SVDB_Wiley</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">1,259</td><td class="metric-value">50</td><td class="metric-value">1,309</td><td style="font-size: 11px;">OLDEST_PAGE</td></tr><tr><td>SVDB_Copiague</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">942</td><td class="metric-value">63</td><td class="metric-value">1,005</td><td style="font-size: 11px;">ACTIVE_TRANSACTION</td></tr><tr><td>xSVDB_POS_DEV</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">886</td><td class="metric-value">29</td><td class="metric-value">915</td><td style="font-size: 11px;">NOTHING</td></tr><tr><td>SVDB_Westmoreland</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">717</td><td class="metric-value">114</td><td class="metric-value">831</td><td style="font-size: 11px;">OLDEST_PAGE</td></tr><tr><td>SVDB_Westmoreland08112025KEEP</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">717</td><td class="metric-value">50</td><td class="metric-value">767</td><td style="font-size: 11px;">NOTHING</td></tr><tr><td>SVDB</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">639</td><td class="metric-value">58</td><td class="metric-value">697</td><td style="font-size: 11px;">NOTHING</td></tr><tr><td>SVDB_Coastal</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">558</td><td class="metric-value">50</td><td class="metric-value">609</td><td style="font-size: 11px;">OLDEST_PAGE</td></tr><tr><td>SVDB_CoastalAB</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">558</td><td class="metric-value">50</td><td class="metric-value">609</td><td style="font-size: 11px;">OLDEST_PAGE</td></tr><tr><td>TruckTrack_SBL</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">518</td><td class="metric-value">63</td><td class="metric-value">581</td><td style="font-size: 11px;">NOTHING</td></tr><tr><td>SVDB_SageOak</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">518</td><td class="metric-value">52</td><td class="metric-value">570</td><td style="font-size: 11px;">NOTHING</td></tr><tr><td>TruckTrack_MoovDS</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">518</td><td class="metric-value">51</td><td class="metric-value">569</td><td style="font-size: 11px;">NOTHING</td></tr><tr><td>TruckTrack_AffordableCDL</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">518</td><td class="metric-value">50</td><td class="metric-value">568</td><td style="font-size: 11px;">OLDEST_PAGE</td></tr><tr><td>TruckTrack_CMVT</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">518</td><td class="metric-value">50</td><td class="metric-value">568</td><td style="font-size: 11px;">OLDEST_PAGE</td></tr><tr><td>xTruckTrack_SchoolVision</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">320</td><td class="metric-value">26</td><td class="metric-value">346</td><td style="font-size: 11px;">NOTHING</td></tr><tr><td>TruckTrack_Mellevet</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">262</td><td class="metric-value">62</td><td class="metric-value">324</td><td style="font-size: 11px;">NOTHING</td></tr><tr><td>TruckTrack_Panda</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">262</td><td class="metric-value">59</td><td class="metric-value">321</td><td style="font-size: 11px;">NOTHING</td></tr><tr><td>SVDB_CheckIn_SchoolVision</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">262</td><td class="metric-value">57</td><td class="metric-value">319</td><td style="font-size: 11px;">NOTHING</td></tr><tr><td>TruckTrack_RightLane</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">262</td><td class="metric-value">51</td><td class="metric-value">313</td><td style="font-size: 11px;">NOTHING</td></tr><tr><td>TruckTrack_Moov</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">262</td><td class="metric-value">51</td><td class="metric-value">313</td><td style="font-size: 11px;">NOTHING</td></tr><tr><td>TruckTrack_Lonestar</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">262</td><td class="metric-value">51</td><td class="metric-value">313</td><td style="font-size: 11px;">NOTHING</td></tr><tr><td>TruckTrack_Multipurpose</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">262</td><td class="metric-value">31</td><td class="metric-value">293</td><td style="font-size: 11px;">NOTHING</td></tr><tr><td>TruckTrack_UniqueSL</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">262</td><td class="metric-value">30</td><td class="metric-value">292</td><td style="font-size: 11px;">NOTHING</td></tr><tr><td>TruckTrack_HammerDown</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">262</td><td class="metric-value">27</td><td class="metric-value">289</td><td style="font-size: 11px;">NOTHING</td></tr><tr><td>TruckTrack_RJDevereaux</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">262</td><td class="metric-value">11</td><td class="metric-value">273</td><td style="font-size: 11px;">NOTHING</td></tr><tr><td>xTruckTrack_DEV</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">266</td><td class="metric-value">3</td><td class="metric-value">269</td><td style="font-size: 11px;">NOTHING</td></tr><tr><td>SVDB_Badge_Multicard</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">207</td><td class="metric-value">59</td><td class="metric-value">266</td><td style="font-size: 11px;">NOTHING</td></tr><tr><td>SVDB_BadgeDemo</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">207</td><td class="metric-value">11</td><td class="metric-value">218</td><td style="font-size: 11px;">NOTHING</td></tr><tr><td>SVDB_Demo_Multicard</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">207</td><td class="metric-value">10</td><td class="metric-value">217</td><td style="font-size: 11px;">NOTHING</td></tr><tr><td>MonitoringDB</td><td>ONLINE</td><td>SIMPLE</td><td class="metric-value">8</td><td class="metric-value">51</td><td class="metric-value">59</td><td style="font-size: 11px;">NOTHING</td></tr></table></div><div class="section">
+        <div class="section-header">Recent Error Log Entries (Last 20)</div>
+        <table>
+            <tr>
+                <th>Date/Time (UTC)</th>
+                <th>Process</th>
+                <th>Message</th>
+            </tr><tr><td style="white-space: nowrap;">2025-10-27 19:37:10</td><td>Logon</td><td style="font-size: 11px;">Error: 17832, Severity: 20, State: 2.</td></tr><tr><td style="white-space: nowrap;">2025-10-27 19:37:10</td><td>Logon</td><td style="font-size: 11px;">The login packet used to open the connection is structurally invalid; the connection has been closed. Please contact the vendor of the client library. [CLIENT: 85.208.84.168]
+</td></tr><tr><td style="white-space: nowrap;">2025-10-27 19:02:49</td><td>Logon</td><td style="font-size: 11px;">Error: 18456, Severity: 14, State: 8.</td></tr><tr><td style="white-space: nowrap;">2025-10-27 19:02:49</td><td>Logon</td><td style="font-size: 11px;">Login failed for user 'sv'. Reason: Password did not match that for the login provided. [CLIENT: 10.241.128.75]</td></tr><tr><td style="white-space: nowrap;">2025-10-27 19:02:33</td><td>Logon</td><td style="font-size: 11px;">Error: 18456, Severity: 14, State: 8.</td></tr><tr><td style="white-space: nowrap;">2025-10-27 19:02:33</td><td>Logon</td><td style="font-size: 11px;">Login failed for user 'sv'. Reason: Password did not match that for the login provided. [CLIENT: 10.241.128.75]</td></tr><tr><td style="white-space: nowrap;">2025-10-27 19:00:01</td><td>Backup</td><td style="font-size: 11px;">Error: 3041, Severity: 16, State: 1.</td></tr><tr><td style="white-space: nowrap;">2025-10-27 19:00:01</td><td>Backup</td><td style="font-size: 11px;">BACKUP failed to complete the command BACKUP DATABASE TruckTrack_SchoolVision. Check the backup application log for detailed messages.</td></tr><tr><td style="white-space: nowrap;">2025-10-27 19:00:00</td><td>spid80</td><td style="font-size: 11px;">DBCC TRACEON 1204, server process ID (SPID) 80. This is an informational message only; no user action is required.</td></tr><tr><td style="white-space: nowrap;">2025-10-27 19:00:00</td><td>spid80</td><td style="font-size: 11px;">DBCC TRACEON 1222, server process ID (SPID) 80. This is an informational message only; no user action is required.</td></tr><tr><td style="white-space: nowrap;">2025-10-27 18:56:03</td><td>Logon</td><td style="font-size: 11px;">Error: 18456, Severity: 14, State: 38.</td></tr><tr><td style="white-space: nowrap;">2025-10-27 18:56:03</td><td>Logon</td><td style="font-size: 11px;">Login failed for user 'sv'. Reason: Failed to open the explicitly specified database 'dev_svdb_pos'. [CLIENT: 13.64.173.121]</td></tr><tr><td style="white-space: nowrap;">2025-10-27 18:56:03</td><td>Logon</td><td style="font-size: 11px;">Error: 18456, Severity: 14, State: 38.</td></tr><tr><td style="white-space: nowrap;">2025-10-27 18:56:03</td><td>Logon</td><td style="font-size: 11px;">Login failed for user 'sv'. Reason: Failed to open the explicitly specified database 'dev_svdb_pos'. [CLIENT: 13.64.173.121]</td></tr><tr><td style="white-space: nowrap;">2025-10-27 18:56:02</td><td>Logon</td><td style="font-size: 11px;">Error: 18456, Severity: 14, State: 38.</td></tr><tr><td style="white-space: nowrap;">2025-10-27 18:56:02</td><td>Logon</td><td style="font-size: 11px;">Login failed for user 'sv'. Reason: Failed to open the explicitly specified database 'dev_svdb_pos'. [CLIENT: 13.64.173.121]</td></tr><tr><td style="white-space: nowrap;">2025-10-27 18:23:10</td><td>Logon</td><td style="font-size: 11px;">Error: 18456, Severity: 14, State: 8.</td></tr><tr><td style="white-space: nowrap;">2025-10-27 18:23:10</td><td>Logon</td><td style="font-size: 11px;">Login failed for user 'sv'. Reason: Password did not match that for the login provided. [CLIENT: 10.241.128.75]</td></tr><tr><td style="white-space: nowrap;">2025-10-27 18:22:41</td><td>Logon</td><td style="font-size: 11px;">Error: 18456, Severity: 14, State: 8.</td></tr><tr><td style="white-space: nowrap;">2025-10-27 18:22:41</td><td>Logon</td><td style="font-size: 11px;">Login failed for user 'sv'. Reason: Password did not match that for the login provided. [CLIENT: 10.241.128.75]</td></tr></table></div>
+    <div class="footer">
+        <p>Generated by DBATools.dbo.DBA_DailyHealthOverview_HTML</p>
+        <p>SQL Server Health Monitoring System</p>
+    </div>
+</body>
+</html>

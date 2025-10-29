@@ -147,6 +147,40 @@
                 "value": "ms"
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "QueryPreview"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View Query Details",
+                    "url": "/d/query-store?var-ServerName=${__data.fields.ServerName}&var-DatabaseName=${__data.fields.DatabaseName}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "DatabaseName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Browse Tables",
+                    "url": "/d/table-browser?var-DatabaseName=${__data.fields.DatabaseName}"
+                  }
+                ]
+              }
+            ]
           }
         ]
       },
@@ -355,6 +389,40 @@
               {
                 "id": "unit",
                 "value": "ms"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ProcedureName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View Code",
+                    "url": "/d/code-browser?var-DatabaseName=${__data.fields.DatabaseName}&var-ObjectType=Procedure&var-SearchFilter=${__data.fields.ProcedureName}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "DatabaseName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Browse Tables",
+                    "url": "/d/table-browser?var-DatabaseName=${__data.fields.DatabaseName}"
+                  }
+                ]
               }
             ]
           }

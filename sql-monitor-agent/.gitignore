@@ -1,0 +1,11 @@
+# Secrets and credentials
+servers.txt
+.env
+*.secret
+
+# Deployment logs
+/tmp/*.log
+*.log
+
+# Test connection scripts
+test-connection.ps1

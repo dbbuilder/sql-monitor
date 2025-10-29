@@ -37,7 +37,42 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "DatabaseName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Browse Tables",
+                    "url": "/d/sql-monitor-table-browser?var-DatabaseName=${__data.fields.DatabaseName}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "TableName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View Table",
+                    "url": "/d/sql-monitor-table-details?var-DatabaseName=${__data.fields.DatabaseName}&var-TableName=${__data.fields.TableName}"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 10,
@@ -145,6 +180,40 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "DatabaseName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Browse Tables",
+                    "url": "/d/sql-monitor-table-browser?var-DatabaseName=${__data.fields.DatabaseName}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "TableName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View Table",
+                    "url": "/d/sql-monitor-table-details?var-DatabaseName=${__data.fields.DatabaseName}&var-TableName=${__data.fields.TableName}"
+                  }
+                ]
+              }
+            ]
           }
         ]
       },
@@ -212,7 +281,42 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "DatabaseName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Browse Tables",
+                    "url": "/d/sql-monitor-table-browser?var-DatabaseName=${__data.fields.DatabaseName}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "TableName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View Table",
+                    "url": "/d/sql-monitor-table-details?var-DatabaseName=${__data.fields.DatabaseName}&var-TableName=${__data.fields.TableName}"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -278,7 +382,42 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "DatabaseName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Browse Tables",
+                    "url": "/d/sql-monitor-table-browser?var-DatabaseName=${__data.fields.DatabaseName}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "TableName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View Table",
+                    "url": "/d/sql-monitor-table-details?var-DatabaseName=${__data.fields.DatabaseName}&var-TableName=${__data.fields.TableName}"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,

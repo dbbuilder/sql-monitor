@@ -328,6 +328,46 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "DatabaseName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Browse Tables in ${__data.fields.DatabaseName}",
+                    "url": "/d/table-browser?var-DatabaseName=${__data.fields.DatabaseName}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "QueryText_Preview"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto"
+                }
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View Full Query",
+                    "url": "/d/query-store-analysis?var-ServerName=${__data.fields.ServerName}&var-DatabaseName=${__data.fields.DatabaseName}"
+                  }
+                ]
+              }
+            ]
           }
         ]
       },
@@ -642,6 +682,46 @@
                     }
                   ]
                 }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "DatabaseName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Browse Tables in ${__data.fields.DatabaseName}",
+                    "url": "/d/table-browser?var-DatabaseName=${__data.fields.DatabaseName}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "QueryText_Preview"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto"
+                }
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View Full Query",
+                    "url": "/d/query-store-analysis?var-ServerName=${__data.fields.ServerName}&var-DatabaseName=${__data.fields.DatabaseName}"
+                  }
+                ]
               }
             ]
           }
