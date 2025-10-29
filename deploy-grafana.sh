@@ -221,22 +221,19 @@ deploy_azure() {
 
     print_step "Creating Azure Container Instance..."
 
-    # Create connection string for environment variable
-    local connection_string="Server=${MONITORINGDB_SERVER},${MONITORINGDB_PORT};Database=${MONITORINGDB_DATABASE};User Id=${MONITORINGDB_USER};Password=${MONITORINGDB_PASSWORD};Encrypt=True;TrustServerCertificate=True;"
-
-    # GitHub repo URL for dashboard downloads
+    # GitHub repo URL for dashboard downloads (used by entrypoint script in container)
     local github_repo="${GITHUB_REPO:-https://raw.githubusercontent.com/dbbuilder/sql-monitor/main/public}"
-    local entrypoint_url="${github_repo}/grafana-entrypoint.sh"
 
-    print_step "Using GitHub repo: $github_repo"
-    print_step "Entrypoint script: $entrypoint_url"
+    print_step "Using custom image: dbbuilder/sql-monitor-grafana:latest"
+    print_step "Dashboards will download from: $github_repo"
 
-    # Deploy container instance with GitHub-based dashboard download
+    # Deploy container instance with custom Grafana image
+    # The image has the entrypoint script baked in - no command-line override needed
     # Split environment variables: regular (non-sensitive) and secure (passwords)
     az container create \
         --resource-group "$AZURE_RESOURCE_GROUP" \
         --name "$AZURE_CONTAINER_NAME" \
-        --image grafana/grafana-oss:10.2.0 \
+        --image dbbuilder/sql-monitor-grafana:latest \
         --os-type Linux \
         --dns-name-label "$AZURE_DNS_LABEL" \
         --ports 3000 \
@@ -254,7 +251,6 @@ deploy_azure() {
         --secure-environment-variables \
             GF_SECURITY_ADMIN_PASSWORD="$GRAFANA_ADMIN_PASSWORD" \
             MONITORINGDB_PASSWORD="$MONITORINGDB_PASSWORD" \
-        --command-line "/bin/sh -c 'apk add --no-cache wget && wget -O /tmp/entrypoint.sh ${entrypoint_url} && chmod +x /tmp/entrypoint.sh && /tmp/entrypoint.sh'" \
         --location "$AZURE_LOCATION"
 
     # Get FQDN

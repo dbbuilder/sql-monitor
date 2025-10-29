@@ -1,0 +1,23 @@
+# SQL Monitor - Grafana with GitHub Dashboard Provisioning
+# This image extends official Grafana with a custom entrypoint that downloads
+# dashboards from GitHub at startup - works on any platform
+
+FROM grafana/grafana-oss:10.2.0
+
+# Switch to root to install dependencies and copy script
+USER root
+
+# Install wget (needed for downloading dashboards)
+RUN apk add --no-cache wget
+
+# Copy entrypoint script
+COPY public/grafana-entrypoint.sh /grafana-entrypoint.sh
+
+# Make executable
+RUN chmod +x /grafana-entrypoint.sh
+
+# Note: Script runs as root so it can chown files to grafana user (472)
+# The script calls 'exec /run.sh' which handles switching to grafana user
+
+# Set custom entrypoint
+ENTRYPOINT ["/bin/bash", "/grafana-entrypoint.sh"]
