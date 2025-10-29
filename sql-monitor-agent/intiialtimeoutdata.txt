@@ -1,0 +1,498 @@
+ 
+==============================================================================
+TIMEOUT RESCUE KIT - Root Cause Analysis
+==============================================================================
+ 
+Investigation Timeframe:
+  Start: 2025-10-29 14:40:09
+  End:   2025-10-29 18:40:09
+  Timeout Threshold: 30 seconds
+ 
+==============================================================================
+SECTION 1: ATTENTION EVENTS (Client-Side Query Cancellations)
+==============================================================================
+ 
+EventTime               SessionID   DatabaseName                                                                                                                     Username                                                                                                                         ClientApp                                                                                                                                                                                                                                                        DurationSeconds      AttentionReason            SqlTextPreview
+----------------------- ----------- -------------------------------------------------------------------------------------------------------------------------------- -------------------------------------------------------------------------------------------------------------------------------- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -------------------- -------------------------- ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  ?  No attention events found in system_health for this timeframe
+ 
+==============================================================================
+SECTION 2: LONG-RUNNING QUERIES (From Performance Snapshots)
+==============================================================================
+ 
+CaptureTime                 SessionID   LoginName                                                                                                                                                                                                                                                        HostName                                                                                                                                                                                                                                                         DatabaseName                                                                                                                     Status                                                       Command                                                      WaitType                                                                                                                 WaitTimeMs           BlockingSessionID CpuTimeMs            TotalElapsedMs       LogicalReads         ElapsedSeconds                          TimeoutRisk         StatementPreview                                                                                                                                                                                                                                                 OBJECT_NAME_Resolved
+--------------------------- ----------- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -------------------------------------------------------------------------------------------------------------------------------- ------------------------------------------------------------ ------------------------------------------------------------ ------------------------------------------------------------------------------------------------------------------------ -------------------- ----------------- -------------------- -------------------- -------------------- --------------------------------------- ------------------- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+2025-10-29 17:05:03.911     434         NT AUTHORITY\NETWORK SERVICE                                                                                                                                                                                                                                     ip-10-10-2-210                                                                                                                                                                                                                                                   PROD                                                                                                                             suspended                                                    BACKUP DATABASE                                              BACKUPIO                                                                                                                 41                   0                 158526               3902169              5157                 3902.17                                 EXCEEDED TIMEOUT    BACKUP DATABASE [PROD]
+    TO DISK = N'/mnt/migration/sql-001/PROD_20251029_160010_diff.bak'
+    WITH DIFFERENTIAL,
+         INIT,
+         COMPRESSION,
+         ENCRYPTION (
+             ALGORI                                                         NULL
+2025-10-29 17:00:04.932     434         NT AUTHORITY\NETWORK SERVICE                                                                                                                                                                                                                                     ip-10-10-2-210                                                                                                                                                                                                                                                   PROD                                                                                                                             suspended                                                    BACKUP DATABASE                                              BACKUPIO                                                                                                                 25                   0                 140788               3606766              5157                 3606.77                                 EXCEEDED TIMEOUT    BACKUP DATABASE [PROD]
+    TO DISK = N'/mnt/migration/sql-001/PROD_20251029_160010_diff.bak'
+    WITH DIFFERENTIAL,
+         INIT,
+         COMPRESSION,
+         ENCRYPTION (
+             ALGORI                                                         NULL
+2025-10-29 16:55:03.783     434         NT AUTHORITY\NETWORK SERVICE                                                                                                                                                                                                                                     ip-10-10-2-210                                                                                                                                                                                                                                                   PROD                                                                                                                             running                                                      BACKUP DATABASE                                              NULL                                                                                                                     0                    0                 105054               3302251              5157                 3302.25                                 EXCEEDED TIMEOUT    BACKUP DATABASE [PROD]
+    TO DISK = N'/mnt/migration/sql-001/PROD_20251029_160010_diff.bak'
+    WITH DIFFERENTIAL,
+         INIT,
+         COMPRESSION,
+         ENCRYPTION (
+             ALGORI                                                         NULL
+2025-10-29 16:50:05.144     434         NT AUTHORITY\NETWORK SERVICE                                                                                                                                                                                                                                     ip-10-10-2-210                                                                                                                                                                                                                                                   PROD                                                                                                                             suspended                                                    BACKUP DATABASE                                              BACKUPIO                                                                                                                 6                    0                 85175                3003427              5157                 3003.43                                 EXCEEDED TIMEOUT    BACKUP DATABASE [PROD]
+    TO DISK = N'/mnt/migration/sql-001/PROD_20251029_160010_diff.bak'
+    WITH DIFFERENTIAL,
+         INIT,
+         COMPRESSION,
+         ENCRYPTION (
+             ALGORI                                                         NULL
+2025-10-29 16:45:04.945     434         NT AUTHORITY\NETWORK SERVICE                                                                                                                                                                                                                                     ip-10-10-2-210                                                                                                                                                                                                                                                   PROD                                                                                                                             suspended                                                    BACKUP DATABASE                                              BACKUPIO                                                                                                                 0                    0                 73619                2703276              5157                 2703.28                                 EXCEEDED TIMEOUT    BACKUP DATABASE [PROD]
+    TO DISK = N'/mnt/migration/sql-001/PROD_20251029_160010_diff.bak'
+    WITH DIFFERENTIAL,
+         INIT,
+         COMPRESSION,
+         ENCRYPTION (
+             ALGORI                                                         NULL
+2025-10-29 16:40:04.833     434         NT AUTHORITY\NETWORK SERVICE                                                                                                                                                                                                                                     ip-10-10-2-210                                                                                                                                                                                                                                                   PROD                                                                                                                             suspended                                                    BACKUP DATABASE                                              BACKUPIO                                                                                                                 5                    0                 65220                2403195              5157                 2403.20                                 EXCEEDED TIMEOUT    BACKUP DATABASE [PROD]
+    TO DISK = N'/mnt/migration/sql-001/PROD_20251029_160010_diff.bak'
+    WITH DIFFERENTIAL,
+         INIT,
+         COMPRESSION,
+         ENCRYPTION (
+             ALGORI                                                         NULL
+2025-10-29 16:35:03.739     434         NT AUTHORITY\NETWORK SERVICE                                                                                                                                                                                                                                     ip-10-10-2-210                                                                                                                                                                                                                                                   PROD                                                                                                                             suspended                                                    BACKUP DATABASE                                              BACKUPIO                                                                                                                 4                    0                 48298                2101986              5157                 2101.99                                 EXCEEDED TIMEOUT    BACKUP DATABASE [PROD]
+    TO DISK = N'/mnt/migration/sql-001/PROD_20251029_160010_diff.bak'
+    WITH DIFFERENTIAL,
+         INIT,
+         COMPRESSION,
+         ENCRYPTION (
+             ALGORI                                                         NULL
+2025-10-29 16:30:05.185     434         NT AUTHORITY\NETWORK SERVICE                                                                                                                                                                                                                                     ip-10-10-2-210                                                                                                                                                                                                                                                   PROD                                                                                                                             suspended                                                    BACKUP DATABASE                                              BACKUPIO                                                                                                                 0                    0                 44009                1803386              5157                 1803.39                                 EXCEEDED TIMEOUT    BACKUP DATABASE [PROD]
+    TO DISK = N'/mnt/migration/sql-001/PROD_20251029_160010_diff.bak'
+    WITH DIFFERENTIAL,
+         INIT,
+         COMPRESSION,
+         ENCRYPTION (
+             ALGORI                                                         NULL
+2025-10-29 18:19:23.882     244         sa                                                                                                                                                                                                                                                               WSAMZN-V0PI6RP3                                                                                                                                                                                                                                                  master                                                                                                                           suspended                                                    SELECT                                                       XE_LIVE_TARGET_TVF                                                                                                       541                  0                 21                   1688554              0                    1688.55                                 EXCEEDED TIMEOUT    SELECT type, data FROM sys.fn_MSxe_read_event_stream (@source, @sourceopt)                                                                                                                                                                                       NULL
+2025-10-29 18:19:23.882     257         sa                                                                                                                                                                                                                                                               WSAMZN-V0PI6RP3                                                                                                                                                                                                                                                  master                                                                                                                           suspended                                                    SELECT                                                       XE_LIVE_TARGET_TVF                                                                                                       11607                0                 5                    1679627              0                    1679.63                                 EXCEEDED TIMEOUT    SELECT type, data FROM sys.fn_MSxe_read_event_stream (@source, @sourceopt)                                                                                                                                                                                       NULL
+2025-10-29 16:25:03.978     434         NT AUTHORITY\NETWORK SERVICE                                                                                                                                                                                                                                     ip-10-10-2-210                                                                                                                                                                                                                                                   PROD                                                                                                                             suspended                                                    BACKUP DATABASE                                              ASYNC_IO_COMPLETION                                                                                                      181                  0                 37137                1502361              4888                 1502.36                                 EXCEEDED TIMEOUT    BACKUP DATABASE [PROD]
+    TO DISK = N'/mnt/migration/sql-001/PROD_20251029_160010_diff.bak'
+    WITH DIFFERENTIAL,
+         INIT,
+         COMPRESSION,
+         ENCRYPTION (
+             ALGORI                                                         NULL
+2025-10-29 16:20:05.369     434         NT AUTHORITY\NETWORK SERVICE                                                                                                                                                                                                                                     ip-10-10-2-210                                                                                                                                                                                                                                                   PROD                                                                                                                             suspended                                                    BACKUP DATABASE                                              ASYNC_IO_COMPLETION                                                                                                      1196095              0                 27904                1203648              3651                 1203.65                                 EXCEEDED TIMEOUT    BACKUP DATABASE [PROD]
+    TO DISK = N'/mnt/migration/sql-001/PROD_20251029_160010_diff.bak'
+    WITH DIFFERENTIAL,
+         INIT,
+         COMPRESSION,
+         ENCRYPTION (
+             ALGORI                                                         NULL
+2025-10-29 16:15:04.274     434         NT AUTHORITY\NETWORK SERVICE                                                                                                                                                                                                                                     ip-10-10-2-210                                                                                                                                                                                                                                                   PROD                                                                                                                             suspended                                                    BACKUP DATABASE                                              ASYNC_IO_COMPLETION                                                                                                      895202               0                 18077                902755               3651                 902.76                                  EXCEEDED TIMEOUT    BACKUP DATABASE [PROD]
+    TO DISK = N'/mnt/migration/sql-001/PROD_20251029_160010_diff.bak'
+    WITH DIFFERENTIAL,
+         INIT,
+         COMPRESSION,
+         ENCRYPTION (
+             ALGORI                                                         NULL
+2025-10-29 16:10:05.658     434         NT AUTHORITY\NETWORK SERVICE                                                                                                                                                                                                                                     ip-10-10-2-210                                                                                                                                                                                                                                                   PROD                                                                                                                             suspended                                                    BACKUP DATABASE                                              ASYNC_IO_COMPLETION                                                                                                      596637               0                 13090                604190               3651                 604.19                                  EXCEEDED TIMEOUT    BACKUP DATABASE [PROD]
+    TO DISK = N'/mnt/migration/sql-001/PROD_20251029_160010_diff.bak'
+    WITH DIFFERENTIAL,
+         INIT,
+         COMPRESSION,
+         ENCRYPTION (
+             ALGORI                                                         NULL
+2025-10-29 17:45:03.934     454         sa                                                                                                                                                                                                                                                               WSAMZN-V0PI6RP3                                                                                                                                                                                                                                                  master                                                                                                                           suspended                                                    SELECT                                                       XE_LIVE_TARGET_TVF                                                                                                       672                  0                 95                   347896               23                   347.90                                  EXCEEDED TIMEOUT    SELECT type, data FROM sys.fn_MSxe_read_event_stream (@source, @sourceopt)                                                                                                                                                                                       NULL
+2025-10-29 16:10:05.658     196         arctradeprodrunner                                                                                                                                                                                                                                               EC2AMAZ-FJ136P9                                                                                                                                                                                                                                                  PROD                                                                                                                             suspended                                                    SELECT                                                       PAGEIOLATCH_SH                                                                                                           7                    0                 9497                 308170               11184709             308.17                                  EXCEEDED TIMEOUT    SELECT  m.USG_LDC_Account_ID ldcAcctId, mc.USG_Meter_Channel_ID, mc.MKT_LDC_Loss_Factor_ID lossFactorId, mc.Is_UFE isUfe,
+			prj.Projection_Cycle cycle, prj.[Version] [version], sttl.STTL_ISO_Account                                                         dbo.USG_GetEspLdcAcctLatestProjections
+2025-10-29 16:05:05.446     434         NT AUTHORITY\NETWORK SERVICE                                                                                                                                                                                                                                     ip-10-10-2-210                                                                                                                                                                                                                                                   PROD                                                                                                                             suspended                                                    BACKUP DATABASE                                              ASYNC_IO_COMPLETION                                                                                                      296418               0                 7048                 303971               3651                 303.97                                  EXCEEDED TIMEOUT    BACKUP DATABASE [PROD]
+    TO DISK = N'/mnt/migration/sql-001/PROD_20251029_160010_diff.bak'
+    WITH DIFFERENTIAL,
+         INIT,
+         COMPRESSION,
+         ENCRYPTION (
+             ALGORI                                                         NULL
+2025-10-29 17:55:03.745     244         sa                                                                                                                                                                                                                                                               WSAMZN-V0PI6RP3                                                                                                                                                                                                                                                  master                                                                                                                           suspended                                                    SELECT                                                       XE_LIVE_TARGET_TVF                                                                                                       467                  0                 3                    228468               0                    228.47                                  EXCEEDED TIMEOUT    SELECT type, data FROM sys.fn_MSxe_read_event_stream (@source, @sourceopt)                                                                                                                                                                                       NULL
+2025-10-29 17:55:03.745     257         sa                                                                                                                                                                                                                                                               WSAMZN-V0PI6RP3                                                                                                                                                                                                                                                  master                                                                                                                           suspended                                                    SELECT                                                       XE_LIVE_TARGET_TVF                                                                                                       51539                0                 1                    219541               0                    219.54                                  EXCEEDED TIMEOUT    SELECT type, data FROM sys.fn_MSxe_read_event_stream (@source, @sourceopt)                                                                                                                                                                                       NULL
+2025-10-29 16:50:05.144     171         akram                                                                                                                                                                                                                                                            ARCTRADE-AKRAM                                                                                                                                                                                                                                                   PROD                                                                                                                             rollback                                                     ROLLBACK TRANSACTION                                         IO_COMPLETION                                                                                                            118                  0                 23376                96293                7292778              96.29                                   EXCEEDED TIMEOUT    ROLLBACK TRAN;  
+-- COMMIT TRAN;                                                                                                                                                                                                                                NULL
+2025-10-29 17:40:05.309     454         sa                                                                                                                                                                                                                                                               WSAMZN-V0PI6RP3                                                                                                                                                                                                                                                  master                                                                                                                           suspended                                                    SELECT                                                       XE_LIVE_TARGET_TVF                                                                                                       2255                 0                 36                   49470                23                   49.47                                   EXCEEDED TIMEOUT    SELECT type, data FROM sys.fn_MSxe_read_event_stream (@source, @sourceopt)                                                                                                                                                                                       NULL
+2025-10-29 16:25:03.978     87          arctradeprodrunner                                                                                                                                                                                                                                               EC2AMAZ-FJ136P9                                                                                                                                                                                                                                                  PROD                                                                                                                             suspended                                                    SELECT                                                       PAGEIOLATCH_SH                                                                                                           0                    0                 2632                 35926                3604411              35.93                                   EXCEEDED TIMEOUT    SELECT  m.USG_LDC_Account_ID ldcAcctId, mc.USG_Meter_Channel_ID, mc.MKT_LDC_Loss_Factor_ID lossFactorId, mc.Is_UFE isUfe,
+			prj.Projection_Cycle cycle, prj.[Version] [version], sttl.STTL_ISO_Account                                                         dbo.USG_GetEspLdcAcctLatestProjections
+2025-10-29 16:50:05.144     439         arctradeprodrunner                                                                                                                                                                                                                                               EC2AMAZ-FJ136P9                                                                                                                                                                                                                                                  PROD                                                                                                                             suspended                                                    SELECT                                                       LCK_M_IS                                                                                                                 24257                171               0                    24257                0                    24.26                                   Near Timeout (75%+) SELECT la.[Account_Identifier] AS ldcAccountIdentifier
+		,clat.[Account_Status] AS ldcAccountStatus
+	FROM [USG_Customer_LDC_Account_Tracking] AS clat
+	INNER JOIN [CRM_Client_Account] AS ca ON ca.[C                                                         dbo.USG_GetLdcAccountsStatus
+2025-10-29 17:45:03.934     196         arctradeprodrunner                                                                                                                                                                                                                                               EC2AMAZ-FJ136P9                                                                                                                                                                                                                                                  PROD                                                                                                                             suspended                                                    SELECT                                                       PAGEIOLATCH_SH                                                                                                           0                    0                 8875                 22812                11620415             22.81                                   Near Timeout (75%+) SELECT  m.USG_LDC_Account_ID ldcAcctId, mc.USG_Meter_Channel_ID, mc.MKT_LDC_Loss_Factor_ID lossFactorId, mc.Is_UFE isUfe,
+			prj.Projection_Cycle cycle, prj.[Version] [version], sttl.STTL_ISO_Account                                                         dbo.USG_GetEspLdcAcctLatestProjections
+2025-10-29 16:00:06.276     87          arctradeprodrunner                                                                                                                                                                                                                                               EC2AMAZ-FJ136P9                                                                                                                                                                                                                                                  PROD                                                                                                                             suspended                                                    SELECT                                                       PAGEIOLATCH_SH                                                                                                           0                    0                 8127                 19752                12057670             19.75                                   Below Threshold     SELECT  m.USG_LDC_Account_ID ldcAcctId, mc.USG_Meter_Channel_ID, mc.MKT_LDC_Loss_Factor_ID lossFactorId, mc.Is_UFE isUfe,
+			prj.Projection_Cycle cycle, prj.[Version] [version], sttl.STTL_ISO_Account                                                         dbo.USG_GetEspLdcAcctLatestProjections
+2025-10-29 16:50:05.144     117         arctradeprodrunner                                                                                                                                                                                                                                               EC2AMAZ-FJ136P9                                                                                                                                                                                                                                                  PROD                                                                                                                             suspended                                                    INSERT                                                       LCK_M_IS                                                                                                                 19673                171               0                    19673                9                    19.67                                   Below Threshold     INSERT INTO @BillGroupCLAccounts(groupInvoiceId, endDate, customerLdcAcctId)
+	SELECT groupInvoiceId, endDate, customerLdcAcctId
+	FROM (
+		SELECT 
+			gi.BIL_Group_Invoice_ID groupInvoiceId,
+			--i                                                         dbo.BIL_GetInvoiceSummary
+2025-10-29 16:50:05.144     233         arctradeprodrunner                                                                                                                                                                                                                                               EC2AMAZ-FJ136P9                                                                                                                                                                                                                                                  PROD                                                                                                                             suspended                                                    INSERT                                                       LCK_M_IS                                                                                                                 17849                171               2                    17851                155                  17.85                                   Below Threshold     INSERT INTO @BillGroupCLAccounts(groupInvoiceId, endDate, customerLdcAcctId)
+	SELECT groupInvoiceId, endDate, customerLdcAcctId
+	FROM (
+		SELECT 
+			gi.BIL_Group_Invoice_ID groupInvoiceId,
+			--i                                                         dbo.BIL_GetInvoiceSummary
+2025-10-29 16:50:05.144     217         arctradeprodrunner                                                                                                                                                                                                                                               EC2AMAZ-FJ136P9                                                                                                                                                                                                                                                  PROD                                                                                                                             suspended                                                    INSERT                                                       LCK_M_IS                                                                                                                 16809                171               2                    16811                155                  16.81                                   Below Threshold     INSERT INTO @BillGroupCLAccounts(groupInvoiceId, endDate, customerLdcAcctId)
+	SELECT groupInvoiceId, endDate, customerLdcAcctId
+	FROM (
+		SELECT 
+			gi.BIL_Group_Invoice_ID groupInvoiceId,
+			--i                                                         dbo.BIL_GetInvoiceSummary
+
+  ? Long-running queries listed above
+ 
+==============================================================================
+SECTION 3: BLOCKING CHAINS (Root Cause of Waits)
+==============================================================================
+ 
+CaptureTime                 BlockedSession BlockingSession BlockerLogin                                                                                                                                                                                                                                                     BlockerHost                                                                                                                                                                                                                                                      WaitType                                                                                                                 WaitSeconds                             BlockedElapsedSeconds                   DatabaseName                                                                                                                     WhatWasBlocked                                                                                                                                                                                                                                                   WhatWasBlocking
+--------------------------- -------------- --------------- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- ------------------------------------------------------------------------------------------------------------------------ --------------------------------------- --------------------------------------- -------------------------------------------------------------------------------------------------------------------------------- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+2025-10-29 16:50:05.144     439            171             akram                                                                                                                                                                                                                                                            ARCTRADE-AKRAM                                                                                                                                                                                                                                                   LCK_M_IS                                                                                                                 24.26                                   24.26                                   PROD                                                                                                                             SELECT la.[Account_Identifier] AS ldcAccountIdentifier
+		,clat.[Account_Status] AS ldcAccountStatus
+	FROM [USG_Customer_LDC_Account_Tracking] AS clat
+	INNER JOIN [CRM_Client_Account] AS ca ON ca.[C                                                         ROLLBACK TRAN;  
+-- COMMIT TRAN;  
+2025-10-29 16:50:05.144     117            171             akram                                                                                                                                                                                                                                                            ARCTRADE-AKRAM                                                                                                                                                                                                                                                   LCK_M_IS                                                                                                                 19.67                                   19.67                                   PROD                                                                                                                             INSERT INTO @BillGroupCLAccounts(groupInvoiceId, endDate, customerLdcAcctId)
+	SELECT groupInvoiceId, endDate, customerLdcAcctId
+	FROM (
+		SELECT 
+			gi.BIL_Group_Invoice_ID groupInvoiceId,
+			--i                                                         ROLLBACK TRAN;  
+-- COMMIT TRAN;  
+2025-10-29 16:50:05.144     233            171             akram                                                                                                                                                                                                                                                            ARCTRADE-AKRAM                                                                                                                                                                                                                                                   LCK_M_IS                                                                                                                 17.85                                   17.85                                   PROD                                                                                                                             INSERT INTO @BillGroupCLAccounts(groupInvoiceId, endDate, customerLdcAcctId)
+	SELECT groupInvoiceId, endDate, customerLdcAcctId
+	FROM (
+		SELECT 
+			gi.BIL_Group_Invoice_ID groupInvoiceId,
+			--i                                                         ROLLBACK TRAN;  
+-- COMMIT TRAN;  
+2025-10-29 16:50:05.144     217            171             akram                                                                                                                                                                                                                                                            ARCTRADE-AKRAM                                                                                                                                                                                                                                                   LCK_M_IS                                                                                                                 16.81                                   16.81                                   PROD                                                                                                                             INSERT INTO @BillGroupCLAccounts(groupInvoiceId, endDate, customerLdcAcctId)
+	SELECT groupInvoiceId, endDate, customerLdcAcctId
+	FROM (
+		SELECT 
+			gi.BIL_Group_Invoice_ID groupInvoiceId,
+			--i                                                         ROLLBACK TRAN;  
+-- COMMIT TRAN;  
+2025-10-29 16:50:05.144     395            171             akram                                                                                                                                                                                                                                                            ARCTRADE-AKRAM                                                                                                                                                                                                                                                   LCK_M_IS                                                                                                                 13.68                                   13.68                                   PROD                                                                                                                             insert into #taskCount
+    select 10  , count(distinct cvd.[Issue_ID])
+	from RSK_Contract c WITH (NOLOCK)
+	join [RSK_Contract_Version] cv WITH (NOLOCK) on c.RSK_Contract_ID = cv.RSK_Contract_ID and                                                         ROLLBACK TRAN;  
+-- COMMIT TRAN;  
+2025-10-29 16:50:05.144     182            171             akram                                                                                                                                                                                                                                                            ARCTRADE-AKRAM                                                                                                                                                                                                                                                   LCK_M_IS                                                                                                                 9.31                                    9.31                                    PROD                                                                                                                             with blockedStatus as (
+  SELECT 		
+		case when eh.Reject_Reason is null then 0 else  1 end as isBlocked, 
+		main.[Status_Code] as [Status_Code],
+		main.Account_Group_Name as groupName,
+		main.Ac                                                         ROLLBACK TRAN;  
+-- COMMIT TRAN;  
+2025-10-29 16:50:05.144     235            171             akram                                                                                                                                                                                                                                                            ARCTRADE-AKRAM                                                                                                                                                                                                                                                   LCK_M_IS                                                                                                                 5.70                                    5.71                                    PROD                                                                                                                             select la.USG_LDC_Account_ID as ldcAccountId,
+	       la.LDC_ID as ldcId,
+	       la.LDC_Load_Zone_ID as ldcLoadZoneId,
+	       la.Account_Identifier as accountIdentifier,
+	       la.Old_Account_I                                                         ROLLBACK TRAN;  
+-- COMMIT TRAN;  
+2025-10-29 16:50:05.144     248            171             akram                                                                                                                                                                                                                                                            ARCTRADE-AKRAM                                                                                                                                                                                                                                                   LCK_M_IS                                                                                                                 1.40                                    1.40                                    PROD                                                                                                                             select 
+t.CRM_Client_Account_ID clientAcctId,
+t.RSK_Contract_ID contractId,
+t.RSK_Contract_Version_ID contractVersionId,
+t.RSK_Contract_Version_Status_ID contractVersionStatusId,
+t.Status_Date ap                                                         ROLLBACK TRAN;  
+-- COMMIT TRAN;  
+2025-10-29 16:50:05.144     62             171             akram                                                                                                                                                                                                                                                            ARCTRADE-AKRAM                                                                                                                                                                                                                                                   LCK_M_IS                                                                                                                 1.10                                    1.10                                    PROD                                                                                                                             SELECT 	la.[LDC_ID] AS ldcId,
+	        ldc.ISO AS iso,
+			la.[Account_Type] AS ldcAcctType, -- USG-2853
+			ISNULL(e.[If_Read_Cycle], ec.[Is_Read_Cycle]) AS ifReadCycle,
+			ca.[Client_Entity_ID] AS                                                         ROLLBACK TRAN;  
+-- COMMIT TRAN;  
+
+  ? Blocking chains listed above - investigate the blocker sessions
+ 
+==============================================================================
+SECTION 4: WAIT STATISTICS (Resource Bottlenecks)
+==============================================================================
+ 
+SnapshotTime                WaitType                                                                                                                 WaitingTasksCount    WaitSeconds                             AvgWaitMs                               WaitTypeDescription
+--------------------------- ------------------------------------------------------------------------------------------------------------------------ -------------------- --------------------------------------- --------------------------------------- ------------------------------------
+2025-10-29 18:19:23.882     SOS_WORK_DISPATCHER                                                                                                      32397107             107917111.04                            3331.00                                 See wait stats documentation
+2025-10-29 17:55:03.745     SOS_WORK_DISPATCHER                                                                                                      32111752             106867846.03                            3327.00                                 See wait stats documentation
+2025-10-29 17:50:05.196     SOS_WORK_DISPATCHER                                                                                                      32081644             106698727.61                            3325.00                                 See wait stats documentation
+2025-10-29 17:45:03.934     SOS_WORK_DISPATCHER                                                                                                      32057848             106617602.85                            3325.00                                 See wait stats documentation
+2025-10-29 17:40:05.309     SOS_WORK_DISPATCHER                                                                                                      31998141             106407057.55                            3325.00                                 See wait stats documentation
+2025-10-29 17:35:04.164     SOS_WORK_DISPATCHER                                                                                                      31916834             106118189.32                            3324.00                                 See wait stats documentation
+2025-10-29 17:30:05.627     SOS_WORK_DISPATCHER                                                                                                      31872271             105908637.23                            3322.00                                 See wait stats documentation
+2025-10-29 17:25:05.314     SOS_WORK_DISPATCHER                                                                                                      31793899             105726837.95                            3325.00                                 See wait stats documentation
+2025-10-29 17:20:05.169     SOS_WORK_DISPATCHER                                                                                                      31643634             105585111.06                            3336.00                                 See wait stats documentation
+2025-10-29 17:15:04.011     SOS_WORK_DISPATCHER                                                                                                      31536051             105404159.88                            3342.00                                 See wait stats documentation
+2025-10-29 17:10:05.323     SOS_WORK_DISPATCHER                                                                                                      31304019             105177582.28                            3359.00                                 See wait stats documentation
+2025-10-29 17:05:03.911     SOS_WORK_DISPATCHER                                                                                                      31226855             105030294.30                            3363.00                                 See wait stats documentation
+2025-10-29 17:00:04.932     SOS_WORK_DISPATCHER                                                                                                      31107966             104784220.92                            3368.00                                 See wait stats documentation
+2025-10-29 16:55:03.783     SOS_WORK_DISPATCHER                                                                                                      30938842             104569612.21                            3379.00                                 See wait stats documentation
+2025-10-29 16:50:05.144     SOS_WORK_DISPATCHER                                                                                                      30851414             104346367.64                            3382.00                                 See wait stats documentation
+2025-10-29 16:45:04.945     SOS_WORK_DISPATCHER                                                                                                      30778104             104116321.96                            3382.00                                 See wait stats documentation
+2025-10-29 16:40:04.833     SOS_WORK_DISPATCHER                                                                                                      30714429             103916005.68                            3383.00                                 See wait stats documentation
+2025-10-29 16:35:03.739     SOS_WORK_DISPATCHER                                                                                                      30605563             103745258.82                            3389.00                                 See wait stats documentation
+2025-10-29 16:30:05.185     SOS_WORK_DISPATCHER                                                                                                      30557424             103579456.23                            3389.00                                 See wait stats documentation
+2025-10-29 16:25:03.978     SOS_WORK_DISPATCHER                                                                                                      30464917             103334168.67                            3391.00                                 See wait stats documentation
+
+  ? Wait statistics listed above - focus on top wait types
+ 
+==============================================================================
+SECTION 5: QUERY STORE - Plan Regressions
+==============================================================================
+ 
+query_id             ObjectName                                                                                                                       AvgDurationMs          MaxDurationMs                           ExecutionCount       last_execution_time                plan_id              PlanStatus   QueryText
+-------------------- -------------------------------------------------------------------------------------------------------------------------------- ---------------------- --------------------------------------- -------------------- ---------------------------------- -------------------- ------------ ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  ?  No plan regressions found in Query Store
+ 
+==============================================================================
+SECTION 6: RECENTLY EXECUTED SLOW QUERIES (DMV Cache)
+==============================================================================
+ 
+DatabaseName                                                                                                                     ObjectName                                                                                                                       last_execution_time     execution_count      AvgElapsedMs                            MaxElapsedMs                            MinElapsedMs                            AvgCpuMs                                AvgLogicalReads                         TimeoutRisk         QueryTextPreview
+-------------------------------------------------------------------------------------------------------------------------------- -------------------------------------------------------------------------------------------------------------------------------- ----------------------- -------------------- --------------------------------------- --------------------------------------- --------------------------------------- --------------------------------------- --------------------------------------- ------------------- ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                             NULL                                                                                                                             2025-10-29 18:09:44.900 190038               86.58                                   657819.03                               0.06                                    31.59                                   65.00                                   EXCEEDED TIMEOUT    (@P1 varchar(25),@P2 varchar(23))select  top 50000 
+	[Current LSN],
+	[operation],
+	[Context],
+	[Transaction ID],
+	[Transaction Name],
+	[Begin Time],
+	[End Time],
+	[Flag Bits],
+	[PartitionID],
+	[Page I
+PROD                                                                                                                             USG_GetEspLdcAcctLatestProjections                                                                                               2025-10-29 18:39:21.413 491                  4280.70                                 439407.99                               1.28                                    1354.30                                 1925047.00                              EXCEEDED TIMEOUT    --DECLARE
+--	@espBeId INT = 484,
+--	@acctIdList LongIdTable
+--INSERT @acctIdList (Id)
+--VALUES(203638)
+--EXEC [USG_GetEspLdcAcctLatestProjections] @espBeId = @espBeId, @acctIdList = @acctIdList
+NULL                                                                                                                             NULL                                                                                                                             2025-10-29 17:39:18.277 1                    438619.74                               438619.74                               438619.74                               101.55                                  0.00                                    EXCEEDED TIMEOUT    (@source nvarchar(256),@sourceopt int)SELECT type, data FROM sys.fn_MSxe_read_event_stream (@source, @sourceopt)
+NULL                                                                                                                             NULL                                                                                                                             2025-10-29 18:10:38.700 191746               73.72                                   332320.36                               0.06                                    23.84                                   65.00                                   EXCEEDED TIMEOUT    (@P1 varchar(25),@P2 varchar(23))select  top 50000 
+	[Current LSN],
+	[operation],
+	[Context],
+	[Transaction ID],
+	[Transaction Name],
+	[Begin Time],
+	[End Time],
+	[Flag Bits],
+	[PartitionID],
+	[Page I
+NULL                                                                                                                             NULL                                                                                                                             2025-10-29 18:09:45.477 190411               80.77                                   314747.40                               0.06                                    29.23                                   65.00                                   EXCEEDED TIMEOUT    (@P1 varchar(25),@P2 varchar(23))select  top 50000 
+	[Current LSN],
+	[operation],
+	[Context],
+	[Transaction ID],
+	[Transaction Name],
+	[Begin Time],
+	[End Time],
+	[Flag Bits],
+	[PartitionID],
+	[Page I
+NULL                                                                                                                             NULL                                                                                                                             2025-10-29 18:10:07.670 190439               81.14                                   306273.72                               0.06                                    29.82                                   65.00                                   EXCEEDED TIMEOUT    (@P1 varchar(25),@P2 varchar(23))select  top 50000 
+	[Current LSN],
+	[operation],
+	[Context],
+	[Transaction ID],
+	[Transaction Name],
+	[Begin Time],
+	[End Time],
+	[Flag Bits],
+	[PartitionID],
+	[Page I
+NULL                                                                                                                             NULL                                                                                                                             2025-10-29 18:10:38.350 192101               71.54                                   292475.81                               0.06                                    21.67                                   65.00                                   EXCEEDED TIMEOUT    (@P1 varchar(25),@P2 varchar(23))select  top 50000 
+	[Current LSN],
+	[operation],
+	[Context],
+	[Transaction ID],
+	[Transaction Name],
+	[Begin Time],
+	[End Time],
+	[Flag Bits],
+	[PartitionID],
+	[Page I
+PROD                                                                                                                             USG_GetEspActiveBillingMeterChannelUsageIntervals                                                                                2025-10-29 18:29:26.450 69                   11718.66                                130094.92                               17.61                                   1498.51                                 1147014.00                              EXCEEDED TIMEOUT    CREATE PROCEDURE [dbo].[USG_GetEspActiveBillingMeterChannelUsageIntervals]
+	@ldcAcctIds LONGIDTABLE READONLY
+	,@espBeId INT
+	,@periodBegin DATE
+	,@periodEnd DATE
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	S
+NULL                                                                                                                             NULL                                                                                                                             2025-10-29 18:09:45.870 130284               39.71                                   101914.78                               0.06                                    19.07                                   59.00                                   EXCEEDED TIMEOUT    (@P1 varchar(25),@P2 varchar(23))select  top 50000 
+	[Current LSN],
+	[operation],
+	[Context],
+	[Transaction ID],
+	[Transaction Name],
+	[Begin Time],
+	[End Time],
+	[Flag Bits],
+	[PartitionID],
+	[Page I
+NULL                                                                                                                             NULL                                                                                                                             2025-10-29 17:52:33.853 45480                88.97                                   96465.45                                0.07                                    32.16                                   72.00                                   EXCEEDED TIMEOUT    (@P1 varchar(25),@P2 varchar(23))select  top 50000 
+	[Current LSN],
+	[operation],
+	[Context],
+	[Transaction ID],
+	[Transaction Name],
+	[Begin Time],
+	[End Time],
+	[Flag Bits],
+	[PartitionID],
+	[Page I
+NULL                                                                                                                             NULL                                                                                                                             2025-10-29 18:10:38.410 130198               39.70                                   86704.14                                0.06                                    18.98                                   60.00                                   EXCEEDED TIMEOUT    (@P1 varchar(25),@P2 varchar(23))select  top 50000 
+	[Current LSN],
+	[operation],
+	[Context],
+	[Transaction ID],
+	[Transaction Name],
+	[Begin Time],
+	[End Time],
+	[Flag Bits],
+	[PartitionID],
+	[Page I
+PROD                                                                                                                             USG_GetEspLdcAcctCustomisedProjection                                                                                            2025-10-29 18:39:23.693 770                  158.07                                  60219.38                                0.19                                    29.55                                   29405.00                                EXCEEDED TIMEOUT    CREATE PROCEDURE [dbo].[USG_GetEspLdcAcctCustomisedProjection] -- get forecast
+	@espBeId INT
+	,@acctIdList IntIdTable READONLY
+	,@beginDate Date
+	,@endDate Date
+AS
+	SELECT m.USG_LDC_Account_ID A
+PROD                                                                                                                             BIL_GetEspCIInvoiceReport                                                                                                        2025-10-29 18:34:51.187 6                    19555.53                                55054.02                                10115.96                                9833.90                                 7226029.00                              EXCEEDED TIMEOUT    CREATE PROCEDURE [dbo].[BIL_GetEspCIInvoiceReport]
+	@espBeId INT
+	,@states TYPE_NvarcharKey READONLY
+	,@ldcs TYPE_NvarcharKey READONLY
+	,@brokers IntIdTable READONLY
+	,@beginDate DATETIME2(4)
+	,
+NULL                                                                                                                             NULL                                                                                                                             2025-10-29 18:30:31.450 1                    48236.97                                48236.97                                48236.97                                47817.29                                26954219.00                             EXCEEDED TIMEOUT    
+
+WITH XEFile AS
+(
+    SELECT CONVERT(XML, event_data) AS event_xml
+    FROM sys.fn_xe_file_target_read_file
+    (
+        'TrackCommandTimeouts*.xel',
+        NULL,
+        NULL,
+        NU
+PROD                                                                                                                             BIL_GetEspActiveBillingDetails                                                                                                   2025-10-29 18:29:28.730 162                  3404.54                                 38193.28                                6.67                                    2673.86                                 2593636.00                              EXCEEDED TIMEOUT    CREATE PROCEDURE [dbo].[BIL_GetEspActiveBillingDetails]
+	@ldcAcctIds INTIDTABLE READONLY
+	,@espBeId INT
+	,@periodBegin DATE
+	,@periodEnd DATE
+	,@versionDate DATETIME2(4)
+AS
+BEGIN
+	SET NOCOUNT 
+PROD                                                                                                                             USG_GetLdcAccountTrackingHistoricalUsageByFilterByLastStatusChange                                                               2025-10-29 18:39:08.747 350                  5339.20                                 29610.78                                77.24                                   68083.19                                14602817.00                             Near Timeout (75%+) --DECLARE @espBeId int = 158378
+--DECLARE @userId int = 1192
+
+--DECLARE @ldcIds [IntIdTable]
+--INSERT INTO @ldcIds
+--SELECT [MKT_LDC_ID] FROM [MKT_LDC]
+
+--DECLARE @ldcLoadZoneIds [IntIdTable]
+PROD                                                                                                                             RSK_SaveRetailPositionsLdcLoadzone                                                                                               2025-10-29 18:39:15.427 458                  551.12                                  28825.85                                0.04                                    0.05                                    2.00                                    Near Timeout (75%+) CREATE PROCEDURE [dbo].[RSK_SaveRetailPositionsLdcLoadzone]
+	@espBeId INT
+	,@ldcLoadzoneId INT
+	,@referenceTime DATETIME2(4)
+	,@userId NVARCHAR(50)
+	,@pqi [RSK_TYPE_Power_Quantity_Interval] READO
+NULL                                                                                                                             NULL                                                                                                                             2025-10-29 16:36:31.890 5                    6141.92                                 28705.28                                110.90                                  184.97                                  62029.00                                Near Timeout (75%+) (@_msparam_0 nvarchar(4000),@_msparam_1 nvarchar(4000),@_msparam_2 nvarchar(4000),@_msparam_3 nvarchar(4000),@_msparam_4 nvarchar(4000),@_msparam_5 nvarchar(4000),@_msparam_6 nvarchar(4000),@_msparam_
+PROD                                                                                                                             RSK_GetTradesHourlyV2                                                                                                            2025-10-29 18:30:31.480 14                   4837.54                                 28161.81                                262.73                                  173.40                                  108709.00                               Near Timeout (75%+) CREATE PROCEDURE [dbo].[RSK_GetTradesHourlyV2]
+	@espBeId int,
+	@tradeIds [LongIdTable] readonly,
+	@periodBegin DATE = '19000101',
+	@periodEnd Date = null
+AS
+	SELECT  th.[RSK_Trade_Id], [Flow_Dat
+PROD                                                                                                                             USG_GetLdcAccountTrackingEnrollmentByLastStatusChangeV3                                                                          2025-10-29 18:21:42.123 348                  367.18                                  26045.01                                22.55                                   275.46                                  110627.00                               Near Timeout (75%+) --DECLARE @espId INT = 484,
+--	@userId INT = 112,
+--	@ldcIds [TYPE_IntKey],
+--	@clientAcctIds [TYPE_BigIntKey],
+--	@beNames [TYPE_NvarcharKey],
+--	@ldcAcctIdentifiers [TYPE_NvarcharKey],
+--	@sup
+PROD                                                                                                                             BIL_GetEspEarliestPeriodUpdated                                                                                                  2025-10-29 15:03:20.130 136                  4407.56                                 24330.28                                2.20                                    2829.02                                 4059244.00                              Near Timeout (75%+) CREATE PROCEDURE [dbo].[BIL_GetEspEarliestPeriodUpdated]
+	@espBeId INT
+	,@ldcLoadzoneId INT
+	,@periodBegin DATETIME2(4)
+	,@periodEnd DATETIME2(4)
+AS
+
+SET NOCOUNT ON
+SELECT MIN(minPeriodBegin) 
+PROD                                                                                                                             BIL_GetEspCIInvoiceReport                                                                                                        2025-10-29 18:35:03.940 6                    17169.23                                23995.55                                8058.97                                 7212.24                                 10462016.00                             Near Timeout (75%+) CREATE PROCEDURE [dbo].[BIL_GetEspCIInvoiceReport]
+	@espBeId INT
+	,@states TYPE_NvarcharKey READONLY
+	,@ldcs TYPE_NvarcharKey READONLY
+	,@brokers IntIdTable READONLY
+	,@beginDate DATETIME2(4)
+	,
+PROD                                                                                                                             USG_GetLdcAccount                                                                                                                2025-10-29 18:30:47.437 3685                 10.90                                   23615.34                                2.13                                    3.50                                    450.00                                  Near Timeout (75%+) --Example: EXEC USG_GetLdcAccount @ldcacctid=32392, @espBeId=484
+CREATE PROCEDURE [dbo].[USG_GetLdcAccount]
+	@LdcAcctId int,
+	@espBeId int
+AS	
+	;With Capacity AS (
+		SELECT USG_LDC_Account_ID
+	
+PROD                                                                                                                             USG_GetHistoricalUsageMinMaxDate                                                                                                 2025-10-29 18:21:42.047 2410                 19.36                                   21864.07                                0.13                                    1.15                                    794.00                                  Below Threshold     --EXAMPLE: exec USG_GetHistoricalUsageMinMaxDate @clientAccountId=170737, @groupName='GroupB305'
+--EXAMPLE: exec USG_GetHistoricalUsageMinMaxDate @clientAccountId=170737, @ldcAccountId=32274
+--EXAMP
+PROD                                                                                                                             RSK_GetContractDocumentsForUploadByTypes                                                                                         2025-10-29 17:16:47.147 107                  246.49                                  20200.26                                51.24                                   53.85                                   28953.00                                Below Threshold     CREATE PROCEDURE [dbo].[RSK_GetContractDocumentsForUploadByTypes]
+	@contractId BIGINT,
+	@types TinyIntCodeTable READONLY 
+AS
+BEGIN
+	SELECT  DISTINCT
+		d.RSK_Contract_Version_Document_ID as docum
+NULL                                                                                                                             NULL                                                                                                                             2025-10-29 17:26:10.867 3                    17550.92                                20190.10                                14235.05                                16249.90                                0.00                                    Below Threshold     -- =============================================
+-- 2. SQL Server Performance Health Check
+-- =============================================
+-- Purpose: Monitor CPU, memory, wait, and IO performance
+PROD                                                                                                                             RSK_SaveRetailPositionsLdcLoadzone                                                                                               2025-10-29 18:39:15.427 130                  1734.59                                 19550.13                                1.26                                    1238.26                                 100145.00                               Below Threshold     CREATE PROCEDURE [dbo].[RSK_SaveRetailPositionsLdcLoadzone]
+	@espBeId INT
+	,@ldcLoadzoneId INT
+	,@referenceTime DATETIME2(4)
+	,@userId NVARCHAR(50)
+	,@pqi [RSK_TYPE_Power_Quantity_Interval] READO
+PROD                                                                                                                             TRG_DW_SYNC_USG_LDC_Account                                                                                                      2025-10-29 18:24:38.087 12021                3.02                                    17550.44                                0.04                                    0.25                                    34.00                                   Below Threshold     
+CREATE TRIGGER TRG_DW_SYNC_USG_LDC_Account
+ON USG_LDC_Account
+AFTER INSERT, DELETE, UPDATE
+AS
+BEGIN
+    DECLARE @TableName NVARCHAR(60) = 'usg_ldc_account';
+    DECLARE @CurrentDateTime DATETI
+
+  ? Slow queries listed above - investigate these procedures/statements
+ 
+==============================================================================
+SECTION 7: SQL SERVER ERROR LOG (Timeout Messages)
+==============================================================================
+ 
+Msg 0, Level 11, State 0, Line 28
+A severe error occurred on the current command.  The results, if any, should be discarded.
+
+Completion time: 2025-10-29T11:40:10.6250579-07:00

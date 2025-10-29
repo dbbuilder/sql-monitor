@@ -77,7 +77,48 @@ Deployed to 3 servers:
 - `99_QUICK_VALIDATE.sql` - Quick validation queries
 - `99_TEST_AND_VALIDATE.sql` - Comprehensive validation
 
+**Diagnostics:**
+- `DIAGNOSE_PROCEDURE_TIMEOUTS.sql` - Identify procedures at risk of timeout (with microsecond fix)
+- `ADJUST_COLLECTION_SCHEDULE.sql` - Modify SQL Agent job schedules to reduce overhead
+- `DIAGNOSE_COLLECTORS.sql` - Troubleshoot collector execution issues
+
+**Timeout Investigation Rescue Kit:**
+- `TIMEOUT_RESCUE_KIT.sql` - 📊 **Comprehensive post-mortem analysis** (10 diagnostic sections)
+- `CREATE_TIMEOUT_TRACKING_XE.sql` - 🔍 Set up Extended Events for real-time timeout tracking
+- `TIMEOUT_INVESTIGATION_CHEATSHEET.md` - 📖 Quick reference guide and decision tree
+- See [TIMEOUT_INVESTIGATION_CHEATSHEET.md](TIMEOUT_INVESTIGATION_CHEATSHEET.md) for workflow examples
+
 ## Recent Enhancements
+
+**Timeout Investigation Rescue Kit** (Oct 29, 2025):
+- 📊 **TIMEOUT_RESCUE_KIT.sql** - Comprehensive 10-section post-mortem analysis
+  - Attention events (client-side timeouts)
+  - Long-running queries from snapshots
+  - Blocking chains (what was blocking what)
+  - Wait statistics (resource bottlenecks)
+  - Query Store plan regressions
+  - DMV cache slow queries
+  - Error log analysis
+  - Deadlock correlation
+  - Server resource pressure
+  - Memory pressure indicators
+- 🔍 **CREATE_TIMEOUT_TRACKING_XE.sql** - Extended Events session for proactive timeout tracking
+  - Captures timeout events automatically
+  - Includes full SQL text and execution context
+  - Minimal overhead (<1%)
+  - Persistent across SQL Server restarts
+- 📖 **TIMEOUT_INVESTIGATION_CHEATSHEET.md** - Quick reference guide
+  - Decision tree for root cause identification
+  - Common timeout patterns with solutions
+  - Sample investigation workflows
+  - Quick commands reference
+
+**Timeout Detection Bug Fix** (Oct 29, 2025):
+- Fixed microsecond-to-millisecond conversion bug in timeout diagnostic query
+- All DBATools procedures running well under 30-second threshold (1-5 seconds actual)
+- Added `DIAGNOSE_PROCEDURE_TIMEOUTS.sql` with proper unit conversion
+- Added `ADJUST_COLLECTION_SCHEDULE.sql` for performance tuning
+- See `TIMEOUT-DETECTION-FIX-2025-10-29.md` for details
 
 **Per-Database Collection** (Oct 27, 2025):
 - Query stats: 2467 rows vs 100 (24x increase)

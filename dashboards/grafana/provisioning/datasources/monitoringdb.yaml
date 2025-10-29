@@ -1,6 +1,3 @@
-# Grafana Datasource Configuration
-# SQL Server MonitoringDB
-
 apiVersion: 1
 
 datasources:
@@ -10,12 +7,13 @@ datasources:
     url: sqltest.schoolvision.net:14333
     database: MonitoringDB
     user: sv
-    jsonData:
-      encrypt: 'true'
-      sslmode: 'disable'
-      tlsSkipVerify: true
-      authenticator: 'SQL Server Authentication'
     secureJsonData:
-      password: 'Gv51076!'
-    isDefault: true
+      password: Gv51076!
+    jsonData:
+      maxOpenConns: 10
+      maxIdleConns: 2
+      connMaxLifetime: 14400
+      encrypt: 'true'
+      tlsSkipVerify: true
     editable: false
+    isDefault: true
