@@ -224,16 +224,29 @@ deploy_azure() {
     # GitHub repo URL for dashboard downloads (used by entrypoint script in container)
     local github_repo="${GITHUB_REPO:-https://raw.githubusercontent.com/dbbuilder/sql-monitor/main/public}"
 
-    print_step "Using custom image: dbbuilder/sql-monitor-grafana:latest"
+    # Azure Container Registry configuration
+    local acr_name="sqlmonitoracr"
+    local acr_server="${acr_name}.azurecr.io"
+    local image_name="${acr_server}/sql-monitor-grafana:latest"
+
+    print_step "Using custom image from ACR: $image_name"
     print_step "Dashboards will download from: $github_repo"
 
-    # Deploy container instance with custom Grafana image
+    # Get ACR credentials
+    print_step "Retrieving ACR credentials..."
+    local acr_username=$(az acr credential show --name $acr_name --query username -o tsv)
+    local acr_password=$(az acr credential show --name $acr_name --query "passwords[0].value" -o tsv)
+
+    # Deploy container instance with custom Grafana image from ACR
     # The image has the entrypoint script baked in - no command-line override needed
     # Split environment variables: regular (non-sensitive) and secure (passwords)
     az container create \
         --resource-group "$AZURE_RESOURCE_GROUP" \
         --name "$AZURE_CONTAINER_NAME" \
-        --image dbbuilder/sql-monitor-grafana:latest \
+        --image "$image_name" \
+        --registry-login-server "$acr_server" \
+        --registry-username "$acr_username" \
+        --registry-password "$acr_password" \
         --os-type Linux \
         --dns-name-label "$AZURE_DNS_LABEL" \
         --ports 3000 \
