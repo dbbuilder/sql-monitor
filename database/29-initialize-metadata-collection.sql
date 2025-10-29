@@ -7,6 +7,10 @@
 USE [MonitoringDB];
 GO
 
+SET QUOTED_IDENTIFIER ON;
+SET ANSI_NULLS ON;
+GO
+
 PRINT '========================================';
 PRINT 'Initializing Metadata Collection';
 PRINT '========================================';
@@ -24,8 +28,8 @@ IF NOT EXISTS (SELECT 1 FROM dbo.Servers WHERE ServerID = @ServerID)
 BEGIN
     PRINT 'Registering local server...';
 
-    INSERT INTO dbo.Servers (ServerName, InstanceName, ServerType, IsActive, MonitoringEnabled)
-    VALUES (@ServerName, 'DEFAULT', 'Production', 1, 1);
+    INSERT INTO dbo.Servers (ServerName, Environment, IsActive)
+    VALUES (@ServerName, 'Production', 1);
 
     SET @ServerID = SCOPE_IDENTITY();
     PRINT CONCAT('  ✓ Registered server: ', @ServerName, ' (ServerID: ', @ServerID, ')');

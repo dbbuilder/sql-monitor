@@ -1,0 +1,95 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SQL Monitor Deployment Configuration",
+  "description": "Configuration template for SQL Monitor deployment",
+  "type": "object",
+  "properties": {
+    "sqlServer": {
+      "type": "string",
+      "description": "SQL Server instance (e.g., localhost,1433 or server.domain.com)",
+      "examples": ["localhost,14333", "sqlserver.company.com", "192.168.1.100,1433"]
+    },
+    "sqlUser": {
+      "type": "string",
+      "description": "SQL Server username (SQL authentication)",
+      "examples": ["sa", "monitor_user"]
+    },
+    "sqlPassword": {
+      "type": "string",
+      "description": "SQL Server password (store securely, not in source control)",
+      "format": "password"
+    },
+    "databaseName": {
+      "type": "string",
+      "description": "Target database name for monitoring data",
+      "default": "MonitoringDB",
+      "examples": ["MonitoringDB", "SQL_Monitor", "DBA_Monitoring"]
+    },
+    "environment": {
+      "type": "string",
+      "description": "Environment designation",
+      "enum": ["Development", "Staging", "Production"],
+      "default": "Development"
+    },
+    "grafanaPort": {
+      "type": "integer",
+      "description": "HTTP port for Grafana UI",
+      "default": 9002,
+      "minimum": 1024,
+      "maximum": 65535
+    },
+    "apiPort": {
+      "type": "integer",
+      "description": "HTTP port for REST API",
+      "default": 9000,
+      "minimum": 1024,
+      "maximum": 65535
+    },
+    "skipDocker": {
+      "type": "boolean",
+      "description": "Skip Docker container setup (database only)",
+      "default": false
+    },
+    "batchSize": {
+      "type": "integer",
+      "description": "Number of databases to process in each batch during metadata collection",
+      "default": 10,
+      "minimum": 1,
+      "maximum": 50
+    },
+    "collectionTimeout": {
+      "type": "integer",
+      "description": "Timeout in seconds for each database metadata collection",
+      "default": 300,
+      "minimum": 60,
+      "maximum": 3600
+    }
+  },
+  "required": ["sqlServer", "sqlUser", "sqlPassword"],
+  "examples": [
+    {
+      "sqlServer": "localhost,14333",
+      "sqlUser": "sa",
+      "sqlPassword": "YourSecurePassword123!",
+      "databaseName": "MonitoringDB",
+      "environment": "Development",
+      "grafanaPort": 9002,
+      "apiPort": 9000,
+      "skipDocker": false,
+      "batchSize": 10,
+      "collectionTimeout": 300
+    },
+    {
+      "sqlServer": "prod-sql-01.company.com",
+      "sqlUser": "monitor_svc",
+      "sqlPassword": "ProdPassword456!",
+      "databaseName": "MonitoringDB",
+      "environment": "Production",
+      "grafanaPort": 9002,
+      "apiPort": 9000,
+      "skipDocker": false,
+      "batchSize": 5,
+      "collectionTimeout": 600
+    }
+  ]
+}

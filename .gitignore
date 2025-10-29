@@ -5,6 +5,9 @@
 .env.local
 .env.production
 
+# Deployment checkpoint
+.deploy-checkpoint.json
+
 # Database backup files
 *.bak
 *.trn
