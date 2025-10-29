@@ -1,0 +1,18 @@
+{
+  "ConnectionStrings": {
+    "MonitoringDB": "Server=YOUR_SERVER,PORT;Database=MonitoringDB;User Id=YOUR_USER;Password=YOUR_PASSWORD;TrustServerCertificate=True;Encrypt=Optional;MultipleActiveResultSets=true;Connection Timeout=30"
+  },
+  "Jwt": {
+    "SecretKey": "YOUR-SECRET-KEY-MIN-32-CHARACTERS-LONG",
+    "Issuer": "SqlMonitor.Api",
+    "Audience": "SqlMonitor.Client",
+    "ExpirationHours": 8
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*"
+}

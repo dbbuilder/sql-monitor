@@ -73,3 +73,14 @@ x86/
 tmp/
 temp/
 *.tmp
+
+# Sensitive files - never commit
+.env
+.env.*
+!.env.example
+api/appsettings.json
+api/appsettings.*.json
+!api/appsettings.Development.json.example
+api.tests/appsettings.Test.json
+api/bin/
+api/obj/
