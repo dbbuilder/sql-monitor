@@ -1,28 +1,52 @@
 #!/bin/bash
 # Grafana Entrypoint with GitHub Dashboard Download
-# This script downloads dashboards and provisioning configs from GitHub
-# and starts Grafana - works on any container platform
+# Simplified version with extensive debugging
 
+# Enable debug mode and exit on any error
+set -x
 set -e
 
+echo "=========================================="
+echo "GRAFANA ENTRYPOINT - DEBUG MODE"
+echo "=========================================="
+date
+echo ""
+
+# Configuration
 GITHUB_REPO="${GITHUB_REPO:-https://raw.githubusercontent.com/dbbuilder/sql-monitor/main/public}"
 DASHBOARDS_DIR="/var/lib/grafana/dashboards"
 PROVISIONING_DIR="/etc/grafana/provisioning"
 
-echo "=== Grafana Startup with GitHub Dashboard Download ==="
-echo "GitHub Repo: $GITHUB_REPO"
-echo "Dashboards Dir: $DASHBOARDS_DIR"
-echo "Provisioning Dir: $PROVISIONING_DIR"
+echo "Configuration:"
+echo "  GitHub Repo: $GITHUB_REPO"
+echo "  Dashboards Dir: $DASHBOARDS_DIR"
+echo "  Provisioning Dir: $PROVISIONING_DIR"
+echo "  MonitoringDB Server: ${MONITORINGDB_SERVER:-NOT_SET}"
+echo "  MonitoringDB Port: ${MONITORINGDB_PORT:-NOT_SET}"
+echo "  MonitoringDB Database: ${MONITORINGDB_DATABASE:-NOT_SET}"
+echo "  MonitoringDB User: ${MONITORINGDB_USER:-NOT_SET}"
+echo ""
 
-# Create directories if they don't exist
+# Check environment variables
+if [ -z "$MONITORINGDB_SERVER" ] || [ -z "$MONITORINGDB_PASSWORD" ]; then
+    echo "ERROR: Required environment variables not set!"
+    echo "  MONITORINGDB_SERVER: ${MONITORINGDB_SERVER:-NOT_SET}"
+    echo "  MONITORINGDB_PASSWORD: ${MONITORINGDB_PASSWORD:-NOT_SET}"
+    exit 1
+fi
+
+# Step 1: Create directories
+echo "Step 1: Creating directories..."
 mkdir -p "$DASHBOARDS_DIR"
 mkdir -p "$PROVISIONING_DIR/dashboards"
 mkdir -p "$PROVISIONING_DIR/datasources"
+echo "  Directories created successfully"
+ls -la "$DASHBOARDS_DIR" || true
+ls -la "$PROVISIONING_DIR" || true
+echo ""
 
-# Download provisioning configurations
-echo "Downloading provisioning configs..."
-
-# Generate datasource YAML dynamically from environment variables
+# Step 2: Generate datasource configuration
+echo "Step 2: Generating datasource configuration..."
 cat > "$PROVISIONING_DIR/datasources/monitoringdb.yaml" <<EOF
 apiVersion: 1
 
@@ -45,13 +69,24 @@ datasources:
     isDefault: true
 EOF
 
-echo "  Datasource config generated from environment variables"
+echo "  Datasource config generated"
+echo "  Validating YAML syntax..."
+cat "$PROVISIONING_DIR/datasources/monitoringdb.yaml"
+echo ""
 
+# Step 3: Download dashboard provider config
+echo "Step 3: Downloading dashboard provider config..."
 wget -q -O "$PROVISIONING_DIR/dashboards/dashboards.yaml" \
-    "$GITHUB_REPO/provisioning/dashboards/dashboards.yaml" || echo "Dashboard provider config download failed"
+    "$GITHUB_REPO/provisioning/dashboards/dashboards.yaml" || {
+    echo "  ERROR: Dashboard provider config download failed"
+    exit 1
+}
+echo "  Dashboard provider config downloaded"
+cat "$PROVISIONING_DIR/dashboards/dashboards.yaml"
+echo ""
 
-# Download all dashboard JSON files
-echo "Downloading dashboards..."
+# Step 4: Download dashboard JSON files
+echo "Step 4: Downloading dashboard JSON files..."
 DASHBOARDS=(
     "00-dashboard-browser.json"
     "00-landing-page.json"
@@ -68,21 +103,40 @@ DASHBOARDS=(
     "sql-server-overview.json"
 )
 
+DOWNLOAD_COUNT=0
+FAILED_COUNT=0
+
 for dashboard in "${DASHBOARDS[@]}"; do
     echo "  Downloading $dashboard..."
-    wget -q -O "$DASHBOARDS_DIR/$dashboard" \
-        "$GITHUB_REPO/dashboards/$dashboard" || echo "  Warning: $dashboard download failed"
+    if wget -q -O "$DASHBOARDS_DIR/$dashboard" "$GITHUB_REPO/dashboards/$dashboard"; then
+        DOWNLOAD_COUNT=$((DOWNLOAD_COUNT + 1))
+        echo "    ✓ Success"
+    else
+        FAILED_COUNT=$((FAILED_COUNT + 1))
+        echo "    ✗ Failed"
+    fi
 done
 
-echo "Dashboard download complete!"
+echo "  Downloaded: $DOWNLOAD_COUNT dashboards"
+echo "  Failed: $FAILED_COUNT dashboards"
+echo ""
 
-# Fix permissions (Grafana runs as user 472)
-echo "Setting permissions..."
-chown -R 472:472 "$DASHBOARDS_DIR"
-chown -R 472:472 "$PROVISIONING_DIR"
+# Step 5: Set permissions
+echo "Step 5: Setting permissions (Grafana runs as UID 472)..."
+chown -R 472:472 "$DASHBOARDS_DIR" || echo "  Warning: chown dashboards failed"
+chown -R 472:472 "$PROVISIONING_DIR" || echo "  Warning: chown provisioning failed"
+echo "  Permissions set"
+ls -la "$DASHBOARDS_DIR" | head -5
+echo ""
 
-echo "Starting Grafana as grafana user..."
+# Step 6: Start Grafana (simplified - run as root for now)
+echo "Step 6: Starting Grafana..."
+echo "  Command: /run.sh"
+echo "  Running as root (user switching removed for debugging)"
+echo ""
+echo "=========================================="
+echo "HANDING OFF TO GRAFANA"
+echo "=========================================="
 
-# Switch to grafana user (UID 472) and start Grafana
-# Note: Use 'su' to drop privileges from root to grafana user
-exec su -s /bin/sh grafana -c '/run.sh'
+# Execute Grafana - simplified without user switching
+exec /run.sh
