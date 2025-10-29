@@ -179,7 +179,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n    s.ServerName,\n    co.DatabaseName,\n    co.SchemaName,\n    co.ObjectName,\n    co.ObjectType,\n    co.LineCount,\n    co.CharacterCount,\n    co.DependencyCount,\n    'View Code' AS ViewCode,\n    co.CreatedDate,\n    co.ModifiedDate\nFROM dbo.CodeObjectMetadata co\nINNER JOIN dbo.Servers s ON co.ServerID = s.ServerID\nWHERE co.DatabaseName NOT IN ('master', 'model', 'msdb', 'tempdb', 'ReportServer', 'ReportServerTempDB')\n  AND 1=1\n  AND (${DatabaseName:sqlstring} = 'All' OR co.DatabaseName = ${DatabaseName:sqlstring})\n  AND (${ObjectType:sqlstring} = 'All' OR co.ObjectType = ${ObjectType:sqlstring})\n  AND (${ObjectName:sqlstring} = '' OR co.ObjectName LIKE '%' + ${ObjectName:sqlstring} + '%')\nORDER BY co.LineCount DESC;",
+          "rawSql": "SELECT\n    s.ServerName,\n    co.DatabaseName,\n    co.SchemaName,\n    co.ObjectName,\n    co.ObjectType,\n    co.LineCount,\n    co.CharacterCount,\n    co.DependencyCount,\n    'View Code' AS ViewCode,\n    co.CreatedDate,\n    co.ModifiedDate\nFROM dbo.CodeObjectMetadata co\nINNER JOIN dbo.Servers s ON co.ServerID = s.ServerID\nWHERE co.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb', 'ReportServer', 'ReportServerTempDB')\n  AND 1=1\n  AND (${DatabaseName:sqlstring} = 'All' OR co.DatabaseName = ${DatabaseName:sqlstring})\n  AND (${ObjectType:sqlstring} = 'All' OR co.ObjectType = ${ObjectType:sqlstring})\n  AND (${ObjectName:sqlstring} = '' OR co.ObjectName LIKE '%' + ${ObjectName:sqlstring} + '%')\nORDER BY co.LineCount DESC;",
           "refId": "A"
         }
       ],
@@ -410,14 +410,14 @@
           "type": "mssql",
           "uid": "MonitoringDB"
         },
-        "definition": "SELECT DISTINCT DatabaseName FROM dbo.CodeObjectMetadata WHERE DatabaseName NOT IN ('master', 'model', 'msdb', 'tempdb', 'ReportServer', 'ReportServerTempDB') ORDER BY DatabaseName",
+        "definition": "SELECT DISTINCT DatabaseName FROM dbo.CodeObjectMetadata WHERE DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb', 'ReportServer', 'ReportServerTempDB') ORDER BY DatabaseName",
         "hide": 0,
         "includeAll": false,
         "label": "Database",
         "multi": false,
         "name": "DatabaseName",
         "options": [],
-        "query": "SELECT DISTINCT DatabaseName FROM dbo.CodeObjectMetadata WHERE DatabaseName NOT IN ('master', 'model', 'msdb', 'tempdb', 'ReportServer', 'ReportServerTempDB') ORDER BY DatabaseName",
+        "query": "SELECT DISTINCT DatabaseName FROM dbo.CodeObjectMetadata WHERE DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb', 'ReportServer', 'ReportServerTempDB') ORDER BY DatabaseName",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,

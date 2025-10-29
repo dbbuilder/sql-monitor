@@ -172,7 +172,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n    s.ServerName,\n    tm.DatabaseName,\n    tm.SchemaName,\n    tm.TableName,\n    tm.[RowCount],\n    tm.TotalSizeMB,\n    tm.DataSizeMB,\n    tm.IndexSizeMB,\n    tm.ColumnCount,\n    tm.IndexCount,\n    CASE WHEN tm.IsPartitioned = 1 THEN 'Yes' ELSE 'No' END AS IsPartitioned,\n    tm.CompressionType,\n    tm.ModifiedDate\nFROM dbo.TableMetadata tm\nINNER JOIN dbo.Servers s ON tm.ServerID = s.ServerID\nWHERE tm.DatabaseName NOT IN ('master', 'model', 'msdb', 'tempdb', 'ReportServer', 'ReportServerTempDB')\n  AND 1=1\n  AND (${DatabaseName:sqlstring} = 'All' OR tm.DatabaseName = ${DatabaseName:sqlstring})\n  AND (${SchemaName:sqlstring} = 'All' OR tm.SchemaName = ${SchemaName:sqlstring})\n  AND (${TableName:sqlstring} = '' OR tm.TableName LIKE '%' + ${TableName:sqlstring} + '%')\nORDER BY tm.TotalSizeMB DESC;",
+          "rawSql": "SELECT\n    s.ServerName,\n    tm.DatabaseName,\n    tm.SchemaName,\n    tm.TableName,\n    tm.[RowCount],\n    tm.TotalSizeMB,\n    tm.DataSizeMB,\n    tm.IndexSizeMB,\n    tm.ColumnCount,\n    tm.IndexCount,\n    CASE WHEN tm.IsPartitioned = 1 THEN 'Yes' ELSE 'No' END AS IsPartitioned,\n    tm.CompressionType,\n    tm.ModifiedDate\nFROM dbo.TableMetadata tm\nINNER JOIN dbo.Servers s ON tm.ServerID = s.ServerID\nWHERE tm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb', 'ReportServer', 'ReportServerTempDB')\n  AND 1=1\n  AND (${DatabaseName:sqlstring} = 'All' OR tm.DatabaseName = ${DatabaseName:sqlstring})\n  AND (${SchemaName:sqlstring} = 'All' OR tm.SchemaName = ${SchemaName:sqlstring})\n  AND (${TableName:sqlstring} = '' OR tm.TableName LIKE '%' + ${TableName:sqlstring} + '%')\nORDER BY tm.TotalSizeMB DESC;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -237,14 +237,14 @@
           "type": "mssql",
           "uid": "MonitoringDB"
         },
-        "definition": "SELECT DISTINCT DatabaseName FROM dbo.TableMetadata WHERE DatabaseName NOT IN ('master', 'model', 'msdb', 'tempdb', 'ReportServer', 'ReportServerTempDB') ORDER BY DatabaseName",
+        "definition": "SELECT DISTINCT DatabaseName FROM dbo.TableMetadata WHERE DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb', 'ReportServer', 'ReportServerTempDB') ORDER BY DatabaseName",
         "hide": 0,
         "includeAll": false,
         "label": "Database",
         "multi": false,
         "name": "DatabaseName",
         "options": [],
-        "query": "SELECT DISTINCT DatabaseName FROM dbo.TableMetadata WHERE DatabaseName NOT IN ('master', 'model', 'msdb', 'tempdb', 'ReportServer', 'ReportServerTempDB') ORDER BY DatabaseName",
+        "query": "SELECT DISTINCT DatabaseName FROM dbo.TableMetadata WHERE DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb', 'ReportServer', 'ReportServerTempDB') ORDER BY DatabaseName",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,

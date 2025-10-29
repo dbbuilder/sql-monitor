@@ -68,7 +68,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n    cm.ColumnName,\n    cm.DataType,\n    cm.MaxLength,\n    cm.Precision,\n    cm.Scale,\n    CASE WHEN cm.IsNullable = 1 THEN 'Yes' ELSE 'No' END AS IsNullable,\n    CASE WHEN cm.IsPrimaryKey = 1 THEN 'Yes' ELSE 'No' END AS IsPrimaryKey,\n    CASE WHEN cm.IsForeignKey = 1 THEN 'Yes' ELSE 'No' END AS IsForeignKey,\n    CASE WHEN cm.IsIdentity = 1 THEN 'Yes' ELSE 'No' END AS IsIdentity,\n    cm.DefaultConstraint\nFROM dbo.ColumnMetadata cm\nWHERE cm.DatabaseName = ${DatabaseName:sqlstring}\n  AND cm.SchemaName = ${SchemaName:sqlstring}\n  AND cm.TableName = ${TableName:sqlstring}\nORDER BY cm.OrdinalPosition;",
+          "rawSql": "SELECT\n    cm.ColumnName,\n    cm.DataType,\n    cm.MaxLength,\n    cm.Precision,\n    cm.Scale,\n    CASE WHEN cm.IsNullable = 1 THEN 'Yes' ELSE 'No' END AS IsNullable,\n    CASE WHEN cm.IsPrimaryKey = 1 THEN 'Yes' ELSE 'No' END AS IsPrimaryKey,\n    CASE WHEN cm.IsForeignKey = 1 THEN 'Yes' ELSE 'No' END AS IsForeignKey,\n    CASE WHEN cm.IsIdentity = 1 THEN 'Yes' ELSE 'No' END AS IsIdentity,\n    cm.DefaultConstraint\nFROM dbo.ColumnMetadata cm\nINNER JOIN dbo.TableMetadata tm ON cm.DatabaseName = tm.DatabaseName\n  AND cm.SchemaName = tm.SchemaName\n  AND cm.TableName = tm.TableName\nINNER JOIN dbo.SchemaMetadata sm ON tm.DatabaseName = sm.DatabaseName\n  AND tm.SchemaName = sm.SchemaName\nINNER JOIN dbo.Servers s ON sm.ServerID = s.ServerID\nWHERE cm.DatabaseName = ${DatabaseName:sqlstring}\n  AND cm.SchemaName = ${SchemaName:sqlstring}\n  AND cm.TableName = ${TableName:sqlstring}\n  AND cm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n  AND s.IsActive = 1\n  AND ('$__all' = '${ServerName}' OR s.ServerName = '${ServerName}')\nORDER BY cm.OrdinalPosition;",
           "refId": "A"
         }
       ],
@@ -177,7 +177,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n    im.IndexName,\n    im.IndexType,\n    im.KeyColumns,\n    im.IncludedColumns,\n    im.FragmentationPercent,\n    im.[FillFactor],\n    CASE WHEN im.IsUnique = 1 THEN 'Yes' ELSE 'No' END AS IsUnique,\n    CASE WHEN im.IsPrimaryKey = 1 THEN 'Yes' ELSE 'No' END AS IsPrimaryKey,\n    CASE WHEN im.IsDisabled = 1 THEN 'Yes' ELSE 'No' END AS IsDisabled\nFROM dbo.IndexMetadata im\nWHERE im.DatabaseName = ${DatabaseName:sqlstring}\n  AND im.SchemaName = ${SchemaName:sqlstring}\n  AND im.TableName = ${TableName:sqlstring}\nORDER BY im.IndexName;",
+          "rawSql": "SELECT\n    im.IndexName,\n    im.IndexType,\n    im.KeyColumns,\n    im.IncludedColumns,\n    im.FragmentationPercent,\n    im.[FillFactor],\n    CASE WHEN im.IsUnique = 1 THEN 'Yes' ELSE 'No' END AS IsUnique,\n    CASE WHEN im.IsPrimaryKey = 1 THEN 'Yes' ELSE 'No' END AS IsPrimaryKey,\n    CASE WHEN im.IsDisabled = 1 THEN 'Yes' ELSE 'No' END AS IsDisabled\nFROM dbo.IndexMetadata im\nINNER JOIN dbo.TableMetadata tm ON im.DatabaseName = tm.DatabaseName\n  AND im.SchemaName = tm.SchemaName\n  AND im.TableName = tm.TableName\nINNER JOIN dbo.SchemaMetadata sm ON tm.DatabaseName = sm.DatabaseName\n  AND tm.SchemaName = sm.SchemaName\nINNER JOIN dbo.Servers s ON sm.ServerID = s.ServerID\nWHERE im.DatabaseName = ${DatabaseName:sqlstring}\n  AND im.SchemaName = ${SchemaName:sqlstring}\n  AND im.TableName = ${TableName:sqlstring}\n  AND im.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n  AND s.IsActive = 1\n  AND ('$__all' = '${ServerName}' OR s.ServerName = '${ServerName}')\nORDER BY im.IndexName;",
           "refId": "A"
         }
       ],
@@ -243,7 +243,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n    fk.ConstraintName,\n    fk.ReferencedSchema,\n    fk.ReferencedTable,\n    fk.ColumnNames,\n    fk.ReferencedColumns,\n    fk.DeleteAction,\n    fk.UpdateAction,\n    CASE WHEN fk.IsDisabled = 1 THEN 'Yes' ELSE 'No' END AS IsDisabled\nFROM dbo.ForeignKeyMetadata fk\nWHERE fk.DatabaseName = ${DatabaseName:sqlstring}\n  AND fk.SchemaName = ${SchemaName:sqlstring}\n  AND fk.TableName = ${TableName:sqlstring}\nORDER BY fk.ConstraintName;",
+          "rawSql": "SELECT\n    fk.ConstraintName,\n    fk.ReferencedSchema,\n    fk.ReferencedTable,\n    fk.ColumnNames,\n    fk.ReferencedColumns,\n    fk.DeleteAction,\n    fk.UpdateAction,\n    CASE WHEN fk.IsDisabled = 1 THEN 'Yes' ELSE 'No' END AS IsDisabled\nFROM dbo.ForeignKeyMetadata fk\nINNER JOIN dbo.TableMetadata tm ON fk.DatabaseName = tm.DatabaseName\n  AND fk.SchemaName = tm.SchemaName\n  AND fk.TableName = tm.TableName\nINNER JOIN dbo.SchemaMetadata sm ON tm.DatabaseName = sm.DatabaseName\n  AND tm.SchemaName = sm.SchemaName\nINNER JOIN dbo.Servers s ON sm.ServerID = s.ServerID\nWHERE fk.DatabaseName = ${DatabaseName:sqlstring}\n  AND fk.SchemaName = ${SchemaName:sqlstring}\n  AND fk.TableName = ${TableName:sqlstring}\n  AND fk.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n  AND s.IsActive = 1\n  AND ('$__all' = '${ServerName}' OR s.ServerName = '${ServerName}')\nORDER BY fk.ConstraintName;",
           "refId": "A"
         }
       ],
@@ -309,7 +309,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n    pm.PartitionNumber,\n    pm.PartitionScheme,\n    pm.PartitionFunction,\n    pm.BoundaryValue,\n    pm.[RowCount],\n    pm.DataCompressionType\nFROM dbo.PartitionMetadata pm\nWHERE pm.DatabaseName = ${DatabaseName:sqlstring}\n  AND pm.SchemaName = ${SchemaName:sqlstring}\n  AND pm.TableName = ${TableName:sqlstring}\nORDER BY pm.PartitionNumber;",
+          "rawSql": "SELECT\n    pm.PartitionNumber,\n    pm.PartitionScheme,\n    pm.PartitionFunction,\n    pm.BoundaryValue,\n    pm.[RowCount],\n    pm.DataCompressionType\nFROM dbo.PartitionMetadata pm\nINNER JOIN dbo.TableMetadata tm ON pm.DatabaseName = tm.DatabaseName\n  AND pm.SchemaName = tm.SchemaName\n  AND pm.TableName = tm.TableName\nINNER JOIN dbo.SchemaMetadata sm ON tm.DatabaseName = sm.DatabaseName\n  AND tm.SchemaName = sm.SchemaName\nINNER JOIN dbo.Servers s ON sm.ServerID = s.ServerID\nWHERE pm.DatabaseName = ${DatabaseName:sqlstring}\n  AND pm.SchemaName = ${SchemaName:sqlstring}\n  AND pm.TableName = ${TableName:sqlstring}\n  AND pm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n  AND s.IsActive = 1\n  AND ('$__all' = '${ServerName}' OR s.ServerName = '${ServerName}')\nORDER BY pm.PartitionNumber;",
           "refId": "A"
         }
       ],
@@ -350,6 +350,30 @@
       {
         "current": {
           "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "MonitoringDB"
+        },
+        "definition": "SELECT ServerName FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Server",
+        "multi": false,
+        "name": "ServerName",
+        "options": [],
+        "query": "SELECT ServerName FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
           "text": "MonitoringDB",
           "value": "MonitoringDB"
         },
@@ -357,14 +381,14 @@
           "type": "mssql",
           "uid": "MonitoringDB"
         },
-        "definition": "SELECT DISTINCT DatabaseName FROM dbo.TableMetadata ORDER BY DatabaseName",
+        "definition": "SELECT DISTINCT tm.DatabaseName\nFROM dbo.TableMetadata tm\nINNER JOIN dbo.SchemaMetadata sm ON tm.DatabaseName = sm.DatabaseName\n  AND tm.SchemaName = sm.SchemaName\nINNER JOIN dbo.Servers s ON sm.ServerID = s.ServerID\nWHERE tm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n  AND s.IsActive = 1\n  AND ('$__all' = '${ServerName}' OR s.ServerName = '${ServerName}')\nORDER BY tm.DatabaseName",
         "hide": 0,
         "includeAll": false,
         "label": "Database",
         "multi": false,
         "name": "DatabaseName",
         "options": [],
-        "query": "SELECT DISTINCT DatabaseName FROM dbo.TableMetadata ORDER BY DatabaseName",
+        "query": "SELECT DISTINCT tm.DatabaseName\nFROM dbo.TableMetadata tm\nINNER JOIN dbo.SchemaMetadata sm ON tm.DatabaseName = sm.DatabaseName\n  AND tm.SchemaName = sm.SchemaName\nINNER JOIN dbo.Servers s ON sm.ServerID = s.ServerID\nWHERE tm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n  AND s.IsActive = 1\n  AND ('$__all' = '${ServerName}' OR s.ServerName = '${ServerName}')\nORDER BY tm.DatabaseName",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -381,14 +405,14 @@
           "type": "mssql",
           "uid": "MonitoringDB"
         },
-        "definition": "SELECT DISTINCT SchemaName FROM dbo.TableMetadata WHERE DatabaseName = ${DatabaseName:sqlstring} ORDER BY SchemaName",
+        "definition": "SELECT DISTINCT tm.SchemaName\nFROM dbo.TableMetadata tm\nINNER JOIN dbo.SchemaMetadata sm ON tm.DatabaseName = sm.DatabaseName\n  AND tm.SchemaName = sm.SchemaName\nINNER JOIN dbo.Servers s ON sm.ServerID = s.ServerID\nWHERE tm.DatabaseName = ${DatabaseName:sqlstring}\n  AND tm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n  AND s.IsActive = 1\n  AND ('$__all' = '${ServerName}' OR s.ServerName = '${ServerName}')\nORDER BY tm.SchemaName",
         "hide": 0,
         "includeAll": false,
         "label": "Schema",
         "multi": false,
         "name": "SchemaName",
         "options": [],
-        "query": "SELECT DISTINCT SchemaName FROM dbo.TableMetadata WHERE DatabaseName = ${DatabaseName:sqlstring} ORDER BY SchemaName",
+        "query": "SELECT DISTINCT tm.SchemaName\nFROM dbo.TableMetadata tm\nINNER JOIN dbo.SchemaMetadata sm ON tm.DatabaseName = sm.DatabaseName\n  AND tm.SchemaName = sm.SchemaName\nINNER JOIN dbo.Servers s ON sm.ServerID = s.ServerID\nWHERE tm.DatabaseName = ${DatabaseName:sqlstring}\n  AND tm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n  AND s.IsActive = 1\n  AND ('$__all' = '${ServerName}' OR s.ServerName = '${ServerName}')\nORDER BY tm.SchemaName",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -405,14 +429,14 @@
           "type": "mssql",
           "uid": "MonitoringDB"
         },
-        "definition": "SELECT DISTINCT TableName FROM dbo.TableMetadata WHERE DatabaseName = ${DatabaseName:sqlstring} AND SchemaName = ${SchemaName:sqlstring} ORDER BY TableName",
+        "definition": "SELECT DISTINCT tm.TableName\nFROM dbo.TableMetadata tm\nINNER JOIN dbo.SchemaMetadata sm ON tm.DatabaseName = sm.DatabaseName\n  AND tm.SchemaName = sm.SchemaName\nINNER JOIN dbo.Servers s ON sm.ServerID = s.ServerID\nWHERE tm.DatabaseName = ${DatabaseName:sqlstring}\n  AND tm.SchemaName = ${SchemaName:sqlstring}\n  AND tm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n  AND s.IsActive = 1\n  AND ('$__all' = '${ServerName}' OR s.ServerName = '${ServerName}')\nORDER BY tm.TableName",
         "hide": 0,
         "includeAll": false,
         "label": "Table",
         "multi": false,
         "name": "TableName",
         "options": [],
-        "query": "SELECT DISTINCT TableName FROM dbo.TableMetadata WHERE DatabaseName = ${DatabaseName:sqlstring} AND SchemaName = ${SchemaName:sqlstring} ORDER BY TableName",
+        "query": "SELECT DISTINCT tm.TableName\nFROM dbo.TableMetadata tm\nINNER JOIN dbo.SchemaMetadata sm ON tm.DatabaseName = sm.DatabaseName\n  AND tm.SchemaName = sm.SchemaName\nINNER JOIN dbo.Servers s ON sm.ServerID = s.ServerID\nWHERE tm.DatabaseName = ${DatabaseName:sqlstring}\n  AND tm.SchemaName = ${SchemaName:sqlstring}\n  AND tm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n  AND s.IsActive = 1\n  AND ('$__all' = '${ServerName}' OR s.ServerName = '${ServerName}')\nORDER BY tm.TableName",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,

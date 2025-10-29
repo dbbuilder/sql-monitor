@@ -186,7 +186,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n    DatabaseName,\n    CAST(QueryText AS NVARCHAR(300)) AS QueryPreview,\n    ExecutionCount,\n    CAST(AvgDurationMs AS DECIMAL(10,2)) AS AvgDurationMs,\n    CAST(MaxDurationMs AS DECIMAL(10,2)) AS MaxDurationMs,\n    CAST(AvgCPUMs AS DECIMAL(10,2)) AS AvgCPUMs,\n    CAST(AvgLogicalReads AS DECIMAL(10,0)) AS AvgLogicalReads\nFROM (\n    SELECT\n        DatabaseName,\n        QueryText,\n        AVG(ExecutionCount) AS ExecutionCount,\n        AVG(AvgDurationMs) AS AvgDurationMs,\n        MAX(MaxDurationMs) AS MaxDurationMs,\n        AVG(AvgCPUMs) AS AvgCPUMs,\n        AVG(AvgLogicalReads) AS AvgLogicalReads,\n        ROW_NUMBER() OVER (ORDER BY AVG(AvgDurationMs) DESC) AS rn\n    FROM dbo.QueryMetrics\n    WHERE ServerID = 1\n      AND DatabaseName LIKE CASE WHEN '$database' = 'All' THEN '%' ELSE '$database' END\n      AND CollectionTime >= $__timeFrom()\n      AND CollectionTime <= $__timeTo()\n    GROUP BY DatabaseName, QueryText, QueryHash\n) AS ranked\nWHERE rn <= 100\nORDER BY AvgDurationMs DESC",
+          "rawSql": "SELECT\n    DatabaseName,\n    CAST(QueryText AS NVARCHAR(300)) AS QueryPreview,\n    ExecutionCount,\n    CAST(AvgDurationMs AS DECIMAL(10,2)) AS AvgDurationMs,\n    CAST(MaxDurationMs AS DECIMAL(10,2)) AS MaxDurationMs,\n    CAST(AvgCPUMs AS DECIMAL(10,2)) AS AvgCPUMs,\n    CAST(AvgLogicalReads AS DECIMAL(10,0)) AS AvgLogicalReads\nFROM (\n    SELECT\n        DatabaseName,\n        QueryText,\n        AVG(ExecutionCount) AS ExecutionCount,\n        AVG(AvgDurationMs) AS AvgDurationMs,\n        MAX(MaxDurationMs) AS MaxDurationMs,\n        AVG(AvgCPUMs) AS AvgCPUMs,\n        AVG(AvgLogicalReads) AS AvgLogicalReads,\n        ROW_NUMBER() OVER (ORDER BY AVG(AvgDurationMs) DESC) AS rn\n    FROM dbo.QueryMetrics\n    WHERE ServerID IN (SELECT ServerID FROM dbo.Servers WHERE ServerName LIKE CASE WHEN '$server' = 'All' THEN '%' ELSE '$server' END)\n      AND DatabaseName LIKE CASE WHEN '$database' = 'All' THEN '%' ELSE '$database' END\n      AND DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n      AND ('$SearchFilter' = '' OR CAST(QueryText AS NVARCHAR(MAX)) LIKE '%$SearchFilter%' OR DatabaseName LIKE '%$SearchFilter%')\n      AND CollectionTime >= $__timeFrom()\n      AND CollectionTime <= $__timeTo()\n    GROUP BY DatabaseName, QueryText, QueryHash\n) AS ranked\nWHERE rn <= 100\nORDER BY AvgDurationMs DESC",
           "refId": "A"
         }
       ],
@@ -396,7 +396,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n    DatabaseName,\n    ProcedureName,\n    ExecutionCount,\n    CAST(AvgCPUMs AS DECIMAL(10,2)) AS AvgCPUMs,\n    CAST(AvgDurationMs AS DECIMAL(10,2)) AS AvgDurationMs,\n    CAST(AvgLogicalReads AS DECIMAL(10,0)) AS AvgLogicalReads\nFROM (\n    SELECT\n        DatabaseName,\n        SchemaName + '.' + ProcedureName AS ProcedureName,\n        AVG(ExecutionCount) AS ExecutionCount,\n        AVG(AvgCPUMs) AS AvgCPUMs,\n        AVG(AvgDurationMs) AS AvgDurationMs,\n        AVG(AvgLogicalReads) AS AvgLogicalReads,\n        ROW_NUMBER() OVER (ORDER BY AVG(AvgDurationMs) DESC) AS rn\n    FROM dbo.ProcedureMetrics\n    WHERE ServerID = 1\n      AND DatabaseName LIKE CASE WHEN '$database' = 'All' THEN '%' ELSE '$database' END\n      AND CollectionTime >= $__timeFrom()\n      AND CollectionTime <= $__timeTo()\n    GROUP BY DatabaseName, SchemaName, ProcedureName\n) AS ranked\nWHERE rn <= 100\nORDER BY AvgDurationMs DESC",
+          "rawSql": "SELECT\n    DatabaseName,\n    ProcedureName,\n    ExecutionCount,\n    CAST(AvgCPUMs AS DECIMAL(10,2)) AS AvgCPUMs,\n    CAST(AvgDurationMs AS DECIMAL(10,2)) AS AvgDurationMs,\n    CAST(AvgLogicalReads AS DECIMAL(10,0)) AS AvgLogicalReads\nFROM (\n    SELECT\n        DatabaseName,\n        SchemaName + '.' + ProcedureName AS ProcedureName,\n        AVG(ExecutionCount) AS ExecutionCount,\n        AVG(AvgCPUMs) AS AvgCPUMs,\n        AVG(AvgDurationMs) AS AvgDurationMs,\n        AVG(AvgLogicalReads) AS AvgLogicalReads,\n        ROW_NUMBER() OVER (ORDER BY AVG(AvgDurationMs) DESC) AS rn\n    FROM dbo.ProcedureMetrics\n    WHERE ServerID IN (SELECT ServerID FROM dbo.Servers WHERE ServerName LIKE CASE WHEN '$server' = 'All' THEN '%' ELSE '$server' END)\n      AND DatabaseName LIKE CASE WHEN '$database' = 'All' THEN '%' ELSE '$database' END\n      AND DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n      AND ('$SearchFilter' = '' OR ProcedureName LIKE '%$SearchFilter%' OR DatabaseName LIKE '%$SearchFilter%')\n      AND CollectionTime >= $__timeFrom()\n      AND CollectionTime <= $__timeTo()\n    GROUP BY DatabaseName, SchemaName, ProcedureName\n) AS ranked\nWHERE rn <= 100\nORDER BY AvgDurationMs DESC",
           "refId": "A"
         }
       ],
@@ -502,7 +502,7 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT\n    CollectionTime AS time,\n    DatabaseName + ' - ' + LEFT(CAST(QueryText AS NVARCHAR(50)), 30) AS metric,\n    AvgDurationMs AS value\nFROM (\n    SELECT\n        DatabaseName,\n        QueryText,\n        CollectionTime,\n        AvgDurationMs,\n        ROW_NUMBER() OVER (PARTITION BY CollectionTime ORDER BY AvgDurationMs DESC) AS rn\n    FROM dbo.QueryMetrics\n    WHERE ServerID = 1\n      AND DatabaseName LIKE CASE WHEN '$database' = 'All' THEN '%' ELSE '$database' END\n      AND CollectionTime >= $__timeFrom()\n      AND CollectionTime <= $__timeTo()\n) AS ranked\nWHERE rn <= 5\nORDER BY time ASC",
+          "rawSql": "SELECT\n    CollectionTime AS time,\n    DatabaseName + ' - ' + LEFT(CAST(QueryText AS NVARCHAR(50)), 30) AS metric,\n    AvgDurationMs AS value\nFROM (\n    SELECT\n        DatabaseName,\n        QueryText,\n        CollectionTime,\n        AvgDurationMs,\n        ROW_NUMBER() OVER (PARTITION BY CollectionTime ORDER BY AvgDurationMs DESC) AS rn\n    FROM dbo.QueryMetrics\n    WHERE ServerID IN (SELECT ServerID FROM dbo.Servers WHERE ServerName LIKE CASE WHEN '$server' = 'All' THEN '%' ELSE '$server' END)\n      AND DatabaseName LIKE CASE WHEN '$database' = 'All' THEN '%' ELSE '$database' END\n      AND DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n      AND ('$SearchFilter' = '' OR CAST(QueryText AS NVARCHAR(MAX)) LIKE '%$SearchFilter%' OR DatabaseName LIKE '%$SearchFilter%')\n      AND CollectionTime >= $__timeFrom()\n      AND CollectionTime <= $__timeTo()\n) AS ranked\nWHERE rn <= 5\nORDER BY time ASC",
           "refId": "A"
         }
       ],
@@ -595,7 +595,7 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT\n    CollectionTime AS time,\n    DatabaseName + ' - ' + ProcedureName AS metric,\n    AvgDurationMs AS value\nFROM (\n    SELECT\n        DatabaseName,\n        SchemaName + '.' + ProcedureName AS ProcedureName,\n        CollectionTime,\n        AvgDurationMs,\n        ROW_NUMBER() OVER (PARTITION BY CollectionTime ORDER BY AvgDurationMs DESC) AS rn\n    FROM dbo.ProcedureMetrics\n    WHERE ServerID = 1\n      AND DatabaseName LIKE CASE WHEN '$database' = 'All' THEN '%' ELSE '$database' END\n      AND CollectionTime >= $__timeFrom()\n      AND CollectionTime <= $__timeTo()\n) AS ranked\nWHERE rn <= 5\nORDER BY time ASC",
+          "rawSql": "SELECT\n    CollectionTime AS time,\n    DatabaseName + ' - ' + ProcedureName AS metric,\n    AvgDurationMs AS value\nFROM (\n    SELECT\n        DatabaseName,\n        SchemaName + '.' + ProcedureName AS ProcedureName,\n        CollectionTime,\n        AvgDurationMs,\n        ROW_NUMBER() OVER (PARTITION BY CollectionTime ORDER BY AvgDurationMs DESC) AS rn\n    FROM dbo.ProcedureMetrics\n    WHERE ServerID IN (SELECT ServerID FROM dbo.Servers WHERE ServerName LIKE CASE WHEN '$server' = 'All' THEN '%' ELSE '$server' END)\n      AND DatabaseName LIKE CASE WHEN '$database' = 'All' THEN '%' ELSE '$database' END\n      AND DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n      AND ('$SearchFilter' = '' OR ProcedureName LIKE '%$SearchFilter%' OR DatabaseName LIKE '%$SearchFilter%')\n      AND CollectionTime >= $__timeFrom()\n      AND CollectionTime <= $__timeTo()\n) AS ranked\nWHERE rn <= 5\nORDER BY time ASC",
           "refId": "A"
         }
       ],
@@ -642,19 +642,63 @@
           "type": "mssql",
           "uid": "monitoringdb"
         },
-        "definition": "SELECT 'All' AS DatabaseName UNION SELECT DISTINCT DatabaseName FROM dbo.QueryMetrics WHERE ServerID = 1 UNION SELECT DISTINCT DatabaseName FROM dbo.ProcedureMetrics WHERE ServerID = 1 ORDER BY DatabaseName",
+        "definition": "SELECT 'All' AS ServerName UNION SELECT DISTINCT ServerName FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Server",
+        "multi": false,
+        "name": "server",
+        "options": [],
+        "query": "SELECT 'All' AS ServerName UNION SELECT DISTINCT ServerName FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "All"
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "monitoringdb"
+        },
+        "definition": "SELECT 'All' AS DatabaseName UNION SELECT DISTINCT DatabaseName FROM dbo.QueryMetrics WHERE ServerID IN (SELECT ServerID FROM dbo.Servers WHERE ServerName LIKE CASE WHEN '$server' = 'All' THEN '%' ELSE '$server' END) AND DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb') UNION SELECT DISTINCT DatabaseName FROM dbo.ProcedureMetrics WHERE ServerID IN (SELECT ServerID FROM dbo.Servers WHERE ServerName LIKE CASE WHEN '$server' = 'All' THEN '%' ELSE '$server' END) AND DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb') ORDER BY DatabaseName",
         "hide": 0,
         "includeAll": false,
         "label": "Database",
         "multi": false,
         "name": "database",
         "options": [],
-        "query": "SELECT 'All' AS DatabaseName UNION SELECT DISTINCT DatabaseName FROM dbo.QueryMetrics WHERE ServerID = 1 UNION SELECT DISTINCT DatabaseName FROM dbo.ProcedureMetrics WHERE ServerID = 1 ORDER BY DatabaseName",
+        "query": "SELECT 'All' AS DatabaseName UNION SELECT DISTINCT DatabaseName FROM dbo.QueryMetrics WHERE ServerID IN (SELECT ServerID FROM dbo.Servers WHERE ServerName LIKE CASE WHEN '$server' = 'All' THEN '%' ELSE '$server' END) AND DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb') UNION SELECT DISTINCT DatabaseName FROM dbo.ProcedureMetrics WHERE ServerID IN (SELECT ServerID FROM dbo.Servers WHERE ServerName LIKE CASE WHEN '$server' = 'All' THEN '%' ELSE '$server' END) AND DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb') ORDER BY DatabaseName",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
         "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "hide": 0,
+        "label": "Search Objects",
+        "name": "SearchFilter",
+        "options": [
+          {
+            "selected": true,
+            "text": "",
+            "value": ""
+          }
+        ],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
       }
     ]
   },

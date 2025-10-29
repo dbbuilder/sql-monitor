@@ -110,7 +110,7 @@
             "uid": "monitoringdb"
           },
           "format": "time_series",
-          "rawSql": "SELECT\n  CollectionTime AS time,\n  MetricValue AS value,\n  s.ServerName AS metric\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.\n  MetricCategory = 'CPU'\n  AND pm.MetricName = 'Percent'\n  AND pm.CollectionTime >= DATEADD(day, -7, GETUTCDATE())\nORDER BY pm.CollectionTime ASC",
+          "rawSql": "SELECT\n  CollectionTime AS time,\n  MetricValue AS value,\n  s.ServerName AS metric\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.MetricCategory = 'CPU'\n  AND pm.MetricName = 'Percent'\n  AND pm.CollectionTime >= DATEADD(day, -7, GETUTCDATE())\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\nORDER BY pm.CollectionTime ASC",
           "refId": "A"
         }
       ],
@@ -205,7 +205,7 @@
             "uid": "monitoringdb"
           },
           "format": "time_series",
-          "rawSql": "SELECT\n  CollectionTime AS time,\n  MetricValue AS value,\n  s.ServerName AS metric\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.\n  MetricCategory = 'Memory'\n  AND pm.MetricName = 'Percent'\n  AND pm.CollectionTime >= DATEADD(day, -7, GETUTCDATE())\nORDER BY pm.CollectionTime ASC",
+          "rawSql": "SELECT\n  CollectionTime AS time,\n  MetricValue AS value,\n  s.ServerName AS metric\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.MetricCategory = 'Memory'\n  AND pm.MetricName = 'Percent'\n  AND pm.CollectionTime >= DATEADD(day, -7, GETUTCDATE())\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\nORDER BY pm.CollectionTime ASC",
           "refId": "A"
         }
       ],
@@ -271,7 +271,7 @@
             "uid": "monitoringdb"
           },
           "format": "table",
-          "rawSql": "SELECT TOP 1\n  MetricValue\nFROM dbo.PerformanceMetrics\nWHERE\n  MetricCategory = 'CPU'\n  AND MetricName = 'Percent'\nORDER BY CollectionTime DESC",
+          "rawSql": "SELECT TOP 1\n  MetricValue\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.MetricCategory = 'CPU'\n  AND pm.MetricName = 'Percent'\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\nORDER BY pm.CollectionTime DESC",
           "refId": "A"
         }
       ],
@@ -337,7 +337,7 @@
             "uid": "monitoringdb"
           },
           "format": "table",
-          "rawSql": "SELECT TOP 1\n  MetricValue\nFROM dbo.PerformanceMetrics\nWHERE\n  MetricCategory = 'Memory'\n  AND MetricName = 'Percent'\nORDER BY CollectionTime DESC",
+          "rawSql": "SELECT TOP 1\n  MetricValue\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.MetricCategory = 'Memory'\n  AND pm.MetricName = 'Percent'\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\nORDER BY pm.CollectionTime DESC",
           "refId": "A"
         }
       ],
@@ -397,7 +397,7 @@
             "uid": "monitoringdb"
           },
           "format": "table",
-          "rawSql": "SELECT COUNT(*) AS value\nFROM dbo.Servers\nWHERE IsActive = 1",
+          "rawSql": "SELECT COUNT(*) AS value\nFROM dbo.Servers s\nWHERE s.IsActive = 1\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))",
           "refId": "A"
         }
       ],
@@ -457,7 +457,7 @@
             "uid": "monitoringdb"
           },
           "format": "table",
-          "rawSql": "SELECT COUNT(*) AS value\nFROM dbo.PerformanceMetrics\nWHERE CollectionTime >= DATEADD(day, -7, GETUTCDATE())",
+          "rawSql": "SELECT COUNT(*) AS value\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.CollectionTime >= DATEADD(day, -7, GETUTCDATE())\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))",
           "refId": "A"
         }
       ],
@@ -548,7 +548,7 @@
             "uid": "monitoringdb"
           },
           "format": "time_series",
-          "rawSql": "SELECT\n  CollectionTime AS time,\n  MetricValue AS value,\n  ServerName + ' - ' + MetricName AS metric\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.\n  MetricCategory = 'Disk'\n  AND pm.MetricName IN ('ReadMBps', 'WriteMBps')\n  AND pm.CollectionTime >= DATEADD(day, -7, GETUTCDATE())\nORDER BY pm.CollectionTime ASC",
+          "rawSql": "SELECT\n  pm.CollectionTime AS time,\n  pm.MetricValue AS value,\n  s.ServerName + ' - ' + pm.MetricName AS metric\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.MetricCategory = 'Disk'\n  AND pm.MetricName IN ('ReadMBps', 'WriteMBps')\n  AND pm.CollectionTime >= DATEADD(day, -7, GETUTCDATE())\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\nORDER BY pm.CollectionTime ASC",
           "refId": "A"
         }
       ],
@@ -644,7 +644,7 @@
             "uid": "monitoringdb"
           },
           "format": "table",
-          "rawSql": "SELECT\n  ServerName,\n  Environment,\n  CASE WHEN IsActive = 1 THEN 1 ELSE 0 END AS IsActive,\n  CreatedDate\nFROM dbo.Servers\nORDER BY IsActive DESC, ServerName ASC",
+          "rawSql": "SELECT\n  s.ServerName,\n  s.Environment,\n  CASE WHEN s.IsActive = 1 THEN 1 ELSE 0 END AS IsActive,\n  s.CreatedDate\nFROM dbo.Servers s\nWHERE ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\nORDER BY s.IsActive DESC, s.ServerName ASC",
           "refId": "A"
         }
       ],
@@ -681,7 +681,33 @@
     "monitoring"
   ],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "allValue": "$__all",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "monitoringdb"
+        },
+        "definition": "SELECT DISTINCT ServerName FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Server",
+        "multi": true,
+        "name": "ServerName",
+        "options": [],
+        "query": "SELECT DISTINCT ServerName FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
   },
   "time": {
     "from": "now-7d",

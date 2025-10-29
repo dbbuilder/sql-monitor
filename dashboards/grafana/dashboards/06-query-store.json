@@ -69,7 +69,7 @@
             "uid": "${DS_MONITORINGDB}"
           },
           "format": "table",
-          "rawSql": "SELECT COUNT(*) AS value\nFROM dbo.QueryStoreSnapshots\nWHERE CollectionTime >= $__timeFrom()\n  AND CollectionTime <= $__timeTo()\n  AND PlanRegressionCount > 0",
+          "rawSql": "-- Count queries with significant regressions\nWITH BaselineMetrics AS (\n  SELECT\n    qm.QueryHash,\n    AVG(qm.AvgDurationMs) AS BaselineAvgDurationMs\n  FROM dbo.QueryMetrics qm\n  INNER JOIN dbo.Servers s ON qm.ServerID = s.ServerID\n  WHERE qm.CollectionTime >= DATEADD(DAY, -7, $__timeFrom())\n    AND qm.CollectionTime < $__timeFrom()\n    AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n    AND qm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n  GROUP BY qm.QueryHash\n),\nCurrentMetrics AS (\n  SELECT\n    qm.QueryHash,\n    AVG(qm.AvgDurationMs) AS CurrentAvgDurationMs\n  FROM dbo.QueryMetrics qm\n  INNER JOIN dbo.Servers s ON qm.ServerID = s.ServerID\n  WHERE qm.CollectionTime >= $__timeFrom()\n    AND qm.CollectionTime <= $__timeTo()\n    AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n    AND qm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n  GROUP BY qm.QueryHash\n)\nSELECT COUNT(*) AS value\nFROM CurrentMetrics c\nINNER JOIN BaselineMetrics b ON c.QueryHash = b.QueryHash\nWHERE c.CurrentAvgDurationMs > b.BaselineAvgDurationMs * 1.5",
           "refId": "A"
         }
       ],
@@ -128,7 +128,7 @@
             "uid": "${DS_MONITORINGDB}"
           },
           "format": "table",
-          "rawSql": "SELECT COUNT(DISTINCT QueryHash) AS value\nFROM dbo.QueryStoreSnapshots\nWHERE CollectionTime >= $__timeFrom()\n  AND CollectionTime <= $__timeTo()",
+          "rawSql": "SELECT COUNT(DISTINCT qm.QueryHash) AS value\nFROM dbo.QueryMetrics qm\nINNER JOIN dbo.Servers s ON qm.ServerID = s.ServerID\nWHERE qm.CollectionTime >= $__timeFrom()\n  AND qm.CollectionTime <= $__timeTo()\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n  AND qm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')",
           "refId": "A"
         }
       ],
@@ -195,7 +195,7 @@
             "uid": "${DS_MONITORINGDB}"
           },
           "format": "table",
-          "rawSql": "SELECT AVG(AvgDurationMs) AS value\nFROM dbo.QueryStoreSnapshots\nWHERE CollectionTime >= $__timeFrom()\n  AND CollectionTime <= $__timeTo()",
+          "rawSql": "SELECT AVG(qm.AvgDurationMs) AS value\nFROM dbo.QueryMetrics qm\nINNER JOIN dbo.Servers s ON qm.ServerID = s.ServerID\nWHERE qm.CollectionTime >= $__timeFrom()\n  AND qm.CollectionTime <= $__timeTo()\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n  AND qm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')",
           "refId": "A"
         }
       ],
@@ -262,7 +262,7 @@
             "uid": "${DS_MONITORINGDB}"
           },
           "format": "table",
-          "rawSql": "SELECT SUM(ExecutionCount) AS value\nFROM dbo.QueryStoreSnapshots\nWHERE CollectionTime >= $__timeFrom()\n  AND CollectionTime <= $__timeTo()",
+          "rawSql": "SELECT SUM(qm.ExecutionCount) AS value\nFROM dbo.QueryMetrics qm\nINNER JOIN dbo.Servers s ON qm.ServerID = s.ServerID\nWHERE qm.CollectionTime >= $__timeFrom()\n  AND qm.CollectionTime <= $__timeTo()\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n  AND qm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')",
           "refId": "A"
         }
       ],
@@ -364,7 +364,7 @@
             "uid": "${DS_MONITORINGDB}"
           },
           "format": "table",
-          "rawSql": "SELECT TOP 20\n  DatabaseName,\n  LEFT(QueryText, 100) AS QueryText_Preview,\n  ExecutionCount,\n  CAST(AvgDurationMs AS DECIMAL(10,2)) AS AvgDurationMs,\n  CAST(MaxDurationMs AS DECIMAL(10,2)) AS MaxDurationMs,\n  CAST(AvgCPUMs AS DECIMAL(10,2)) AS AvgCPUMs,\n  CAST(AvgLogicalReads AS DECIMAL(10,2)) AS AvgLogicalReads,\n  CollectionTime\nFROM dbo.QueryStoreSnapshots\nWHERE CollectionTime >= $__timeFrom()\n  AND CollectionTime <= $__timeTo()\nORDER BY AvgDurationMs DESC",
+          "rawSql": "SELECT TOP 20\n  s.ServerName,\n  qm.DatabaseName,\n  LEFT(qm.QueryText, 100) AS QueryText_Preview,\n  qm.ExecutionCount,\n  CAST(qm.AvgDurationMs AS DECIMAL(10,2)) AS AvgDurationMs,\n  CAST(qm.MaxDurationMs AS DECIMAL(10,2)) AS MaxDurationMs,\n  CAST(qm.AvgCPUMs AS DECIMAL(10,2)) AS AvgCPUMs,\n  CAST(qm.AvgLogicalReads AS DECIMAL(10,2)) AS AvgLogicalReads,\n  qm.CollectionTime\nFROM dbo.QueryMetrics qm\nINNER JOIN dbo.Servers s ON qm.ServerID = s.ServerID\nWHERE qm.CollectionTime >= $__timeFrom()\n  AND qm.CollectionTime <= $__timeTo()\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n  AND qm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\nORDER BY qm.AvgDurationMs DESC",
           "refId": "A"
         }
       ],
@@ -454,7 +454,7 @@
             "uid": "${DS_MONITORINGDB}"
           },
           "format": "time_series",
-          "rawSql": "SELECT\n  CollectionTime AS time,\n  AvgDurationMs AS value,\n  LEFT(QueryText, 50) AS metric\nFROM dbo.QueryStoreSnapshots\nWHERE CollectionTime >= $__timeFrom()\n  AND CollectionTime <= $__timeTo()\n  AND AvgDurationMs > 100\nORDER BY time ASC",
+          "rawSql": "SELECT\n  qm.CollectionTime AS time,\n  qm.AvgDurationMs AS value,\n  s.ServerName + ' - ' + LEFT(qm.QueryText, 40) AS metric\nFROM dbo.QueryMetrics qm\nINNER JOIN dbo.Servers s ON qm.ServerID = s.ServerID\nWHERE qm.CollectionTime >= $__timeFrom()\n  AND qm.CollectionTime <= $__timeTo()\n  AND qm.AvgDurationMs > 100\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n  AND qm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\nORDER BY time ASC",
           "refId": "A"
         }
       ],
@@ -544,7 +544,7 @@
             "uid": "${DS_MONITORINGDB}"
           },
           "format": "time_series",
-          "rawSql": "SELECT\n  CollectionTime AS time,\n  ExecutionCount AS value,\n  LEFT(QueryText, 50) AS metric\nFROM dbo.QueryStoreSnapshots\nWHERE CollectionTime >= $__timeFrom()\n  AND CollectionTime <= $__timeTo()\n  AND ExecutionCount > 100\nORDER BY time ASC",
+          "rawSql": "SELECT\n  qm.CollectionTime AS time,\n  qm.ExecutionCount AS value,\n  s.ServerName + ' - ' + LEFT(qm.QueryText, 40) AS metric\nFROM dbo.QueryMetrics qm\nINNER JOIN dbo.Servers s ON qm.ServerID = s.ServerID\nWHERE qm.CollectionTime >= $__timeFrom()\n  AND qm.CollectionTime <= $__timeTo()\n  AND qm.ExecutionCount > 100\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n  AND qm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\nORDER BY time ASC",
           "refId": "A"
         }
       ],
@@ -680,7 +680,7 @@
             "uid": "${DS_MONITORINGDB}"
           },
           "format": "table",
-          "rawSql": "-- Plan Regressions: Queries that got slower over time\nWITH BaselineMetrics AS (\n  SELECT\n    QueryHash,\n    DatabaseName,\n    QueryText,\n    AVG(AvgDurationMs) AS BaselineAvgDurationMs,\n    MIN(CollectionTime) AS FirstSeenTime\n  FROM dbo.QueryStoreSnapshots\n  WHERE CollectionTime >= DATEADD(DAY, -7, $__timeFrom())\n    AND CollectionTime < $__timeFrom()\n  GROUP BY QueryHash, DatabaseName, QueryText\n),\nCurrentMetrics AS (\n  SELECT\n    QueryHash,\n    DatabaseName,\n    QueryText,\n    AVG(AvgDurationMs) AS CurrentAvgDurationMs,\n    MAX(CollectionTime) AS LastSeenTime\n  FROM dbo.QueryStoreSnapshots\n  WHERE CollectionTime >= $__timeFrom()\n    AND CollectionTime <= $__timeTo()\n  GROUP BY QueryHash, DatabaseName, QueryText\n)\nSELECT TOP 20\n  c.DatabaseName,\n  LEFT(c.QueryText, 100) AS QueryText_Preview,\n  CAST(b.BaselineAvgDurationMs AS DECIMAL(10,2)) AS BaselineAvgDurationMs,\n  CAST(c.CurrentAvgDurationMs AS DECIMAL(10,2)) AS CurrentAvgDurationMs,\n  CAST(((c.CurrentAvgDurationMs - b.BaselineAvgDurationMs) / b.BaselineAvgDurationMs) * 100 AS DECIMAL(10,2)) AS RegressionPercent,\n  b.FirstSeenTime,\n  c.LastSeenTime\nFROM CurrentMetrics c\nINNER JOIN BaselineMetrics b ON c.QueryHash = b.QueryHash\nWHERE c.CurrentAvgDurationMs > b.BaselineAvgDurationMs * 1.5  -- At least 50% slower\nORDER BY RegressionPercent DESC",
+          "rawSql": "-- Plan Regressions: Queries that got slower over time\nWITH BaselineMetrics AS (\n  SELECT\n    qm.QueryHash,\n    s.ServerName,\n    qm.DatabaseName,\n    qm.QueryText,\n    AVG(qm.AvgDurationMs) AS BaselineAvgDurationMs,\n    MIN(qm.CollectionTime) AS FirstSeenTime\n  FROM dbo.QueryMetrics qm\n  INNER JOIN dbo.Servers s ON qm.ServerID = s.ServerID\n  WHERE qm.CollectionTime >= DATEADD(DAY, -7, $__timeFrom())\n    AND qm.CollectionTime < $__timeFrom()\n    AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n    AND qm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n  GROUP BY qm.QueryHash, s.ServerName, qm.DatabaseName, qm.QueryText\n),\nCurrentMetrics AS (\n  SELECT\n    qm.QueryHash,\n    s.ServerName,\n    qm.DatabaseName,\n    qm.QueryText,\n    AVG(qm.AvgDurationMs) AS CurrentAvgDurationMs,\n    MAX(qm.CollectionTime) AS LastSeenTime\n  FROM dbo.QueryMetrics qm\n  INNER JOIN dbo.Servers s ON qm.ServerID = s.ServerID\n  WHERE qm.CollectionTime >= $__timeFrom()\n    AND qm.CollectionTime <= $__timeTo()\n    AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n    AND qm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n  GROUP BY qm.QueryHash, s.ServerName, qm.DatabaseName, qm.QueryText\n)\nSELECT TOP 20\n  c.ServerName,\n  c.DatabaseName,\n  LEFT(c.QueryText, 100) AS QueryText_Preview,\n  CAST(b.BaselineAvgDurationMs AS DECIMAL(10,2)) AS BaselineAvgDurationMs,\n  CAST(c.CurrentAvgDurationMs AS DECIMAL(10,2)) AS CurrentAvgDurationMs,\n  CAST(((c.CurrentAvgDurationMs - b.BaselineAvgDurationMs) / b.BaselineAvgDurationMs) * 100 AS DECIMAL(10,2)) AS RegressionPercent,\n  b.FirstSeenTime,\n  c.LastSeenTime\nFROM CurrentMetrics c\nINNER JOIN BaselineMetrics b ON c.QueryHash = b.QueryHash AND c.ServerName = b.ServerName\nWHERE c.CurrentAvgDurationMs > b.BaselineAvgDurationMs * 1.5  -- At least 50% slower\nORDER BY RegressionPercent DESC",
           "refId": "A"
         }
       ],
@@ -731,6 +731,34 @@
         "regex": "",
         "skipUrlSync": false,
         "type": "datasource"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "${DS_MONITORINGDB}"
+        },
+        "definition": "SELECT ServerName FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Server",
+        "multi": true,
+        "name": "ServerName",
+        "options": [],
+        "query": "SELECT ServerName FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
       }
     ]
   },

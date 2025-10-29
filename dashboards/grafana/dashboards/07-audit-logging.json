@@ -25,7 +25,7 @@
       "targets": [
         {
           "datasource": "MonitoringDB",
-          "rawSql": "SELECT COUNT(*) AS value FROM dbo.AuditLog WHERE EventTime >= DATEADD(HOUR, -24, GETUTCDATE())",
+          "rawSql": "SELECT COUNT(*) AS value FROM dbo.AuditLog WHERE EventTime >= DATEADD(HOUR, -24, GETUTCDATE()) AND ('$server' = 'All' OR DatabaseName = '$server' OR ObjectName LIKE '%$server%')",
           "format": "table"
         }
       ],
@@ -73,7 +73,7 @@
       "targets": [
         {
           "datasource": "MonitoringDB",
-          "rawSql": "SELECT COUNT(*) AS value FROM dbo.AuditLog WHERE EventTime >= DATEADD(HOUR, -24, GETUTCDATE()) AND Severity IN ('Warning', 'Error', 'Critical')",
+          "rawSql": "SELECT COUNT(*) AS value FROM dbo.AuditLog WHERE EventTime >= DATEADD(HOUR, -24, GETUTCDATE()) AND Severity IN ('Warning', 'Error', 'Critical') AND ('$server' = 'All' OR DatabaseName = '$server' OR ObjectName LIKE '%$server%')",
           "format": "table"
         }
       ],
@@ -121,7 +121,7 @@
       "targets": [
         {
           "datasource": "MonitoringDB",
-          "rawSql": "SELECT COUNT(DISTINCT UserName) AS value FROM dbo.AuditLog WHERE EventTime >= DATEADD(HOUR, -24, GETUTCDATE()) AND UserName != 'Anonymous'",
+          "rawSql": "SELECT COUNT(DISTINCT UserName) AS value FROM dbo.AuditLog WHERE EventTime >= DATEADD(HOUR, -24, GETUTCDATE()) AND UserName != 'Anonymous' AND ('$server' = 'All' OR DatabaseName = '$server' OR ObjectName LIKE '%$server%')",
           "format": "table"
         }
       ],
@@ -161,7 +161,7 @@
       "targets": [
         {
           "datasource": "MonitoringDB",
-          "rawSql": "SELECT COUNT(*) AS value FROM dbo.AuditLog WHERE EventTime >= DATEADD(HOUR, -24, GETUTCDATE()) AND EventType = 'HttpRequestError'",
+          "rawSql": "SELECT COUNT(*) AS value FROM dbo.AuditLog WHERE EventTime >= DATEADD(HOUR, -24, GETUTCDATE()) AND EventType = 'HttpRequestError' AND ('$server' = 'All' OR DatabaseName = '$server' OR ObjectName LIKE '%$server%')",
           "format": "table"
         }
       ],
@@ -209,7 +209,7 @@
       "targets": [
         {
           "datasource": "MonitoringDB",
-          "rawSql": "SELECT EventTime AS time, EventType AS metric, COUNT(*) AS value FROM dbo.AuditLog WHERE EventTime >= DATEADD(DAY, -7, GETUTCDATE()) GROUP BY EventTime, EventType ORDER BY EventTime",
+          "rawSql": "SELECT EventTime AS time, EventType AS metric, COUNT(*) AS value FROM dbo.AuditLog WHERE EventTime >= DATEADD(DAY, -7, GETUTCDATE()) AND ('$server' = 'All' OR DatabaseName = '$server' OR ObjectName LIKE '%$server%') GROUP BY EventTime, EventType ORDER BY EventTime",
           "format": "time_series"
         }
       ],
@@ -248,7 +248,7 @@
       "targets": [
         {
           "datasource": "MonitoringDB",
-          "rawSql": "SELECT EventTime AS time, Severity AS metric, COUNT(*) AS value FROM dbo.AuditLog WHERE EventTime >= DATEADD(DAY, -7, GETUTCDATE()) AND Severity IN ('Warning', 'Error', 'Critical') GROUP BY EventTime, Severity ORDER BY EventTime",
+          "rawSql": "SELECT EventTime AS time, Severity AS metric, COUNT(*) AS value FROM dbo.AuditLog WHERE EventTime >= DATEADD(DAY, -7, GETUTCDATE()) AND Severity IN ('Warning', 'Error', 'Critical') AND ('$server' = 'All' OR DatabaseName = '$server' OR ObjectName LIKE '%$server%') GROUP BY EventTime, Severity ORDER BY EventTime",
           "format": "time_series"
         }
       ],
@@ -333,7 +333,7 @@
       "targets": [
         {
           "datasource": "MonitoringDB",
-          "rawSql": "SELECT TOP 100 EventTime, EventType, Severity, UserName, ObjectName, ErrorMessage FROM dbo.AuditLog WHERE Severity IN ('Warning', 'Error', 'Critical') ORDER BY EventTime DESC",
+          "rawSql": "SELECT TOP 100 EventTime, EventType, Severity, UserName, DatabaseName, ObjectName, ErrorMessage FROM dbo.AuditLog WHERE Severity IN ('Warning', 'Error', 'Critical') AND ('$server' = 'All' OR DatabaseName = '$server' OR ObjectName LIKE '%$server%') ORDER BY EventTime DESC",
           "format": "table"
         }
       ],
@@ -406,7 +406,7 @@
       "targets": [
         {
           "datasource": "MonitoringDB",
-          "rawSql": "EXEC dbo.usp_GetSOC2_UserAccessReport @StartTime = DATEADD(DAY, -30, GETUTCDATE())",
+          "rawSql": "SELECT UserName, COUNT(DISTINCT CAST(EventTime AS DATE)) AS DaysActive, MIN(EventTime) AS FirstAccess, MAX(EventTime) AS LastAccess, COUNT(*) AS TotalEvents, COUNT(DISTINCT ObjectName) AS UniqueObjectsAccessed, SUM(CASE WHEN EventType IN ('TableModified', 'ConfigChange') THEN 1 ELSE 0 END) AS WriteOperations, SUM(CASE WHEN Severity IN ('Error', 'Critical') THEN 1 ELSE 0 END) AS ErrorCount, COUNT(DISTINCT IPAddress) AS UniqueIPAddresses FROM dbo.AuditLog WHERE EventTime >= DATEADD(DAY, -30, GETUTCDATE()) AND UserName != 'Anonymous' AND ('$server' = 'All' OR DatabaseName = '$server' OR ObjectName LIKE '%$server%') GROUP BY UserName ORDER BY TotalEvents DESC",
           "format": "table"
         }
       ],
@@ -473,7 +473,7 @@
       "targets": [
         {
           "datasource": "MonitoringDB",
-          "rawSql": "EXEC dbo.usp_GetSOC2_ConfigChangesReport @StartTime = DATEADD(DAY, -90, GETUTCDATE())",
+          "rawSql": "SELECT TOP 100 EventTime, UserName, ObjectName, ObjectType, ActionType, OldValue, NewValue, DataClassification FROM dbo.AuditLog WHERE EventTime >= DATEADD(DAY, -90, GETUTCDATE()) AND EventType = 'ConfigChange' AND ('$server' = 'All' OR DatabaseName = '$server' OR ObjectName LIKE '%$server%') ORDER BY EventTime DESC",
           "format": "table"
         }
       ],
@@ -529,7 +529,7 @@
       "targets": [
         {
           "datasource": "MonitoringDB",
-          "rawSql": "EXEC dbo.usp_GetSOC2_AnomalyDetectionSummary @StartTime = DATEADD(DAY, -7, GETUTCDATE())",
+          "rawSql": "SELECT UserName, COUNT(*) AS TotalEvents, COUNT(DISTINCT IPAddress) AS UniqueIPs, SUM(CASE WHEN Severity IN ('Error', 'Critical') THEN 1 ELSE 0 END) AS ErrorCount, CASE WHEN COUNT(*) > 1000 THEN 'HIGH_ACTIVITY' WHEN COUNT(DISTINCT IPAddress) > 5 THEN 'MULTIPLE_IPS' WHEN CAST(SUM(CASE WHEN Severity IN ('Error', 'Critical') THEN 1 ELSE 0 END) AS FLOAT) / NULLIF(COUNT(*), 0) > 0.5 THEN 'HIGH_ERRORS' ELSE 'NORMAL' END AS AnomalyFlag FROM dbo.AuditLog WHERE EventTime >= DATEADD(DAY, -7, GETUTCDATE()) AND UserName != 'Anonymous' AND ('$server' = 'All' OR DatabaseName = '$server' OR ObjectName LIKE '%$server%') GROUP BY UserName ORDER BY TotalEvents DESC",
           "format": "table"
         }
       ],
@@ -613,7 +613,7 @@
       "targets": [
         {
           "datasource": "MonitoringDB",
-          "rawSql": "SELECT EventType AS metric, COUNT(*) AS value FROM dbo.AuditLog WHERE EventTime >= DATEADD(HOUR, -24, GETUTCDATE()) GROUP BY EventType",
+          "rawSql": "SELECT EventType AS metric, COUNT(*) AS value FROM dbo.AuditLog WHERE EventTime >= DATEADD(HOUR, -24, GETUTCDATE()) AND ('$server' = 'All' OR DatabaseName = '$server' OR ObjectName LIKE '%$server%') GROUP BY EventType",
           "format": "table"
         }
       ],
@@ -650,7 +650,7 @@
       "targets": [
         {
           "datasource": "MonitoringDB",
-          "rawSql": "SELECT Severity AS metric, COUNT(*) AS value FROM dbo.AuditLog WHERE EventTime >= DATEADD(HOUR, -24, GETUTCDATE()) GROUP BY Severity",
+          "rawSql": "SELECT Severity AS metric, COUNT(*) AS value FROM dbo.AuditLog WHERE EventTime >= DATEADD(HOUR, -24, GETUTCDATE()) AND ('$server' = 'All' OR DatabaseName = '$server' OR ObjectName LIKE '%$server%') GROUP BY Severity",
           "format": "table"
         }
       ],
@@ -749,7 +749,7 @@
       "targets": [
         {
           "datasource": "MonitoringDB",
-          "rawSql": "SELECT TOP 10 UserName AS metric, COUNT(*) AS value FROM dbo.AuditLog WHERE EventTime >= DATEADD(DAY, -7, GETUTCDATE()) AND UserName != 'Anonymous' GROUP BY UserName ORDER BY COUNT(*) DESC",
+          "rawSql": "SELECT TOP 10 UserName AS metric, COUNT(*) AS value FROM dbo.AuditLog WHERE EventTime >= DATEADD(DAY, -7, GETUTCDATE()) AND UserName != 'Anonymous' AND ('$server' = 'All' OR DatabaseName = '$server' OR ObjectName LIKE '%$server%') GROUP BY UserName ORDER BY COUNT(*) DESC",
           "format": "table"
         }
       ],
@@ -786,7 +786,32 @@
     }
   ],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "All"
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "monitoringdb"
+        },
+        "definition": "SELECT 'All' AS ServerName UNION SELECT DISTINCT ServerName FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Server",
+        "multi": false,
+        "name": "server",
+        "options": [],
+        "query": "SELECT 'All' AS ServerName UNION SELECT DISTINCT ServerName FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
   },
   "time": {
     "from": "now-7d",
@@ -808,7 +833,7 @@
         "datasource": "MonitoringDB",
         "enable": true,
         "name": "Critical Events",
-        "rawQuery": "SELECT EventTime AS time, CONCAT(EventType, ': ', COALESCE(ErrorMessage, ObjectName)) AS text, 'Critical' AS tags FROM dbo.AuditLog WHERE Severity = 'Critical' AND EventTime >= $__timeFrom() AND EventTime <= $__timeTo()",
+        "rawQuery": "SELECT EventTime AS time, CONCAT(EventType, ': ', COALESCE(ErrorMessage, ObjectName)) AS text, 'Critical' AS tags FROM dbo.AuditLog WHERE Severity = 'Critical' AND EventTime >= $__timeFrom() AND EventTime <= $__timeTo() AND ('$server' = 'All' OR DatabaseName = '$server' OR ObjectName LIKE '%$server%')",
         "iconColor": "red"
       }
     ]
