@@ -1,0 +1,707 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "${DS_MONITORINGDB}"
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style='text-align: center; padding: 15px 0;'>\n  <h1 style='font-size: 36px; margin: 0; color: #e02f44;'>🔍 DBCC Integrity Checks</h1>\n  <p style='font-size: 16px; color: #888; margin-top: 8px;'>Database Consistency Checker | Errors, Warnings & Repair Guidance</p>\n  <p style='font-size: 12px; color: #666;'>ArcTrade</p>\n</div>",
+        "mode": "html"
+      },
+      "pluginVersion": "10.2.0",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "${DS_MONITORINGDB}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 3
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "${DS_MONITORINGDB}"
+          },
+          "format": "time_series",
+          "rawSql": "SELECT\n  $__timeGroup(CheckStartTime, '1d') AS time,\n  COUNT(*) AS value,\n  'Critical Errors' AS metric\nFROM dbo.DBCCCheckResults\nWHERE Severity = 'CRITICAL'\n  AND CheckStartTime >= $__timeFrom()\n  AND CheckStartTime <= $__timeTo()\n  AND ('$__all' IN (${ServerName:singlequote}) OR ServerName IN (${ServerName:singlequote}))\nGROUP BY $__timeGroup(CheckStartTime, '1d')\nORDER BY time ASC",
+          "refId": "A"
+        }
+      ],
+      "title": "🔴 Critical Errors (30d)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "${DS_MONITORINGDB}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "orange",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 3
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "${DS_MONITORINGDB}"
+          },
+          "format": "time_series",
+          "rawSql": "SELECT\n  COUNT(*) AS value\nFROM dbo.DBCCCheckResults dcr\nINNER JOIN dbo.Servers s ON dcr.ServerID = s.ServerID\nWHERE Severity = 'WARNING'\n  AND CheckStartTime >= DATEADD(DAY, -30, GETUTCDATE())\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))",
+          "refId": "A"
+        }
+      ],
+      "title": "🟠 Warnings (30d)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "${DS_MONITORINGDB}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 3
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "${DS_MONITORINGDB}"
+          },
+          "format": "time_series",
+          "rawSql": "SELECT\n  COUNT(*) AS value\nFROM dbo.DBCCCheckResults dcr\nINNER JOIN dbo.Servers s ON dcr.ServerID = s.ServerID\nWHERE Severity = 'SUCCESS'\n  AND CheckStartTime >= DATEADD(DAY, -7, GETUTCDATE())\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))",
+          "refId": "A"
+        }
+      ],
+      "title": "✅ Successful Checks (7d)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "${DS_MONITORINGDB}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s"
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 3
+      },
+      "id": 5,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "${DS_MONITORINGDB}"
+          },
+          "format": "time_series",
+          "rawSql": "SELECT\n  AVG(CAST(DurationSeconds AS FLOAT)) AS value\nFROM dbo.DBCCCheckResults dcr\nINNER JOIN dbo.Servers s ON dcr.ServerID = s.ServerID\nWHERE CheckStartTime >= DATEADD(DAY, -7, GETUTCDATE())\n  AND DurationSeconds IS NOT NULL\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))",
+          "refId": "A"
+        }
+      ],
+      "title": "⏱️ Avg Check Duration",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "${DS_MONITORINGDB}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Severity"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              },
+              {
+                "id": "custom.displayMode",
+                "value": "color-background"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "orange", "value": 1},
+                    {"color": "red", "value": 2}
+                  ]
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {"type": "value", "value": "CRITICAL", "text": "CRITICAL", "color": "red"},
+                  {"type": "value", "value": "WARNING", "text": "WARNING", "color": "orange"},
+                  {"type": "value", "value": "INFO", "text": "INFO", "color": "blue"},
+                  {"type": "value", "value": "SUCCESS", "text": "SUCCESS", "color": "green"}
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ServerName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Server Overview",
+                    "url": "/d/sql-server-monitoring?var-ServerName=${__data.fields.ServerName}"
+                  }
+                ]
+              },
+              {
+                "id": "color",
+                "value": {"mode": "fixed", "fixedColor": "blue"}
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "DatabaseName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Table Browser",
+                    "url": "/d/sql-monitor-table-browser?var-DatabaseName=${__data.fields.DatabaseName}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "RepairLevel"
+            },
+            "properties": [
+              {
+                "id": "custom.displayMode",
+                "value": "color-background"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {"type": "value", "value": "REPAIR_ALLOW_DATA_LOSS", "text": "⚠️ DATA LOSS", "color": "dark-red"},
+                  {"type": "value", "value": "REPAIR_REBUILD", "text": "🔧 REBUILD", "color": "orange"},
+                  {"type": "value", "value": "REPAIR_FAST", "text": "⚡ FAST", "color": "yellow"}
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "id": 6,
+      "options": {
+        "footer": {
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "CheckTime"
+          }
+        ]
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "${DS_MONITORINGDB}"
+          },
+          "format": "table",
+          "rawSql": "SELECT TOP 100\n  s.ServerName,\n  dcr.DatabaseName,\n  dcr.CheckType,\n  dcr.Severity,\n  dcr.MessageType,\n  dcr.RepairLevel,\n  dcr.CheckStartTime AS CheckTime,\n  dcr.DurationSeconds,\n  LEFT(dcr.MessageText, 200) AS Message,\n  dcr.ObjectName\nFROM dbo.DBCCCheckResults dcr\nINNER JOIN dbo.Servers s ON dcr.ServerID = s.ServerID\nWHERE dcr.CheckStartTime >= $__timeFrom()\n  AND dcr.CheckStartTime <= $__timeTo()\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n  AND ('$__all' IN (${Severity:singlequote}) OR dcr.Severity IN (${Severity:singlequote}))\nORDER BY\n  CASE dcr.Severity\n    WHEN 'CRITICAL' THEN 1\n    WHEN 'WARNING' THEN 2\n    WHEN 'INFO' THEN 3\n    WHEN 'SUCCESS' THEN 4\n  END,\n  dcr.CheckStartTime DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "🔍 DBCC Check Results (Errors, Warnings & Repair Guidance)",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "${DS_MONITORINGDB}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 19
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "${DS_MONITORINGDB}"
+          },
+          "format": "time_series",
+          "rawSql": "SELECT\n  $__timeGroup(CheckStartTime, '1d') AS time,\n  COUNT(*) AS value,\n  dcr.Severity AS metric\nFROM dbo.DBCCCheckResults dcr\nINNER JOIN dbo.Servers s ON dcr.ServerID = s.ServerID\nWHERE CheckStartTime >= $__timeFrom()\n  AND CheckStartTime <= $__timeTo()\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\nGROUP BY $__timeGroup(CheckStartTime, '1d'), dcr.Severity\nORDER BY time ASC",
+          "refId": "A"
+        }
+      ],
+      "title": "📊 DBCC Check History (by Severity)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "${DS_MONITORINGDB}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "Duration (seconds)",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 19
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "${DS_MONITORINGDB}"
+          },
+          "format": "time_series",
+          "rawSql": "SELECT\n  $__timeGroup(CheckStartTime, '1d') AS time,\n  AVG(CAST(DurationSeconds AS FLOAT)) AS value,\n  dcr.DatabaseName + ' - ' + dcr.CheckType AS metric\nFROM dbo.DBCCCheckResults dcr\nINNER JOIN dbo.Servers s ON dcr.ServerID = s.ServerID\nWHERE CheckStartTime >= $__timeFrom()\n  AND CheckStartTime <= $__timeTo()\n  AND DurationSeconds IS NOT NULL\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\nGROUP BY $__timeGroup(CheckStartTime, '1d'), dcr.DatabaseName, dcr.CheckType\nORDER BY time ASC",
+          "refId": "A"
+        }
+      ],
+      "title": "⏱️ DBCC Check Duration by Database",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "${DS_MONITORINGDB}"
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 27
+      },
+      "id": 9,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "# 📖 DBCC Check Guide\n\n## What is DBCC?\n\n**DBCC** (Database Console Commands) are SQL Server's built-in tools for checking **physical and logical consistency** of databases. Think of them as \"health checks\" for your data.\n\n---\n\n## Check Types\n\n### 🔴 DBCC CHECKDB (Most Important)\n**What it does**: Comprehensive database integrity check\n- Checks all tables, indexes, and system catalogs\n- Detects corruption, page errors, allocation errors\n- **Run weekly** for production databases\n\n**Example**:\n```sql\nDBCC CHECKDB('YourDatabase') WITH NO_INFOMSGS;\n```\n\n### 🟠 DBCC CHECKCATALOG\n**What it does**: Checks system catalog consistency\n- Verifies metadata integrity (tables, columns, relationships)\n- Faster than CHECKDB (5-10 minutes vs hours)\n- **Run weekly** alongside CHECKDB\n\n**Example**:\n```sql\nDBCC CHECKCATALOG('YourDatabase') WITH NO_INFOMSGS;\n```\n\n### 🟡 DBCC CHECKALLOC\n**What it does**: Checks space allocation structures\n- Verifies page usage, extent allocation\n- Detects orphaned pages, allocation errors\n- **Run monthly** or after large data operations\n\n**Example**:\n```sql\nDBCC CHECKALLOC('YourDatabase') WITH NO_INFOMSGS;\n```\n\n### 🔵 DBCC CHECKTABLE\n**What it does**: Checks specific table integrity\n- Faster alternative to CHECKDB for single table\n- Useful after bulk operations or known issues\n- **Run on-demand** for troubleshooting\n\n**Example**:\n```sql\nDBCC CHECKTABLE('dbo.Orders') WITH NO_INFOMSGS;\n```\n\n---\n\n## Severity Levels\n\n| Severity | Color | Meaning | Action Required |\n|----------|-------|---------|------------------|\n| **CRITICAL** | 🔴 Red | Database corruption detected | **IMMEDIATE**: Restore from backup or repair |\n| **WARNING** | 🟠 Orange | Inconsistencies found, repair available | **URGENT**: Schedule repair during maintenance window |\n| **INFO** | 🔵 Blue | Minor issues, no corruption | **REVIEW**: Monitor, may self-resolve |\n| **SUCCESS** | 🟢 Green | No issues detected | **GOOD**: Database healthy |\n\n---\n\n## Repair Levels\n\n### ⚠️ REPAIR_ALLOW_DATA_LOSS (Most Dangerous)\n**What it does**: Fixes corruption by **deleting damaged rows/pages**\n- ❌ **PERMANENT DATA LOSS** possible\n- Only use when **no backup available**\n- Requires database in **SINGLE_USER** mode\n\n**Example**:\n```sql\n-- ⚠️ DANGER: Only use as LAST RESORT\nALTER DATABASE YourDatabase SET SINGLE_USER WITH ROLLBACK IMMEDIATE;\nDBCC CHECKDB('YourDatabase', REPAIR_ALLOW_DATA_LOSS);\nALTER DATABASE YourDatabase SET MULTI_USER;\n```\n\n**Best Practice**: **RESTORE FROM BACKUP** instead of using REPAIR_ALLOW_DATA_LOSS!\n\n### 🔧 REPAIR_REBUILD\n**What it does**: Rebuilds indexes and structures without data loss\n- ✅ Safe, no data loss\n- Fixes index corruption, allocation errors\n- Can take several hours for large databases\n\n**Example**:\n```sql\nALTER DATABASE YourDatabase SET SINGLE_USER WITH ROLLBACK IMMEDIATE;\nDBCC CHECKDB('YourDatabase', REPAIR_REBUILD);\nALTER DATABASE YourDatabase SET MULTI_USER;\n```\n\n### ⚡ REPAIR_FAST (Deprecated)\n**What it does**: Quick repairs only\n- ⚠️ Deprecated in SQL Server 2016+\n- Use **REPAIR_REBUILD** instead\n\n---\n\n## Common Error Messages\n\n### Error 824: \"SQL Server detected a logical consistency-based I/O error\"\n**Cause**: Damaged data page\n**Fix**: Restore from backup or run REPAIR_ALLOW_DATA_LOSS\n\n### Error 8928: \"Object ID X, index ID X, partition ID X, alloc unit ID X (type X): Page X could not be processed\"\n**Cause**: Page allocation error\n**Fix**: Run REPAIR_REBUILD\n\n### Error 2533: \"Table error: Page X allocated to object ID X, index ID X, partition ID X, alloc unit ID X (type X) was not seen\"\n**Cause**: Orphaned page\n**Fix**: Run REPAIR_REBUILD\n\n---\n\n## Maintenance Schedule\n\n### Weekly (All Production Databases)\n- ✅ **Sunday 2 AM**: DBCC CHECKDB (PHYSICAL_ONLY for speed)\n- ✅ **Monday 2 AM**: DBCC CHECKCATALOG\n\n### Monthly (Large Databases)\n- ✅ **First Sunday**: DBCC CHECKDB (full check, 4-8 hours)\n- ✅ **Second Sunday**: DBCC CHECKALLOC\n\n### On-Demand (Troubleshooting)\n- ❓ Suspected corruption: DBCC CHECKTABLE on specific table\n- ❓ After crash/power loss: Immediate DBCC CHECKDB\n- ❓ Before major upgrade: Full DBCC CHECKDB\n\n---\n\n## Performance Tips\n\n### 1. Use PHYSICAL_ONLY for Weekly Checks (10x Faster)\n```sql\n-- Fast check (10 minutes vs 2 hours)\nDBCC CHECKDB('YourDatabase') WITH PHYSICAL_ONLY, NO_INFOMSGS;\n```\n\n**What it skips**: Row-level integrity, computed column checks\n**What it catches**: Page corruption, allocation errors (most common issues)\n\n### 2. Run During Maintenance Window\n- DBCC CHECKDB is **CPU and I/O intensive**\n- Blocks operations in SINGLE_USER mode\n- Schedule for 2-6 AM when usage is low\n\n### 3. Use Database Snapshots (Enterprise Edition)\n```sql\n-- Create snapshot (instant)\nCREATE DATABASE YourDatabase_Snapshot ON (\n    NAME = YourDatabase_Data,\n    FILENAME = 'E:\\Snapshots\\YourDatabase_Snapshot.ss'\n) AS SNAPSHOT OF YourDatabase;\n\n-- Run CHECKDB on snapshot (no locks on live database)\nDBCC CHECKDB('YourDatabase_Snapshot') WITH NO_INFOMSGS;\n\n-- Drop snapshot when done\nDROP DATABASE YourDatabase_Snapshot;\n```\n\n### 4. Monitor Duration Over Time\n- DBCC CHECKDB duration should be **consistent**\n- Sudden increase = possible corruption or fragmentation\n- Use **Detailed Metrics** dashboard to track trends\n\n---\n\n## What to Do When Errors are Found\n\n### Step 1: Don't Panic\n- ✅ Errors are rare but not catastrophic\n- ✅ Most are fixable with REPAIR_REBUILD (no data loss)\n- ✅ Always try restore from backup first\n\n### Step 2: Assess Severity\n- **CRITICAL**: Database unusable, queries failing\n- **WARNING**: Database functional but inconsistent\n- **INFO**: Minor issues, no impact\n\n### Step 3: Choose Recovery Strategy\n\n**Option 1: Restore from Backup (Best)**\n```sql\n-- 1. Identify last known good backup (before corruption)\n-- 2. Restore to test server first\n-- 3. Run DBCC CHECKDB on restored database\n-- 4. If clean, restore to production during maintenance window\n\nRESTORE DATABASE YourDatabase\nFROM DISK = 'E:\\Backups\\YourDatabase_LastGood.bak'\nWITH REPLACE, RECOVERY;\n```\n\n**Option 2: Repair (If No Backup Available)**\n```sql\n-- 1. Set database to SINGLE_USER (kicks out all connections)\nALTER DATABASE YourDatabase SET SINGLE_USER WITH ROLLBACK IMMEDIATE;\n\n-- 2. Run repair (try REPAIR_REBUILD first)\nDBCC CHECKDB('YourDatabase', REPAIR_REBUILD);\n\n-- 3. If REPAIR_REBUILD fails, escalate to REPAIR_ALLOW_DATA_LOSS\n-- DBCC CHECKDB('YourDatabase', REPAIR_ALLOW_DATA_LOSS);  -- ⚠️ LAST RESORT\n\n-- 4. Set database back to MULTI_USER\nALTER DATABASE YourDatabase SET MULTI_USER;\n\n-- 5. Run CHECKDB again to verify repair succeeded\nDBCC CHECKDB('YourDatabase') WITH NO_INFOMSGS;\n```\n\n### Step 4: Root Cause Analysis\n- **Hardware**: Check disk health (SMART errors, RAID failures)\n- **Memory**: Run Windows Memory Diagnostic\n- **Storage**: Verify SAN/NAS firmware, check for EMC/NetApp alerts\n- **SQL Server**: Review SQL error logs for patterns\n\n### Step 5: Prevent Recurrence\n- Enable **page checksums** (detect corruption earlier)\n- Implement **daily differential backups**\n- Monitor **disk health weekly** (sys.dm_io_virtual_file_stats)\n- Test **backup restores monthly**\n\n---\n\n## Automated Checks (How This Dashboard Works)\n\nThis system automatically runs DBCC checks on a schedule:\n\n1. **DBCCCheckSchedule Table**: Defines which databases to check and frequency\n2. **usp_RunScheduledDBCCChecks**: Executes scheduled checks\n3. **DBCCCheckResults Table**: Stores all results (errors, warnings, success)\n4. **This Dashboard**: Displays results with color coding and repair guidance\n\n**To add a new scheduled check**:\n```sql\nINSERT INTO dbo.DBCCCheckSchedule (ServerID, DatabaseName, CheckType, FrequencyDays, NextRunDate)\nVALUES (\n    1,  -- ServerID (from dbo.Servers table)\n    'YourDatabase',  -- Or 'ALL' for all databases\n    'CHECKDB',  -- Or CHECKCATALOG, CHECKALLOC, CHECKTABLE\n    7,  -- Run every 7 days\n    GETUTCDATE()  -- Start immediately\n);\n```\n\n**To run checks manually**:\n```sql\nEXEC dbo.usp_RunScheduledDBCCChecks;\n```\n\n---\n\n## FAQ\n\n**Q: How often should I run DBCC CHECKDB?**\nA: **Weekly** for production, **monthly** for dev/test.\n\n**Q: Can DBCC CHECKDB cause corruption?**\nA: **No**, it's read-only unless you use REPAIR options.\n\n**Q: What's the difference between CHECKDB and CHECKALLOC?**\nA: CHECKDB = full check (all tables + allocation), CHECKALLOC = allocation only (faster).\n\n**Q: Should I use REPAIR or restore from backup?**\nA: **Always restore from backup** if available. REPAIR is for emergencies only.\n\n**Q: Why is CHECKDB taking 8 hours?**\nA: Large databases (1TB+) can take hours. Use PHYSICAL_ONLY for weekly checks (10x faster).\n\n**Q: Can I cancel DBCC CHECKDB mid-run?**\nA: **Yes**, but you'll lose progress. Ctrl+C or KILL session works.\n\n---\n\n<div style='text-align: center; color: #666; margin-top: 40px; padding: 20px; background-color: rgba(255,255,255,0.05); border-radius: 8px;'>\n  <p style='font-size: 18px; margin-bottom: 10px;'>🔍 <strong>ArcTrade DBCC Integrity Checks</strong></p>\n  <p style='font-size: 14px;'>Proactive database health monitoring | Catch corruption before it causes downtime</p>\n  <p style='font-size: 12px; margin-top: 10px;'>Questions? Check the <strong>Code Browser</strong> for stored procedures or <strong>Server Overview</strong> for disk health</p>\n</div>",
+        "mode": "markdown"
+      },
+      "pluginVersion": "10.2.0",
+      "transparent": true,
+      "type": "text"
+    }
+  ],
+  "refresh": "5m",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["dbcc", "integrity", "errors", "warnings", "repair"],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "MonitoringDB",
+          "value": "MonitoringDB"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Data Source",
+        "multi": false,
+        "name": "DS_MONITORINGDB",
+        "options": [],
+        "query": "mssql",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "${DS_MONITORINGDB}"
+        },
+        "definition": "SELECT DISTINCT ServerName FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Server",
+        "multi": true,
+        "name": "ServerName",
+        "options": [],
+        "query": "SELECT DISTINCT ServerName FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "${DS_MONITORINGDB}"
+        },
+        "definition": "SELECT DISTINCT Severity FROM dbo.DBCCCheckResults ORDER BY CASE Severity WHEN 'CRITICAL' THEN 1 WHEN 'WARNING' THEN 2 WHEN 'INFO' THEN 3 WHEN 'SUCCESS' THEN 4 END",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Severity",
+        "multi": true,
+        "name": "Severity",
+        "options": [],
+        "query": "SELECT DISTINCT Severity FROM dbo.DBCCCheckResults ORDER BY CASE Severity WHEN 'CRITICAL' THEN 1 WHEN 'WARNING' THEN 2 WHEN 'INFO' THEN 3 WHEN 'SUCCESS' THEN 4 END",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-30d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "DBCC Integrity Checks",
+  "uid": "dbcc-integrity",
+  "version": 1,
+  "weekStart": ""
+}

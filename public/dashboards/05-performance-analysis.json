@@ -1,0 +1,783 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 10,
+      "panels": [],
+      "title": "Query Performance",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "monitoringdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AvgDurationMs"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 100
+                    },
+                    {
+                      "color": "orange",
+                      "value": 500
+                    },
+                    {
+                      "color": "red",
+                      "value": 1000
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "MaxDurationMs"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 200
+                    },
+                    {
+                      "color": "orange",
+                      "value": 1000
+                    },
+                    {
+                      "color": "red",
+                      "value": 5000
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AvgCPUMs"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "QueryPreview"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View Query Details",
+                    "url": "/d/query-store?var-ServerName=${__data.fields.ServerName}&var-DatabaseName=${__data.fields.DatabaseName}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "DatabaseName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Browse Tables",
+                    "url": "/d/table-browser?var-DatabaseName=${__data.fields.DatabaseName}"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 1
+      },
+      "id": 1,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "enablePagination": true,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "AvgDurationMs"
+          }
+        ]
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "monitoringdb"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    DatabaseName,\n    CAST(QueryText AS NVARCHAR(300)) AS QueryPreview,\n    ExecutionCount,\n    CAST(AvgDurationMs AS DECIMAL(10,2)) AS AvgDurationMs,\n    CAST(MaxDurationMs AS DECIMAL(10,2)) AS MaxDurationMs,\n    CAST(AvgCPUMs AS DECIMAL(10,2)) AS AvgCPUMs,\n    CAST(AvgLogicalReads AS DECIMAL(10,0)) AS AvgLogicalReads\nFROM (\n    SELECT\n        DatabaseName,\n        QueryText,\n        AVG(ExecutionCount) AS ExecutionCount,\n        AVG(AvgDurationMs) AS AvgDurationMs,\n        MAX(MaxDurationMs) AS MaxDurationMs,\n        AVG(AvgCPUMs) AS AvgCPUMs,\n        AVG(AvgLogicalReads) AS AvgLogicalReads,\n        ROW_NUMBER() OVER (ORDER BY AVG(AvgDurationMs) DESC) AS rn\n    FROM dbo.QueryMetrics\n    WHERE ServerID IN (SELECT ServerID FROM dbo.Servers WHERE ServerName LIKE CASE WHEN '$server' = 'All' THEN '%' ELSE '$server' END)\n      AND DatabaseName LIKE CASE WHEN '$database' = 'All' THEN '%' ELSE '$database' END\n      AND DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n      AND ('$SearchFilter' = '' OR CAST(QueryText AS NVARCHAR(MAX)) LIKE '%$SearchFilter%' OR DatabaseName LIKE '%$SearchFilter%')\n      AND CollectionTime >= $__timeFrom()\n      AND CollectionTime <= $__timeTo()\n    GROUP BY DatabaseName, QueryText, QueryHash\n) AS ranked\nWHERE rn <= 100\nORDER BY AvgDurationMs DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "Long-Running Queries (Sortable & Filterable)",
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 11
+      },
+      "id": 11,
+      "panels": [],
+      "title": "Stored Procedure Performance",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "monitoringdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ExecutionCount"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 100
+                    },
+                    {
+                      "color": "orange",
+                      "value": 500
+                    },
+                    {
+                      "color": "red",
+                      "value": 1000
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AvgDurationMs"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 100
+                    },
+                    {
+                      "color": "orange",
+                      "value": 500
+                    },
+                    {
+                      "color": "red",
+                      "value": 1000
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AvgCPUMs"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 50
+                    },
+                    {
+                      "color": "orange",
+                      "value": 200
+                    },
+                    {
+                      "color": "red",
+                      "value": 500
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ProcedureName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View Code",
+                    "url": "/d/code-browser?var-DatabaseName=${__data.fields.DatabaseName}&var-ObjectType=Procedure&var-SearchFilter=${__data.fields.ProcedureName}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "DatabaseName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Browse Tables",
+                    "url": "/d/table-browser?var-DatabaseName=${__data.fields.DatabaseName}"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "id": 2,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "enablePagination": true,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "AvgDurationMs"
+          }
+        ]
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "monitoringdb"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    DatabaseName,\n    ProcedureName,\n    ExecutionCount,\n    CAST(AvgCPUMs AS DECIMAL(10,2)) AS AvgCPUMs,\n    CAST(AvgDurationMs AS DECIMAL(10,2)) AS AvgDurationMs,\n    CAST(AvgLogicalReads AS DECIMAL(10,0)) AS AvgLogicalReads\nFROM (\n    SELECT\n        DatabaseName,\n        SchemaName + '.' + ProcedureName AS ProcedureName,\n        AVG(ExecutionCount) AS ExecutionCount,\n        AVG(AvgCPUMs) AS AvgCPUMs,\n        AVG(AvgDurationMs) AS AvgDurationMs,\n        AVG(AvgLogicalReads) AS AvgLogicalReads,\n        ROW_NUMBER() OVER (ORDER BY AVG(AvgDurationMs) DESC) AS rn\n    FROM dbo.ProcedureMetrics\n    WHERE ServerID IN (SELECT ServerID FROM dbo.Servers WHERE ServerName LIKE CASE WHEN '$server' = 'All' THEN '%' ELSE '$server' END)\n      AND DatabaseName LIKE CASE WHEN '$database' = 'All' THEN '%' ELSE '$database' END\n      AND DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n      AND ('$SearchFilter' = '' OR ProcedureName LIKE '%$SearchFilter%' OR DatabaseName LIKE '%$SearchFilter%')\n      AND CollectionTime >= $__timeFrom()\n      AND CollectionTime <= $__timeTo()\n    GROUP BY DatabaseName, SchemaName, ProcedureName\n) AS ranked\nWHERE rn <= 100\nORDER BY AvgDurationMs DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "Stored Procedure Performance (Sortable & Filterable)",
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "id": 12,
+      "panels": [],
+      "title": "Performance Trends",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "monitoringdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Duration (ms)",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 23
+      },
+      "id": 3,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "monitoringdb"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    CollectionTime AS time,\n    DatabaseName + ' - ' + LEFT(CAST(QueryText AS NVARCHAR(50)), 30) AS metric,\n    AvgDurationMs AS value\nFROM (\n    SELECT\n        DatabaseName,\n        QueryText,\n        CollectionTime,\n        AvgDurationMs,\n        ROW_NUMBER() OVER (PARTITION BY CollectionTime ORDER BY AvgDurationMs DESC) AS rn\n    FROM dbo.QueryMetrics\n    WHERE ServerID IN (SELECT ServerID FROM dbo.Servers WHERE ServerName LIKE CASE WHEN '$server' = 'All' THEN '%' ELSE '$server' END)\n      AND DatabaseName LIKE CASE WHEN '$database' = 'All' THEN '%' ELSE '$database' END\n      AND DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n      AND ('$SearchFilter' = '' OR CAST(QueryText AS NVARCHAR(MAX)) LIKE '%$SearchFilter%' OR DatabaseName LIKE '%$SearchFilter%')\n      AND CollectionTime >= $__timeFrom()\n      AND CollectionTime <= $__timeTo()\n) AS ranked\nWHERE rn <= 5\nORDER BY time ASC",
+          "refId": "A"
+        }
+      ],
+      "title": "Query Duration Trend (Top 5)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "monitoringdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Duration (ms)",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 23
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "monitoringdb"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    CollectionTime AS time,\n    DatabaseName + ' - ' + ProcedureName AS metric,\n    AvgDurationMs AS value\nFROM (\n    SELECT\n        DatabaseName,\n        SchemaName + '.' + ProcedureName AS ProcedureName,\n        CollectionTime,\n        AvgDurationMs,\n        ROW_NUMBER() OVER (PARTITION BY CollectionTime ORDER BY AvgDurationMs DESC) AS rn\n    FROM dbo.ProcedureMetrics\n    WHERE ServerID IN (SELECT ServerID FROM dbo.Servers WHERE ServerName LIKE CASE WHEN '$server' = 'All' THEN '%' ELSE '$server' END)\n      AND DatabaseName LIKE CASE WHEN '$database' = 'All' THEN '%' ELSE '$database' END\n      AND DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n      AND ('$SearchFilter' = '' OR ProcedureName LIKE '%$SearchFilter%' OR DatabaseName LIKE '%$SearchFilter%')\n      AND CollectionTime >= $__timeFrom()\n      AND CollectionTime <= $__timeTo()\n) AS ranked\nWHERE rn <= 5\nORDER BY time ASC",
+          "refId": "A"
+        }
+      ],
+      "title": "Procedure Duration Trend (Top 5)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "${DS_MONITORINGDB}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 31
+      },
+      "id": 13,
+      "options": {
+        "content": "# \u26a1 Performance Analysis - Query Tuning Guide\n\n## What This Dashboard Shows\n\nDeep performance analysis of queries, stored procedures, and indexes. Identify slow queries, missing indexes, and optimization opportunities.\n\n### Why Performance Matters\n\n| Impact | Slow Queries | Optimized Queries |\n|--------|--------------|-------------------|\n| **User Experience** | Timeout errors, frustrated users | Instant responses, happy users |\n| **Server Load** | High CPU, memory pressure | Efficient resource usage |\n| **Scalability** | Can't handle growth | Scales to millions of rows |\n| **Cost** | Need bigger servers | Run on smaller hardware |\n\n## \ud83d\udcca Key Metrics Explained\n\n### Procedure Performance\n- **Avg Duration**: How long procedure typically runs (milliseconds)\n- **Max Duration**: Longest execution seen (potential timeout)\n- **Execution Count**: How often procedure is called\n- **Avg CPU**: CPU time consumed per execution\n- **Avg Reads**: Disk/memory reads per execution (I/O cost)\n- **Avg Writes**: Disk writes per execution\n\n### What's Good vs Bad?\n| Metric | Good | Warning | Critical |\n|--------|------|---------|----------|\n| Avg Duration | <100ms | 100-1000ms (1 sec) | >5000ms (5 sec) |\n| Avg CPU | <50ms | 50-500ms | >1000ms (1 sec) |\n| Avg Reads (MB) | <10 MB | 10-100 MB | >500 MB |\n| Execution Count | Varies | N/A | >1000/min (hot path) |\n\n## \ud83c\udfaf Common Scenarios\n\n### \"Why is this API call slow?\"\n1. Note the API method name\n2. Find corresponding stored procedure\n3. Check **Avg Duration** and **Max Duration**\n4. If high, check **Avg Reads** (I/O problem?)\n5. Look for missing index recommendations below\n\n### \"Which queries use the most resources?\"\nSort by:\n- **Avg Duration \u00d7 Execution Count** = Total time spent\n- **Avg CPU \u00d7 Execution Count** = Total CPU consumed\n- **Avg Reads \u00d7 Execution Count** = Total I/O impact\n\nOptimize the top 5 queries for biggest impact.\n\n### \"Find missing indexes\"\nLook at **Missing Index Recommendations** panel:\n- **Improvement %**: Estimated query speedup\n- **Equality Columns**: Add to index (WHERE X = Y)\n- **Inequality Columns**: Add to index (WHERE X > Y)\n- **Included Columns**: Add for covered query (SELECT columns)\n\n\u26a0\ufe0f **Don't blindly add all indexes!** Too many = slow INSERTs/UPDATEs.\n\n### \"Compare before/after optimization\"\n1. Note current **Avg Duration** and **Avg Reads**\n2. Make changes (add index, rewrite query, update stats)\n3. Wait 5-10 minutes for metrics to update\n4. Compare new values to baseline\n5. Calculate improvement %\n\n## \ud83d\udd0d Performance Analysis Workflow\n\n### Step 1: Identify Slow Queries\nFilter by **Avg Duration > 1000ms** (1 second):\n```sql\n-- Example filter in dashboard\nWHERE AvgDurationMs > 1000\nORDER BY AvgDurationMs DESC\n```\n\n### Step 2: Analyze Root Cause\nFor each slow query, check:\n\n**High Reads + Low Duration** = Memory cache hit (good!)\n**High Reads + High Duration** = Disk I/O bottleneck (bad!)\n**Low Reads + High Duration** = CPU-bound (complex calculations)\n**High Writes** = Transaction log pressure\n\n### Step 3: Review Execution Plan\n1. Click procedure name to view code\n2. Copy procedure to SSMS/Azure Data Studio\n3. Run with `SET STATISTICS IO, TIME ON`\n4. Click \"Display Estimated Execution Plan\"\n5. Look for:\n   - **Table Scans** (reads entire table) \u2192 Add index\n   - **Key Lookups** (extra I/O to fetch columns) \u2192 Add covering index\n   - **High cost operators** (>50% of query) \u2192 Optimize that part\n   - **Parallelism** (many threads) \u2192 Consider simpler query\n   - **Missing indexes** (green hint) \u2192 Evaluate recommendation\n\n### Step 4: Implement Fix\nCommon fixes:\n- **Add index**: On WHERE/JOIN columns\n- **Rewrite query**: Avoid functions on indexed columns\n- **Update statistics**: `UPDATE STATISTICS TableName WITH FULLSCAN`\n- **Reduce result set**: Add TOP, pagination\n- **Denormalize**: Duplicate data to avoid JOINs\n\n### Step 5: Verify Improvement\n- Compare metrics before/after\n- Test under load (not just single execution)\n- Monitor for 24 hours (different usage patterns)\n\n## \ud83d\udca1 Optimization Techniques\n\n### 1. Indexing Strategies\n**Covering Index**: Includes all SELECT columns\n```sql\nCREATE INDEX IX_Orders_CustomerDate\nON Orders (CustomerID, OrderDate)\nINCLUDE (TotalAmount, Status);\n-- Now query doesn't need to lookup row (key lookup eliminated)\n```\n\n**Filtered Index**: Only index subset of rows\n```sql\nCREATE INDEX IX_Orders_Pending\nON Orders (OrderDate, CustomerID)\nWHERE Status = 'Pending';\n-- Smaller index, faster queries for active orders\n```\n\n### 2. Query Rewriting\n**Avoid functions on indexed columns**:\n```sql\n-- BAD: Can't use index\nWHERE YEAR(OrderDate) = 2025\n\n-- GOOD: Uses index\nWHERE OrderDate >= '2025-01-01' AND OrderDate < '2026-01-01'\n```\n\n**Use EXISTS instead of COUNT**:\n```sql\n-- BAD: Counts all rows\nIF (SELECT COUNT(*) FROM Orders WHERE CustomerID = @ID) > 0\n\n-- GOOD: Stops at first match\nIF EXISTS (SELECT 1 FROM Orders WHERE CustomerID = @ID)\n```\n\n### 3. Avoid SELECT *\nSpecify only needed columns:\n```sql\n-- BAD: Fetches 50 columns\nSELECT * FROM Orders\n\n-- GOOD: Fetches 3 columns (faster, less memory)\nSELECT OrderID, OrderDate, TotalAmount FROM Orders\n```\n\n### 4. Pagination\nFor large result sets:\n```sql\n-- BAD: Fetches all 1 million rows\nSELECT * FROM Orders ORDER BY OrderDate DESC\n\n-- GOOD: Fetches page of 100 rows\nSELECT * FROM Orders\nORDER BY OrderDate DESC\nOFFSET @PageSize * (@PageNumber - 1) ROWS\nFETCH NEXT @PageSize ROWS ONLY\n```\n\n## \ud83d\udcc8 Monitoring Best Practices\n\n### Daily Checks\n- [ ] Top 10 slowest procedures (Avg Duration)\n- [ ] High execution count (>1000/min) + high duration\n- [ ] Missing index recommendations with >50% improvement\n- [ ] Procedures with Max Duration >30 seconds (timeout risk)\n\n### Weekly Reviews\n- [ ] Compare current week vs last week (trending)\n- [ ] Identify new slow queries (recent code changes)\n- [ ] Review index usage (unused indexes = remove)\n- [ ] Check procedure complexity (LineCount from Code Browser)\n\n### After Deployments\n- [ ] Compare metrics before/after deployment\n- [ ] Watch for new slow queries (regressions)\n- [ ] Validate performance improvements from optimizations\n\n## \u26a0\ufe0f Common Mistakes\n\n### 1. Over-Indexing\n**Problem**: 20 indexes on a table\n**Impact**: INSERTs/UPDATEs become 10x slower\n**Solution**: Remove unused indexes, consolidate similar indexes\n\n### 2. Premature Optimization\n**Problem**: Optimizing query that runs once per day\n**Impact**: Wasted development time\n**Solution**: Focus on high-frequency, high-duration queries first\n\n### 3. Ignoring Plan Cache\n**Problem**: Different execution plan each time (parameter sniffing)\n**Impact**: Sometimes fast, sometimes slow\n**Solution**: Use `OPTION (RECOMPILE)` or `OPTION (OPTIMIZE FOR UNKNOWN)`\n\n### 4. Testing Without Load\n**Problem**: Query fast with 1 user, slow with 100 users\n**Impact**: Production slowness not reproduced in dev\n**Solution**: Load test with realistic concurrency\n\n## \ud83d\udd17 Related Dashboards\n\n- **Detailed Metrics**: See real-time performance over time\n- **Code Browser**: View procedure source code\n- **Table Details**: Check index definitions\n- **Wait Statistics**: Understand what queries wait for\n\n## \ud83c\udd98 When to Escalate to DBA\n\n- Procedure >30 seconds consistently (timeout risk)\n- Missing index recommendation >80% improvement\n- High I/O (>1 GB reads per execution)\n- Plan cache issues (parameter sniffing)\n- Need to partition large table (>100 GB)\n- Locking/blocking issues\n\n---\n*Metrics updated every 5 minutes | Focus on high-frequency queries first | Test optimizations before production*\n",
+        "mode": "markdown"
+      },
+      "pluginVersion": "10.2.0",
+      "title": "\ud83d\udcd6 Developer Guide",
+      "type": "text"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [
+    "sql-monitor",
+    "performance"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "All"
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "monitoringdb"
+        },
+        "definition": "SELECT 'All' AS ServerName UNION SELECT DISTINCT ServerName FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Server",
+        "multi": false,
+        "name": "server",
+        "options": [],
+        "query": "SELECT 'All' AS ServerName UNION SELECT DISTINCT ServerName FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "All"
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "monitoringdb"
+        },
+        "definition": "SELECT 'All' AS DatabaseName UNION SELECT DISTINCT DatabaseName FROM dbo.QueryMetrics WHERE ServerID IN (SELECT ServerID FROM dbo.Servers WHERE ServerName LIKE CASE WHEN '$server' = 'All' THEN '%' ELSE '$server' END) AND DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb') UNION SELECT DISTINCT DatabaseName FROM dbo.ProcedureMetrics WHERE ServerID IN (SELECT ServerID FROM dbo.Servers WHERE ServerName LIKE CASE WHEN '$server' = 'All' THEN '%' ELSE '$server' END) AND DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb') ORDER BY DatabaseName",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Database",
+        "multi": false,
+        "name": "database",
+        "options": [],
+        "query": "SELECT 'All' AS DatabaseName UNION SELECT DISTINCT DatabaseName FROM dbo.QueryMetrics WHERE ServerID IN (SELECT ServerID FROM dbo.Servers WHERE ServerName LIKE CASE WHEN '$server' = 'All' THEN '%' ELSE '$server' END) AND DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb') UNION SELECT DISTINCT DatabaseName FROM dbo.ProcedureMetrics WHERE ServerID IN (SELECT ServerID FROM dbo.Servers WHERE ServerName LIKE CASE WHEN '$server' = 'All' THEN '%' ELSE '$server' END) AND DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb') ORDER BY DatabaseName",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "hide": 0,
+        "label": "Search Objects",
+        "name": "SearchFilter",
+        "options": [
+          {
+            "selected": true,
+            "text": "",
+            "value": ""
+          }
+        ],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Performance Analysis",
+  "uid": "performance-analysis",
+  "version": 1,
+  "weekStart": ""
+}

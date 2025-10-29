@@ -1,0 +1,310 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "MonitoringDB"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "RowCount"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 1000000
+                    },
+                    {
+                      "color": "red",
+                      "value": 10000000
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "TotalSizeMB"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "decmbytes"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 1000
+                    },
+                    {
+                      "color": "orange",
+                      "value": 5000
+                    },
+                    {
+                      "color": "red",
+                      "value": 10000
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 20,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "TotalSizeMB"
+          }
+        ]
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "MonitoringDB"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    s.ServerName,\n    tm.DatabaseName,\n    tm.SchemaName,\n    tm.TableName,\n    tm.[RowCount],\n    tm.TotalSizeMB,\n    tm.DataSizeMB,\n    tm.IndexSizeMB,\n    tm.ColumnCount,\n    tm.IndexCount,\n    CASE WHEN tm.IsPartitioned = 1 THEN 'Yes' ELSE 'No' END AS IsPartitioned,\n    tm.CompressionType,\n    tm.ModifiedDate\nFROM dbo.TableMetadata tm\nINNER JOIN dbo.Servers s ON tm.ServerID = s.ServerID\nWHERE tm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb', 'ReportServer', 'ReportServerTempDB')\n  AND 1=1\n  AND (${DatabaseName:sqlstring} = 'All' OR tm.DatabaseName = ${DatabaseName:sqlstring})\n  AND (${SchemaName:sqlstring} = 'All' OR tm.SchemaName = ${SchemaName:sqlstring})\n  AND (${TableName:sqlstring} = '' OR tm.TableName LIKE '%' + ${TableName:sqlstring} + '%')\nORDER BY tm.TotalSizeMB DESC;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Table Browser",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "${DS_MONITORINGDB}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 20
+      },
+      "id": 2,
+      "options": {
+        "content": "# \ud83d\udccb Table Browser - Developer Guide\n\n## What This Dashboard Shows\n\nBrowse all tables across all databases on your monitored SQL Servers. View sizes, row counts, and schema details without writing SQL queries.\n\n### Table Metrics Explained\n\n| Column | What It Means | Why It Matters |\n|--------|---------------|----------------|\n| **TableName** | Name of the table | Identifying specific tables |\n| **RowCount** | Number of rows in table | Performance and data volume |\n| **DataSizeMB** | Space used by actual data | Storage capacity planning |\n| **IndexSizeMB** | Space used by indexes | Index overhead analysis |\n| **TotalSizeMB** | Data + Indexes combined | Total storage consumption |\n| **LastUpdated** | When stats were collected | Data freshness indicator |\n\n## \ud83d\udd0d How to Use\n\n### Filter by Database\n1. Select database from dropdown (top)\n2. Shows all tables in that database\n3. System databases (master, model, msdb, tempdb) are excluded\n\n### Find Specific Tables\n1. Use the **Table Name** filter box\n2. Enter partial name (e.g., \"Customer\")\n3. Matches any table containing that text\n4. Case-insensitive search\n\n### Sort by Size\n- Click any column header to sort\n- Default: Sorted by TotalSizeMB descending (largest first)\n- Useful for finding storage hogs\n\n## \ud83c\udfaf Common Use Cases\n\n### \"How big is my table?\"\n- Type table name in filter\n- Check **TotalSizeMB** column\n- Row count shows record volume\n\n### \"Which tables are huge?\"\n- Leave filters at default\n- Tables sorted by size automatically\n- Top 10 = your largest tables\n\n### \"Find all customer-related tables\"\n- Type \"customer\" in Table Name filter\n- Shows: Customers, CustomerOrders, CustomerAddresses, etc.\n- Useful for understanding data relationships\n\n### \"How much index overhead?\"\n- Compare **DataSizeMB** vs **IndexSizeMB**\n- IndexSizeMB > DataSizeMB = potential over-indexing\n- Indexes speed up reads but slow down writes\n\n## \ud83d\udca1 Understanding Table Sizes\n\n### What's Normal?\n- **Small tables**: <100 MB, <1 million rows (lookup tables, configs)\n- **Medium tables**: 100MB-10GB, 1-100 million rows (transactional data)\n- **Large tables**: >10GB, >100 million rows (historical data, logs)\n\n### When to Worry\n- Table growing >10% per day unexpectedly\n- Index size >5x data size (too many indexes)\n- Row count doesn't match business expectations\n- Tables never updated (stale statistics)\n\n## \ud83d\udd27 Developer Actions\n\n### If Table is Too Large\n1. **Archive old data**: Move historical records to archive database\n2. **Partition table**: Split by date range (requires DBA)\n3. **Check for logs**: Application logs should be truncated/rotated\n4. **Delete unused data**: Identify obsolete records\n\n### If Index Size is High\n1. **Review indexes**: Talk to DBA about removing unused indexes\n2. **Check for duplicates**: Same column(s) indexed multiple times\n3. **Consider filtered indexes**: Index subset of rows only\n4. **Measure impact**: Compare query performance vs write overhead\n\n## \ud83d\udd17 Related Dashboards\n\n- **Table Details** - Click table name to see detailed schema, indexes, and constraints\n- **Code Browser** - View stored procedures that query these tables\n- **Performance Analysis** - See which queries are slowest\n\n## \ud83d\udcca Pro Tips\n\n1. **Bookmark large tables**: Monitor growth over time\n2. **Compare dev vs prod**: Ensure data volumes match\n3. **Check after deployments**: Verify migrations completed\n4. **Identify temp table bloat**: Look for tables with \"temp\" or \"#\" in name\n5. **Share links**: URL includes filters (copy/paste to team)\n\n## \u26a0\ufe0f What This Dashboard Doesn't Show\n\n- **Real-time data**: Stats updated every 5 minutes (not live)\n- **Table relationships**: Foreign keys (see Table Details dashboard)\n- **Query performance**: How fast queries run (see Performance Analysis)\n- **Data inside tables**: Actual row contents (use SQL query tool)\n\n## \ud83c\udd98 When to Contact DBA\n\n- Tables growing faster than expected\n- Production vs development size mismatch >50%\n- Need to partition or archive large tables\n- Index recommendations needed\n\n---\n*Data updated every 5 minutes | System databases excluded | Click table name for details*\n",
+        "mode": "markdown"
+      },
+      "pluginVersion": "10.2.0",
+      "title": "\ud83d\udcd6 Developer Guide",
+      "type": "text"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [
+    "SQL Monitor",
+    "Schema Browser",
+    "Tables"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "MonitoringDB",
+          "value": "MonitoringDB"
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "MonitoringDB"
+        },
+        "definition": "SELECT DISTINCT DatabaseName FROM dbo.TableMetadata WHERE DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb', 'ReportServer', 'ReportServerTempDB') ORDER BY DatabaseName",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Database",
+        "multi": false,
+        "name": "DatabaseName",
+        "options": [],
+        "query": "SELECT DISTINCT DatabaseName FROM dbo.TableMetadata WHERE DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb', 'ReportServer', 'ReportServerTempDB') ORDER BY DatabaseName",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "All"
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "MonitoringDB"
+        },
+        "definition": "SELECT 'All' UNION SELECT DISTINCT SchemaName FROM dbo.TableMetadata WHERE DatabaseName = ${DatabaseName:sqlstring} ORDER BY 1",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Schema",
+        "multi": false,
+        "name": "SchemaName",
+        "options": [],
+        "query": "SELECT 'All' UNION SELECT DISTINCT SchemaName FROM dbo.TableMetadata WHERE DatabaseName = ${DatabaseName:sqlstring} ORDER BY 1",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "hide": 0,
+        "label": "Table Name (search)",
+        "name": "TableName",
+        "options": [
+          {
+            "selected": true,
+            "text": "",
+            "value": ""
+          }
+        ],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "SQL Monitor - Table Browser",
+  "uid": "sql-monitor-table-browser",
+  "version": 0,
+  "weekStart": ""
+}

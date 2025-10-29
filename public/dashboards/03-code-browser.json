@@ -1,0 +1,543 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "MonitoringDB"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "LineCount"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 100
+                    },
+                    {
+                      "color": "orange",
+                      "value": 300
+                    },
+                    {
+                      "color": "red",
+                      "value": 500
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ObjectName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Select Object (View Dependencies & Code)",
+                    "url": "/d/${__dashboard.uid}?var-DatabaseName=${__data.fields.DatabaseName}&var-ObjectType=${__data.fields.ObjectType}&var-ObjectName=${__data.fields.ObjectName}&var-SchemaName=${__data.fields.SchemaName}&var-SelectedObject=${__data.fields.ObjectName}&var-SelectedSchema=${__data.fields.SchemaName}"
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ViewCode"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View Code",
+                    "url": "/d/${__dashboard.uid}/code-popup?var-DatabaseName=${__data.fields.DatabaseName}&var-SchemaName=${__data.fields.SchemaName}&var-ObjectName=${__data.fields.ObjectName}",
+                    "targetBlank": true
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "blue",
+                      "value": null
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "LineCount"
+          }
+        ]
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "MonitoringDB"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    s.ServerName,\n    co.DatabaseName,\n    co.SchemaName,\n    co.ObjectName,\n    co.ObjectType,\n    co.LineCount,\n    co.CharacterCount,\n    co.DependencyCount,\n    'View Code' AS ViewCode,\n    co.CreatedDate,\n    co.ModifiedDate\nFROM dbo.CodeObjectMetadata co\nINNER JOIN dbo.Servers s ON co.ServerID = s.ServerID\nWHERE co.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb', 'ReportServer', 'ReportServerTempDB')\n  AND 1=1\n  AND (${DatabaseName:sqlstring} = 'All' OR co.DatabaseName = ${DatabaseName:sqlstring})\n  AND (${ObjectType:sqlstring} = 'All' OR co.ObjectType = ${ObjectType:sqlstring})\n  AND (${ObjectName:sqlstring} = '' OR co.ObjectName LIKE '%' + ${ObjectName:sqlstring} + '%')\nORDER BY co.LineCount DESC;",
+          "refId": "A"
+        }
+      ],
+      "title": "Code Objects (Click ObjectName to View Dependencies, Click 'View Code' for Source)",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "MonitoringDB"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "To"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Jump to Object",
+                    "url": "/d/${__dashboard.uid}?var-DatabaseName=${DatabaseName}&var-ObjectName=${__data.fields.To:percentencode}"
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "id": 2,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "MonitoringDB"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "-- Dependencies for selected object (what does this object depend on?)\nSELECT\n    dm.ReferencingSchemaName + '.' + dm.ReferencingObjectName AS [From],\n    dm.ReferencingObjectType AS [From Type],\n    dm.ReferencedSchemaName + '.' + dm.ReferencedObjectName AS [To],\n    dm.ReferencedObjectType AS [To Type],\n    CASE WHEN dm.IsSchemaDependent = 1 THEN 'Yes' ELSE 'No' END AS IsSchemaDependent,\n    CASE WHEN dm.IsAmbiguous = 1 THEN 'Yes' ELSE 'No' END AS IsAmbiguous\nFROM dbo.DependencyMetadata dm\nWHERE dm.DatabaseName = ${DatabaseName:sqlstring}\n  AND (\n    -- If object selected, show its dependencies\n    (${SelectedObject:sqlstring} != '' AND dm.ReferencingSchemaName = ${SelectedSchema:sqlstring} AND dm.ReferencingObjectName = ${SelectedObject:sqlstring})\n    OR\n    -- Otherwise, show all matching ObjectName search\n    (${SelectedObject:sqlstring} = '' AND (${ObjectName:sqlstring} = '' OR dm.ReferencingObjectName LIKE '%' + ${ObjectName:sqlstring} + '%'))\n  )\nORDER BY dm.ReferencingObjectName, dm.ReferencedObjectName;",
+          "refId": "A"
+        }
+      ],
+      "title": "Dependencies for: ${SelectedSchema}.${SelectedObject} (Click 'To' object to jump)",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "MonitoringDB"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "SourceCode"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "mode": "basic"
+                }
+              },
+              {
+                "id": "custom.width",
+                "value": 800
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 15,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "id": 3,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "MonitoringDB"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "-- Show source code for selected object\nSELECT\n    oc.ServerID,\n    oc.DatabaseName,\n    oc.SchemaName,\n    oc.ObjectName,\n    oc.ObjectType,\n    oc.SourceCode,\n    oc.LineCount,\n    oc.CharacterCount,\n    oc.CachedDate\nFROM dbo.ObjectCode oc\nWHERE oc.DatabaseName = ${DatabaseName:sqlstring}\n  AND oc.SchemaName = ${SelectedSchema:sqlstring}\n  AND oc.ObjectName = ${SelectedObject:sqlstring}\nORDER BY oc.CachedDate DESC;",
+          "refId": "A"
+        }
+      ],
+      "title": "Source Code for: ${SelectedSchema}.${SelectedObject}",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "${DS_MONITORINGDB}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 37
+      },
+      "id": 4,
+      "options": {
+        "content": "# \ud83d\udcbb Code Browser - Stored Procedure & Object Guide\n\n## What This Dashboard Shows\n\nBrowse all code objects (stored procedures, functions, views, triggers) across your SQL Server databases. View source code, analyze dependencies, and understand how database objects relate to each other.\n\n### Code Object Types\n\n| Type | What It Is | Common Use |\n|------|------------|------------|\n| **Stored Procedure** | Reusable SQL script | Business logic, CRUD operations |\n| **Function** | Returns value(s) | Calculations, data transformations |\n| **View** | Virtual table | Simplified complex queries |\n| **Trigger** | Auto-runs on event | Audit trails, cascading updates |\n\n## \ud83c\udfaf How to Use\n\n### Browse All Code Objects\n1. Select database from **Database** dropdown\n2. Filter by **Object Type** (All, Procedure, Function, View, Trigger)\n3. Search by name in **Object Name** textbox\n4. Sorted by **LineCount** (largest objects first)\n\n### View Dependencies\n1. **Click object name** in the top table\n2. Dependencies panel updates below\n3. Shows what this object calls (dependencies)\n4. Click **To** object to jump to it (navigation)\n\n### View Source Code\n1. Click **View Code** link in top table\n2. Opens popup with full source code\n3. Shows line count, character count, last cached date\n\n## \ud83d\udcca Panel Breakdown\n\n### Panel 1: Code Objects List\n**Columns Explained**:\n- **ServerName**: Which SQL Server instance\n- **DatabaseName**: Which database contains this object\n- **SchemaName**: Schema owner (usually \"dbo\")\n- **ObjectName**: Name of procedure/function/view/trigger\n- **ObjectType**: P, FN, V, TR, etc.\n- **LineCount**: How many lines of code (complexity indicator)\n- **CharacterCount**: Total code size\n- **DependencyCount**: How many other objects this calls\n- **ViewCode**: Click to see source in popup\n\n**Color Coding**:\n- **Green** (<100 lines): Simple, easy to understand\n- **Yellow** (100-300 lines): Moderate complexity\n- **Orange** (300-500 lines): Complex, may need refactoring\n- **Red** (>500 lines): Very complex, hard to maintain\n\n### Panel 2: Dependencies\nShows what the selected object depends on:\n- **From**: Selected object\n- **From Type**: Procedure, Function, etc.\n- **To**: Object being referenced\n- **To Type**: Table, View, Procedure, etc.\n- **IsSchemaDependent**: Uses explicit schema name (dbo.Table)\n- **IsAmbiguous**: Could reference multiple objects\n\n**Click \"To\" object** to jump to that object's details.\n\n### Panel 3: Source Code\nFull code for selected object:\n- **SchemaName.ObjectName**: Fully qualified name\n- **ObjectType**: P (procedure), FN (function), V (view), TR (trigger)\n- **SourceCode**: Complete code definition\n- **LineCount / CharacterCount**: Size metrics\n- **CachedDate**: When code was captured from server\n\n## \ud83d\udd0d Common Scenarios\n\n### \"Find all procedures that touch the Orders table\"\n1. Set **Object Type** = Procedure\n2. Set **Object Name** filter = \"\" (empty)\n3. Click through procedures and check dependencies\n4. Or use Code Search (if available) to search for \"Orders\"\n\n### \"Understand what this procedure does\"\n1. Find procedure in top list\n2. Click object name to see dependencies (what it calls)\n3. Click **View Code** to see full source\n4. Check dependencies to understand data flow\n\n### \"Find the largest/most complex code\"\n1. Leave filters at default (sorts by LineCount DESC)\n2. Top 10 objects are your largest/most complex\n3. LineCount >500 = good refactoring candidate\n4. High DependencyCount = central/critical code\n\n### \"Trace a call chain\"\nExample: API \u2192 Procedure A \u2192 Procedure B \u2192 View \u2192 Tables\n1. Start with API procedure (e.g., GetCustomerOrders)\n2. Click to see dependencies (calls Procedure B)\n3. Click Procedure B in dependencies\n4. See what Procedure B calls (View)\n5. Click View to see underlying tables\n\n### \"Find unused objects\"\nObjects with:\n- **DependencyCount = 0** (doesn't call anything)\n- **Not referenced by other objects** (nothing calls it)\nMay be candidates for removal (verify with team first!)\n\n## \ud83d\udca1 Understanding Dependencies\n\n### Direct vs Indirect Dependencies\n- **Direct**: Procedure A calls Table B directly\n- **Indirect**: Procedure A \u2192 Procedure B \u2192 Table C (A indirectly depends on C)\n\n### Schema-Bound Objects\n**IsSchemaDependent = Yes**:\n- Uses explicit schema: `dbo.Customers` (good!)\n- Prevents accidental table drops\n- Faster name resolution\n\n**IsSchemaDependent = No**:\n- Uses unqualified name: `Customers` (bad practice)\n- SQL Server searches schemas until found\n- Can reference wrong object if multiple schemas\n\n### Circular Dependencies\nWatch for:\n- Procedure A calls Procedure B\n- Procedure B calls Procedure A\n- Creates infinite loop potential\n- Usually indicates design flaw\n\n## \ud83d\udd27 Developer Actions\n\n### Before Changing a Table\n1. Search for table name in Code Browser\n2. Check dependencies to see what breaks\n3. Update all dependent procedures/views\n4. Test thoroughly before deployment\n\n### Before Deleting a Procedure\n1. Select the procedure\n2. Check if anything calls it (reverse dependencies)\n3. If DependencyCount > 0, don't delete (something needs it)\n4. Search entire codebase for references\n\n### Code Quality Checks\n- [ ] Procedures >500 lines (refactor into smaller pieces)\n- [ ] High dependency count (too much coupling?)\n- [ ] No schema binding (add \"dbo.\" prefix)\n- [ ] Circular dependencies (redesign)\n- [ ] Unused objects (safe to remove?)\n\n## \ud83d\udcc8 Metrics to Monitor\n\n### LineCount Trends\n- Procedures growing over time = scope creep\n- New procedures should be <200 lines ideally\n- Break large procedures into reusable functions\n\n### Dependency Complexity\n- Central objects (many things call them) = high risk changes\n- Leaf objects (call many, called by few) = good candidates for optimization\n- Islands (no dependencies) = potential dead code\n\n## \u26a0\ufe0f Common Issues\n\n### \"Code is out of date\"\n- Source code cached every 5 minutes\n- Click refresh to get latest\n- Check **CachedDate** to see when captured\n\n### \"Can't find my procedure\"\n- Check **Database** dropdown (right database?)\n- Try partial name in **Object Name** filter\n- Verify object exists (may have been dropped)\n\n### \"Dependencies are empty\"\n- Some objects may have no dependencies (standalone)\n- Complex dynamic SQL may not show dependencies\n- Linked server calls may not be tracked\n\n### \"Too many objects to browse\"\n- Use filters to narrow down (Object Type, Name search)\n- Sort by LineCount to focus on largest\n- Consider creating custom views for your team's objects\n\n## \ud83d\udd17 Related Dashboards\n\n- **Table Browser**: See what tables exist\n- **Table Details**: View table schema and indexes\n- **Performance Analysis**: See which procedures are slowest\n- **Detailed Metrics**: View procedure execution stats over time\n\n## \ud83d\udcda Best Practices\n\n1. **Keep procedures small**: <200 lines ideal, <500 max\n2. **Use schema binding**: Always prefix objects with schema (dbo.Table)\n3. **Document dependencies**: Add comments explaining what's called\n4. **Refactor regularly**: Break large procedures into reusable functions\n5. **Review unused code**: Delete objects nobody calls\n\n---\n*Click object name to see dependencies | Click 'View Code' for source | Click 'To' object to navigate*\n",
+        "mode": "markdown"
+      },
+      "pluginVersion": "10.2.0",
+      "title": "\ud83d\udcd6 Developer Guide",
+      "type": "text"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [
+    "SQL Monitor",
+    "Schema Browser",
+    "Code Objects"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "MonitoringDB",
+          "value": "MonitoringDB"
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "MonitoringDB"
+        },
+        "definition": "SELECT DISTINCT DatabaseName FROM dbo.CodeObjectMetadata WHERE DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb', 'ReportServer', 'ReportServerTempDB') ORDER BY DatabaseName",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Database",
+        "multi": false,
+        "name": "DatabaseName",
+        "options": [],
+        "query": "SELECT DISTINCT DatabaseName FROM dbo.CodeObjectMetadata WHERE DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb', 'ReportServer', 'ReportServerTempDB') ORDER BY DatabaseName",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "All"
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "MonitoringDB"
+        },
+        "definition": "SELECT 'All' UNION SELECT DISTINCT ObjectType FROM dbo.CodeObjectMetadata WHERE DatabaseName = ${DatabaseName:sqlstring} ORDER BY 1",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Object Type",
+        "multi": false,
+        "name": "ObjectType",
+        "options": [],
+        "query": "SELECT 'All' UNION SELECT DISTINCT ObjectType FROM dbo.CodeObjectMetadata WHERE DatabaseName = ${DatabaseName:sqlstring} ORDER BY 1",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "hide": 0,
+        "label": "Object Name (search)",
+        "name": "ObjectName",
+        "options": [
+          {
+            "selected": true,
+            "text": "",
+            "value": ""
+          }
+        ],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "hide": 0,
+        "label": "Selected Schema",
+        "name": "SelectedSchema",
+        "options": [
+          {
+            "selected": true,
+            "text": "",
+            "value": ""
+          }
+        ],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "hide": 0,
+        "label": "Selected Object",
+        "name": "SelectedObject",
+        "options": [
+          {
+            "selected": true,
+            "text": "",
+            "value": ""
+          }
+        ],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "hide": 2,
+        "label": "Schema Name",
+        "name": "SchemaName",
+        "options": [
+          {
+            "selected": true,
+            "text": "",
+            "value": ""
+          }
+        ],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "SQL Monitor - Code Browser",
+  "uid": "sql-monitor-code-browser",
+  "version": 0,
+  "weekStart": ""
+}

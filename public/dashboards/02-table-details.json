@@ -1,0 +1,597 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "MonitoringDB"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "DatabaseName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Browse Tables",
+                    "url": "/d/sql-monitor-table-browser?var-DatabaseName=${__data.fields.DatabaseName}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "TableName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View Table",
+                    "url": "/d/sql-monitor-table-details?var-DatabaseName=${__data.fields.DatabaseName}&var-TableName=${__data.fields.TableName}"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "MonitoringDB"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    cm.ColumnName,\n    cm.DataType,\n    cm.MaxLength,\n    cm.Precision,\n    cm.Scale,\n    CASE WHEN cm.IsNullable = 1 THEN 'Yes' ELSE 'No' END AS IsNullable,\n    CASE WHEN cm.IsPrimaryKey = 1 THEN 'Yes' ELSE 'No' END AS IsPrimaryKey,\n    CASE WHEN cm.IsForeignKey = 1 THEN 'Yes' ELSE 'No' END AS IsForeignKey,\n    CASE WHEN cm.IsIdentity = 1 THEN 'Yes' ELSE 'No' END AS IsIdentity,\n    cm.DefaultConstraint\nFROM dbo.ColumnMetadata cm\nINNER JOIN dbo.TableMetadata tm ON cm.DatabaseName = tm.DatabaseName\n  AND cm.SchemaName = tm.SchemaName\n  AND cm.TableName = tm.TableName\nINNER JOIN dbo.SchemaMetadata sm ON tm.DatabaseName = sm.DatabaseName\n  AND tm.SchemaName = sm.SchemaName\nINNER JOIN dbo.Servers s ON sm.ServerID = s.ServerID\nWHERE cm.DatabaseName = ${DatabaseName:sqlstring}\n  AND cm.SchemaName = ${SchemaName:sqlstring}\n  AND cm.TableName = ${TableName:sqlstring}\n  AND cm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n  AND s.IsActive = 1\n  AND ('$__all' = '${ServerName}' OR s.ServerName = '${ServerName}')\nORDER BY cm.OrdinalPosition;",
+          "refId": "A"
+        }
+      ],
+      "title": "Columns",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "MonitoringDB"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "FragmentationPercent"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 10
+                    },
+                    {
+                      "color": "orange",
+                      "value": 30
+                    },
+                    {
+                      "color": "red",
+                      "value": 50
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "DatabaseName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Browse Tables",
+                    "url": "/d/sql-monitor-table-browser?var-DatabaseName=${__data.fields.DatabaseName}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "TableName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View Table",
+                    "url": "/d/sql-monitor-table-details?var-DatabaseName=${__data.fields.DatabaseName}&var-TableName=${__data.fields.TableName}"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "MonitoringDB"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    im.IndexName,\n    im.IndexType,\n    im.KeyColumns,\n    im.IncludedColumns,\n    im.FragmentationPercent,\n    im.[FillFactor],\n    CASE WHEN im.IsUnique = 1 THEN 'Yes' ELSE 'No' END AS IsUnique,\n    CASE WHEN im.IsPrimaryKey = 1 THEN 'Yes' ELSE 'No' END AS IsPrimaryKey,\n    CASE WHEN im.IsDisabled = 1 THEN 'Yes' ELSE 'No' END AS IsDisabled\nFROM dbo.IndexMetadata im\nINNER JOIN dbo.TableMetadata tm ON im.DatabaseName = tm.DatabaseName\n  AND im.SchemaName = tm.SchemaName\n  AND im.TableName = tm.TableName\nINNER JOIN dbo.SchemaMetadata sm ON tm.DatabaseName = sm.DatabaseName\n  AND tm.SchemaName = sm.SchemaName\nINNER JOIN dbo.Servers s ON sm.ServerID = s.ServerID\nWHERE im.DatabaseName = ${DatabaseName:sqlstring}\n  AND im.SchemaName = ${SchemaName:sqlstring}\n  AND im.TableName = ${TableName:sqlstring}\n  AND im.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n  AND s.IsActive = 1\n  AND ('$__all' = '${ServerName}' OR s.ServerName = '${ServerName}')\nORDER BY im.IndexName;",
+          "refId": "A"
+        }
+      ],
+      "title": "Indexes",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "MonitoringDB"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "DatabaseName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Browse Tables",
+                    "url": "/d/sql-monitor-table-browser?var-DatabaseName=${__data.fields.DatabaseName}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "TableName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View Table",
+                    "url": "/d/sql-monitor-table-details?var-DatabaseName=${__data.fields.DatabaseName}&var-TableName=${__data.fields.TableName}"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 10
+      },
+      "id": 3,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "MonitoringDB"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    fk.ConstraintName,\n    fk.ReferencedSchema,\n    fk.ReferencedTable,\n    fk.ColumnNames,\n    fk.ReferencedColumns,\n    fk.DeleteAction,\n    fk.UpdateAction,\n    CASE WHEN fk.IsDisabled = 1 THEN 'Yes' ELSE 'No' END AS IsDisabled\nFROM dbo.ForeignKeyMetadata fk\nINNER JOIN dbo.TableMetadata tm ON fk.DatabaseName = tm.DatabaseName\n  AND fk.SchemaName = tm.SchemaName\n  AND fk.TableName = tm.TableName\nINNER JOIN dbo.SchemaMetadata sm ON tm.DatabaseName = sm.DatabaseName\n  AND tm.SchemaName = sm.SchemaName\nINNER JOIN dbo.Servers s ON sm.ServerID = s.ServerID\nWHERE fk.DatabaseName = ${DatabaseName:sqlstring}\n  AND fk.SchemaName = ${SchemaName:sqlstring}\n  AND fk.TableName = ${TableName:sqlstring}\n  AND fk.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n  AND s.IsActive = 1\n  AND ('$__all' = '${ServerName}' OR s.ServerName = '${ServerName}')\nORDER BY fk.ConstraintName;",
+          "refId": "A"
+        }
+      ],
+      "title": "Foreign Keys",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "MonitoringDB"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "DatabaseName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Browse Tables",
+                    "url": "/d/sql-monitor-table-browser?var-DatabaseName=${__data.fields.DatabaseName}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "TableName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View Table",
+                    "url": "/d/sql-monitor-table-details?var-DatabaseName=${__data.fields.DatabaseName}&var-TableName=${__data.fields.TableName}"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 10
+      },
+      "id": 4,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "MonitoringDB"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    pm.PartitionNumber,\n    pm.PartitionScheme,\n    pm.PartitionFunction,\n    pm.BoundaryValue,\n    pm.[RowCount],\n    pm.DataCompressionType\nFROM dbo.PartitionMetadata pm\nINNER JOIN dbo.TableMetadata tm ON pm.DatabaseName = tm.DatabaseName\n  AND pm.SchemaName = tm.SchemaName\n  AND pm.TableName = tm.TableName\nINNER JOIN dbo.SchemaMetadata sm ON tm.DatabaseName = sm.DatabaseName\n  AND tm.SchemaName = sm.SchemaName\nINNER JOIN dbo.Servers s ON sm.ServerID = s.ServerID\nWHERE pm.DatabaseName = ${DatabaseName:sqlstring}\n  AND pm.SchemaName = ${SchemaName:sqlstring}\n  AND pm.TableName = ${TableName:sqlstring}\n  AND pm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n  AND s.IsActive = 1\n  AND ('$__all' = '${ServerName}' OR s.ServerName = '${ServerName}')\nORDER BY pm.PartitionNumber;",
+          "refId": "A"
+        }
+      ],
+      "title": "Partitions",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "${DS_MONITORINGDB}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "id": 5,
+      "options": {
+        "content": "# \ud83d\udd2c Table Details - Deep Dive Guide\n\n## What This Dashboard Shows\n\nDetailed schema information for a specific table, including columns, data types, indexes, constraints, and relationships.\n\n### Why This Matters\n\nUnderstanding table structure helps you:\n- Write correct SQL queries (proper data types, null handling)\n- Optimize performance (use the right indexes)\n- Avoid data errors (respect constraints, foreign keys)\n- Plan schema changes (understand dependencies)\n\n## \ud83d\udcca Panel Breakdown\n\n### 1. Table Summary\n- **Row Count**: Total records (performance baseline)\n- **Total Size**: Data + indexes (storage consumption)\n- **Last Updated**: When stats were refreshed\n- **Created Date**: When table was initially created\n\n### 2. Column Details\n| Column Info | What It Tells You |\n|-------------|-------------------|\n| **Column Name** | Field name in table |\n| **Data Type** | varchar(50), int, datetime2, etc. |\n| **Max Length** | For strings, max characters allowed |\n| **Is Nullable** | Can this field be NULL? |\n| **Default Value** | Auto-populated value if not specified |\n| **Is Identity** | Auto-incrementing ID column |\n\n#### Developer Tips for Columns\n- **varchar vs nvarchar**: Use nvarchar for international characters (Unicode)\n- **datetime vs datetime2**: Use datetime2 (more precise, better range)\n- **NULL handling**: Always check `Is Nullable` before writing queries\n- **Identity columns**: Don't insert values manually (auto-generated)\n\n### 3. Indexes\n| Index Info | Why It Matters |\n|------------|----------------|\n| **Index Name** | Identifier for index |\n| **Type** | CLUSTERED (physical order) or NONCLUSTERED (pointer) |\n| **Columns** | Which columns are indexed |\n| **Is Unique** | Prevents duplicate values |\n| **Filter** | Partial index (subset of rows) |\n\n#### Understanding Indexes\n- **Clustered index**: Only 1 per table, defines physical row order (usually on ID)\n- **Nonclustered indexes**: Multiple allowed, speeds up queries on those columns\n- **Covered queries**: Query uses only indexed columns (super fast!)\n- **Index overhead**: More indexes = slower INSERTs/UPDATEs\n\n### 4. Constraints\n- **Primary Key (PK)**: Unique identifier, cannot be NULL\n- **Foreign Key (FK)**: Links to another table (relationships)\n- **Unique Constraint**: No duplicate values allowed\n- **Check Constraint**: Value must meet condition (e.g., Age > 0)\n- **Default Constraint**: Auto-fill value if not provided\n\n### 5. Foreign Key Relationships\nShows how this table connects to other tables:\n- **Parent \u2192 Child**: This table references other tables\n- **Child \u2192 Parent**: Other tables reference this table\n- **Cascade rules**: What happens on UPDATE/DELETE\n\n## \ud83c\udfaf Common Use Cases\n\n### \"What data type is this column?\"\n1. Select table from dropdown\n2. Find column in Column Details panel\n3. Check **Data Type** column\n4. Note **Max Length** and **Is Nullable**\n\n### \"Why is my INSERT failing?\"\nCheck constraints:\n1. **Primary Key**: Are you providing unique value?\n2. **Foreign Key**: Does referenced record exist?\n3. **Check Constraint**: Does value meet condition?\n4. **NOT NULL**: Are you providing required fields?\n\n### \"Which columns should I index?\"\nLook at existing indexes:\n1. Check what's already indexed\n2. Avoid duplicate indexes (same columns, different order)\n3. Consider composite indexes (multiple columns)\n4. Measure query performance before/after\n\n### \"What happens if I delete this record?\"\nCheck **Foreign Key Relationships**:\n- **CASCADE DELETE**: Child records deleted automatically\n- **NO ACTION**: Delete fails if child records exist\n- **SET NULL**: Child foreign key set to NULL\n- **SET DEFAULT**: Child foreign key set to default value\n\n## \ud83d\udca1 Real-World Examples\n\n### Example 1: E-Commerce Orders Table\n```\nColumns:\n- OrderID (int, PK, Identity) - Auto-incrementing ID\n- CustomerID (int, FK \u2192 Customers.CustomerID) - Links to customer\n- OrderDate (datetime2, NOT NULL) - When order placed\n- TotalAmount (decimal(10,2), NOT NULL) - Order total\n- Status (varchar(20), Default: 'Pending') - Order status\n\nIndexes:\n- IX_OrderDate (OrderDate DESC) - Find recent orders fast\n- IX_CustomerID (CustomerID, OrderDate) - Customer order history\n- IX_Status_Date (Status, OrderDate) WHERE Status = 'Pending' - Active orders only\n\nConstraints:\n- FK_Customer: CASCADE NO ACTION (can't delete customer with orders)\n- CK_Amount: TotalAmount > 0 (no negative orders)\n```\n\n### Example 2: Application Logging Table\n```\nProblem: 500 GB of log data, queries very slow\nSolution: Partition by date, archive old logs\nCheck: Is there a clustered index on LogDate?\n```\n\n## \ud83d\udd27 Developer Actions\n\n### Before Writing Queries\n- [ ] Check column names (case-sensitive in some systems)\n- [ ] Verify data types (string vs numeric comparisons)\n- [ ] Handle NULLs correctly (use IS NULL, not = NULL)\n- [ ] Use indexed columns in WHERE clause (performance)\n- [ ] Respect foreign key relationships (JOIN properly)\n\n### Before Schema Changes\n- [ ] Check foreign key dependencies (breaking changes?)\n- [ ] Consider index impact (rebuild needed?)\n- [ ] Plan for NULL handling (existing data migration)\n- [ ] Test constraint validation (data quality)\n- [ ] Coordinate with DBA (production changes)\n\n## \u26a0\ufe0f Common Pitfalls\n\n1. **Ignoring NULL handling**: `WHERE Status = 'Active'` misses NULL status rows\n2. **Wrong data types**: Comparing string '123' to int 123 (type conversion overhead)\n3. **Missing indexes**: Querying non-indexed columns = table scan (slow!)\n4. **Constraint violations**: INSERT fails because of FK, PK, or Check constraint\n5. **Index over-optimization**: 20 indexes on a table = slow writes, minimal read benefit\n\n## \ud83d\udd17 Navigation\n\n- **Back to Table Browser**: See all tables\n- **View Code**: Click to see stored procedures using this table\n- **Performance Analysis**: See queries hitting this table\n\n---\n*Click table name in Table Browser to load details | Schema updated every 5 minutes*\n",
+        "mode": "markdown"
+      },
+      "pluginVersion": "10.2.0",
+      "title": "\ud83d\udcd6 Developer Guide",
+      "type": "text"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [
+    "SQL Monitor",
+    "Schema Browser",
+    "Table Details"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "MonitoringDB"
+        },
+        "definition": "SELECT ServerName FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Server",
+        "multi": false,
+        "name": "ServerName",
+        "options": [],
+        "query": "SELECT ServerName FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "MonitoringDB",
+          "value": "MonitoringDB"
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "MonitoringDB"
+        },
+        "definition": "SELECT DISTINCT tm.DatabaseName\nFROM dbo.TableMetadata tm\nINNER JOIN dbo.SchemaMetadata sm ON tm.DatabaseName = sm.DatabaseName\n  AND tm.SchemaName = sm.SchemaName\nINNER JOIN dbo.Servers s ON sm.ServerID = s.ServerID\nWHERE tm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n  AND s.IsActive = 1\n  AND ('$__all' = '${ServerName}' OR s.ServerName = '${ServerName}')\nORDER BY tm.DatabaseName",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Database",
+        "multi": false,
+        "name": "DatabaseName",
+        "options": [],
+        "query": "SELECT DISTINCT tm.DatabaseName\nFROM dbo.TableMetadata tm\nINNER JOIN dbo.SchemaMetadata sm ON tm.DatabaseName = sm.DatabaseName\n  AND tm.SchemaName = sm.SchemaName\nINNER JOIN dbo.Servers s ON sm.ServerID = s.ServerID\nWHERE tm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n  AND s.IsActive = 1\n  AND ('$__all' = '${ServerName}' OR s.ServerName = '${ServerName}')\nORDER BY tm.DatabaseName",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "dbo",
+          "value": "dbo"
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "MonitoringDB"
+        },
+        "definition": "SELECT DISTINCT tm.SchemaName\nFROM dbo.TableMetadata tm\nINNER JOIN dbo.SchemaMetadata sm ON tm.DatabaseName = sm.DatabaseName\n  AND tm.SchemaName = sm.SchemaName\nINNER JOIN dbo.Servers s ON sm.ServerID = s.ServerID\nWHERE tm.DatabaseName = ${DatabaseName:sqlstring}\n  AND tm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n  AND s.IsActive = 1\n  AND ('$__all' = '${ServerName}' OR s.ServerName = '${ServerName}')\nORDER BY tm.SchemaName",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Schema",
+        "multi": false,
+        "name": "SchemaName",
+        "options": [],
+        "query": "SELECT DISTINCT tm.SchemaName\nFROM dbo.TableMetadata tm\nINNER JOIN dbo.SchemaMetadata sm ON tm.DatabaseName = sm.DatabaseName\n  AND tm.SchemaName = sm.SchemaName\nINNER JOIN dbo.Servers s ON sm.ServerID = s.ServerID\nWHERE tm.DatabaseName = ${DatabaseName:sqlstring}\n  AND tm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n  AND s.IsActive = 1\n  AND ('$__all' = '${ServerName}' OR s.ServerName = '${ServerName}')\nORDER BY tm.SchemaName",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "Servers",
+          "value": "Servers"
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "MonitoringDB"
+        },
+        "definition": "SELECT DISTINCT tm.TableName\nFROM dbo.TableMetadata tm\nINNER JOIN dbo.SchemaMetadata sm ON tm.DatabaseName = sm.DatabaseName\n  AND tm.SchemaName = sm.SchemaName\nINNER JOIN dbo.Servers s ON sm.ServerID = s.ServerID\nWHERE tm.DatabaseName = ${DatabaseName:sqlstring}\n  AND tm.SchemaName = ${SchemaName:sqlstring}\n  AND tm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n  AND s.IsActive = 1\n  AND ('$__all' = '${ServerName}' OR s.ServerName = '${ServerName}')\nORDER BY tm.TableName",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Table",
+        "multi": false,
+        "name": "TableName",
+        "options": [],
+        "query": "SELECT DISTINCT tm.TableName\nFROM dbo.TableMetadata tm\nINNER JOIN dbo.SchemaMetadata sm ON tm.DatabaseName = sm.DatabaseName\n  AND tm.SchemaName = sm.SchemaName\nINNER JOIN dbo.Servers s ON sm.ServerID = s.ServerID\nWHERE tm.DatabaseName = ${DatabaseName:sqlstring}\n  AND tm.SchemaName = ${SchemaName:sqlstring}\n  AND tm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n  AND s.IsActive = 1\n  AND ('$__all' = '${ServerName}' OR s.ServerName = '${ServerName}')\nORDER BY tm.TableName",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "SQL Monitor - Table Details",
+  "uid": "sql-monitor-table-details",
+  "version": 0,
+  "weekStart": ""
+}

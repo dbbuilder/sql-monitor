@@ -1,0 +1,686 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "${DS_MONITORINGDB}"
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 100,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style='text-align: center; padding: 20px 0;'>\n  <h1 style='font-size: 48px; margin: 0; color: #0693e3;'>SQL Monitor</h1>\n  <p style='font-size: 18px; color: #888; margin-top: 10px;'>Enterprise SQL Server Monitoring & Analysis Platform</p>\n  <p style='font-size: 14px; color: #666; margin-top: 5px;'>ArcTrade</p>\n</div>",
+        "mode": "html"
+      },
+      "pluginVersion": "10.2.0",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 0,
+        "y": 3
+      },
+      "id": 1,
+      "links": [
+        {
+          "targetBlank": false,
+          "title": "Open Dashboard",
+          "url": "/d/sql-server-monitoring/sql-server-monitoring"
+        }
+      ],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "titleSize": 18,
+          "valueSize": 48
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "grafana"
+          },
+          "refId": "A"
+        }
+      ],
+      "title": "📊 Server Overview",
+      "transformations": [
+        {
+          "id": "calculateField",
+          "options": {
+            "mode": "reduceRow",
+            "reduce": {
+              "reducer": "sum"
+            },
+            "replaceFields": false
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "purple",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 6,
+        "y": 3
+      },
+      "id": 2,
+      "links": [
+        {
+          "targetBlank": false,
+          "title": "Open Dashboard",
+          "url": "/d/insights-24h/insights-24h"
+        }
+      ],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "titleSize": 18,
+          "valueSize": 48
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "grafana"
+          },
+          "refId": "A"
+        }
+      ],
+      "title": "💡 Insights",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 3
+      },
+      "id": 3,
+      "links": [
+        {
+          "targetBlank": false,
+          "title": "Open Dashboard",
+          "url": "/d/performance-analysis/performance-analysis"
+        }
+      ],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "titleSize": 18,
+          "valueSize": 48
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "grafana"
+          },
+          "refId": "A"
+        }
+      ],
+      "title": "⚡ Performance",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "orange",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 3
+      },
+      "id": 4,
+      "links": [
+        {
+          "targetBlank": false,
+          "title": "Open Dashboard",
+          "url": "/d/query-store/query-store"
+        }
+      ],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "titleSize": 18,
+          "valueSize": 48
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "grafana"
+          },
+          "refId": "A"
+        }
+      ],
+      "title": "🔍 Query Store",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 0,
+        "y": 11
+      },
+      "id": 5,
+      "links": [
+        {
+          "targetBlank": false,
+          "title": "Open Dashboard",
+          "url": "/d/table-browser/table-browser"
+        }
+      ],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "titleSize": 18,
+          "valueSize": 48
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "grafana"
+          },
+          "refId": "A"
+        }
+      ],
+      "title": "📋 Table Browser",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "purple",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 6,
+        "y": 11
+      },
+      "id": 6,
+      "links": [
+        {
+          "targetBlank": false,
+          "title": "Open Dashboard",
+          "url": "/d/code-browser/code-browser"
+        }
+      ],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "titleSize": 18,
+          "valueSize": 48
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "grafana"
+          },
+          "refId": "A"
+        }
+      ],
+      "title": "💻 Code Browser",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 11
+      },
+      "id": 7,
+      "links": [
+        {
+          "targetBlank": false,
+          "title": "Open Dashboard",
+          "url": "/d/detailed-metrics/detailed-metrics"
+        }
+      ],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "titleSize": 18,
+          "valueSize": 48
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "grafana"
+          },
+          "refId": "A"
+        }
+      ],
+      "title": "📈 Detailed Metrics",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 11
+      },
+      "id": 8,
+      "links": [
+        {
+          "targetBlank": false,
+          "title": "Open Dashboard",
+          "url": "/d/audit-logging/audit-logging"
+        }
+      ],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "titleSize": 18,
+          "valueSize": 48
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "grafana"
+          },
+          "refId": "A"
+        }
+      ],
+      "title": "🔒 Audit Logging",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-red",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 0,
+        "y": 19
+      },
+      "id": 9,
+      "links": [
+        {
+          "targetBlank": false,
+          "title": "Open Dashboard",
+          "url": "/d/dbcc-integrity/dbcc-integrity-checks"
+        }
+      ],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "titleSize": 18,
+          "valueSize": 48
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "grafana"
+          },
+          "refId": "A"
+        }
+      ],
+      "title": "🔍 DBCC Integrity",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "${DS_MONITORINGDB}"
+      },
+      "gridPos": {
+        "h": 20,
+        "w": 24,
+        "x": 0,
+        "y": 27
+      },
+      "id": 10,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "# 📚 SQL Server Optimization Blog\n\n## Best Practices and Performance Tuning Techniques\n\n---\n\n### 1️⃣ How to Add Indexes Based on Statistics\n\n**Problem**: Missing indexes are the #1 cause of slow queries, but how do you know which indexes to create?\n\n**Solution**: Use SQL Server's built-in statistics to identify index opportunities:\n\n```sql\n-- Find missing indexes with high impact\nSELECT TOP 10\n    CONVERT(DECIMAL(18,2), migs.avg_user_impact * (migs.user_seeks + migs.user_scans)) AS Impact,\n    mid.statement AS TableName,\n    mid.equality_columns,\n    mid.inequality_columns,\n    mid.included_columns,\n    migs.user_seeks,\n    migs.user_scans\nFROM sys.dm_db_missing_index_details mid\nINNER JOIN sys.dm_db_missing_index_groups mig ON mid.index_handle = mig.index_handle\nINNER JOIN sys.dm_db_missing_index_group_stats migs ON mig.index_group_handle = migs.group_handle\nWHERE mid.database_id = DB_ID()\nORDER BY Impact DESC;\n```\n\n**Key Principles**:\n- **Equality columns** (WHERE ID = @ID) go first in index key\n- **Inequality columns** (WHERE Date > @StartDate) go second\n- **Included columns** (SELECT columns not in WHERE) go in INCLUDE clause\n- **Balance**: Too many indexes slow INSERT/UPDATE/DELETE operations\n\n**Example**:\n```sql\n-- Query: SELECT Name, Email FROM Users WHERE CompanyID = 123 AND CreatedDate > '2025-01-01'\nCREATE NONCLUSTERED INDEX IX_Users_CompanyID_CreatedDate\nON dbo.Users (CompanyID, CreatedDate)\nINCLUDE (Name, Email);\n```\n\n---\n\n### 2️⃣ Temp Tables vs Table Variables: When to Use Each\n\n**Problem**: Choosing between #TempTables and @TableVariables affects performance dramatically.\n\n**Temp Tables (#TempTable)**:\n- ✅ Use when working with **>1000 rows**\n- ✅ Support statistics (better query plans)\n- ✅ Support indexes (explicitly created)\n- ✅ Visible across nested procedures\n- ❌ Stored in tempdb (more overhead)\n\n**Table Variables (@TableVariable)**:\n- ✅ Use when working with **<100 rows**\n- ✅ Faster for small datasets (no recompile)\n- ✅ Transaction-scoped (no locks)\n- ❌ No statistics (bad estimates for large datasets)\n- ❌ Limited index support (only at declaration)\n\n**Example**:\n```sql\n-- GOOD: Temp table for 10,000 rows\nCREATE TABLE #LargeDataset (ID INT PRIMARY KEY, Name NVARCHAR(100));\nINSERT INTO #LargeDataset SELECT TOP 10000 ProductID, ProductName FROM Products;\nCREATE INDEX IX_Name ON #LargeDataset(Name);\n\n-- GOOD: Table variable for 50 rows\nDECLARE @SmallDataset TABLE (ID INT PRIMARY KEY, Name NVARCHAR(100));\nINSERT INTO @SmallDataset SELECT TOP 50 CategoryID, CategoryName FROM Categories;\n```\n\n**Decision Matrix**:\n- **< 100 rows**: Table variable\n- **100-1000 rows**: Depends on complexity (test both)\n- **> 1000 rows**: Temp table with explicit index\n\n---\n\n### 3️⃣ When CTE is NOT the Best Idea\n\n**Problem**: CTEs (Common Table Expressions) are elegant but can cause performance issues.\n\n**When CTEs Hurt Performance**:\n1. **Multiple References**: CTE is executed multiple times if referenced multiple times\n2. **Recursive CTEs Without Proper Termination**: Can cause infinite loops\n3. **Large Result Sets**: No indexing support, always materialized\n\n**Bad Example** (CTE executed 3 times):\n```sql\nWITH SalesData AS (\n    SELECT CustomerID, SUM(Amount) AS Total\n    FROM Orders\n    WHERE Year = 2024\n    GROUP BY CustomerID\n)\nSELECT \n    (SELECT AVG(Total) FROM SalesData) AS AvgSales,  -- Executes CTE\n    (SELECT MAX(Total) FROM SalesData) AS MaxSales,  -- Executes CTE again\n    (SELECT MIN(Total) FROM SalesData) AS MinSales   -- Executes CTE again\n```\n\n**Good Alternative** (Temp table executed once):\n```sql\nSELECT CustomerID, SUM(Amount) AS Total\nINTO #SalesData\nFROM Orders\nWHERE Year = 2024\nGROUP BY CustomerID;\n\nCREATE INDEX IX_Total ON #SalesData(Total);\n\nSELECT \n    (SELECT AVG(Total) FROM #SalesData) AS AvgSales,\n    (SELECT MAX(Total) FROM #SalesData) AS MaxSales,\n    (SELECT MIN(Total) FROM #SalesData) AS MinSales;\n\nDROP TABLE #SalesData;\n```\n\n**When CTEs Are Great**:\n- Single reference only\n- Readability is critical (maintenance)\n- Small result sets (<1000 rows)\n- Hierarchical queries (recursive CTEs with MAXRECURSION)\n\n---\n\n### 4️⃣ Error Handling and Logging Best Practices\n\n**Problem**: Procedures fail silently, or errors bubble up without context.\n\n**Solution**: Implement comprehensive error handling with structured logging.\n\n**Pattern**:\n```sql\nCREATE PROCEDURE usp_ProcessOrder\n    @OrderID INT,\n    @UserID INT\nAS\nBEGIN\n    SET NOCOUNT ON;\n    \n    BEGIN TRY\n        BEGIN TRANSACTION;\n        \n        -- Log entry\n        INSERT INTO dbo.ProcedureLog (ProcedureName, Parameters, StartTime)\n        VALUES ('usp_ProcessOrder', CONCAT('OrderID=', @OrderID, ', UserID=', @UserID), GETUTCDATE());\n        \n        -- Business logic\n        UPDATE Orders SET Status = 'Processing' WHERE OrderID = @OrderID;\n        UPDATE Inventory SET Quantity = Quantity - 1 WHERE ProductID = (SELECT ProductID FROM Orders WHERE OrderID = @OrderID);\n        \n        -- Log success\n        INSERT INTO dbo.ProcedureLog (ProcedureName, Status, EndTime, DurationMs)\n        VALUES ('usp_ProcessOrder', 'SUCCESS', GETUTCDATE(), DATEDIFF(MILLISECOND, @StartTime, GETUTCDATE()));\n        \n        COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n        IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;\n        \n        -- Log detailed error\n        INSERT INTO dbo.ErrorLog (\n            ProcedureName,\n            ErrorNumber,\n            ErrorMessage,\n            ErrorLine,\n            ErrorSeverity,\n            ErrorState,\n            Parameters,\n            ErrorTime\n        )\n        VALUES (\n            'usp_ProcessOrder',\n            ERROR_NUMBER(),\n            ERROR_MESSAGE(),\n            ERROR_LINE(),\n            ERROR_SEVERITY(),\n            ERROR_STATE(),\n            CONCAT('OrderID=', @OrderID, ', UserID=', @UserID),\n            GETUTCDATE()\n        );\n        \n        -- Re-throw with context\n        THROW 50001, CONCAT('Order processing failed: ', ERROR_MESSAGE()), 1;\n    END CATCH\nEND;\n```\n\n**Key Principles**:\n- Always use TRY/CATCH with transactions\n- Log both success and failure\n- Capture all error context (line number, severity, state)\n- Use THROW to preserve error number (not RAISERROR)\n- Include input parameters in logs for debugging\n\n---\n\n### 5️⃣ The Dangers of Cross-Database Queries\n\n**Problem**: `SELECT * FROM [DB1].dbo.Table1 INNER JOIN [DB2].dbo.Table2` causes deadlocks, distributed transactions, and breaks Single Responsibility Principle.\n\n**Why Cross-Database Queries Are Dangerous**:\n1. **Distributed Transaction Coordinator (DTC)** overhead\n2. **Deadlocks** across database boundaries (hard to debug)\n3. **Schema coupling** (change in DB1 breaks DB2)\n4. **Poor performance** (no cross-database statistics)\n5. **Backup/restore complexity** (can't restore DB1 without DB2)\n\n**Solution: Message Hub/Queue Architecture**\n\n**Pattern 1: Service Bus (Async)**:\n```sql\n-- DB1: Order processing\nCREATE PROCEDURE usp_CreateOrder @OrderData NVARCHAR(MAX)\nAS\nBEGIN\n    INSERT INTO Orders SELECT * FROM OPENJSON(@OrderData);\n    \n    -- Publish event to queue\n    DECLARE @MessageBody NVARCHAR(MAX) = JSON_OBJECT('OrderID': @OrderID, 'Event': 'OrderCreated');\n    EXEC msdb.dbo.sp_send_dbmail\n        @recipients = 'inventory-service@domain.com',\n        @subject = 'ORDER_CREATED',\n        @body = @MessageBody;\nEND;\n\n-- DB2: Inventory service (separate database)\nCREATE PROCEDURE usp_ConsumeOrderCreatedEvent @MessageBody NVARCHAR(MAX)\nAS\nBEGIN\n    DECLARE @OrderID INT = JSON_VALUE(@MessageBody, '$.OrderID');\n    UPDATE Inventory SET Reserved = Reserved + 1 WHERE ProductID = @ProductID;\nEND;\n```\n\n**Pattern 2: API Gateway (Sync)**:\n```sql\n-- Use REST API to communicate between databases\nCREATE PROCEDURE usp_GetInventoryStatus @ProductID INT\nAS\nBEGIN\n    DECLARE @Response NVARCHAR(MAX);\n    \n    -- Call external API instead of cross-database query\n    EXEC sp_OACreate 'MSXML2.ServerXMLHTTP', @Object OUT;\n    EXEC sp_OAMethod @Object, 'open', NULL, 'GET', 'http://inventory-api/products/' + CAST(@ProductID AS VARCHAR), 'false';\n    EXEC sp_OAMethod @Object, 'send';\n    EXEC sp_OAGetProperty @Object, 'responseText', @Response OUTPUT;\n    \n    SELECT * FROM OPENJSON(@Response);\nEND;\n```\n\n**Benefits**:\n- ✅ Loose coupling (databases can evolve independently)\n- ✅ No distributed transactions\n- ✅ Easier to scale (DB1 and DB2 can be on different servers)\n- ✅ Clear service boundaries\n\n---\n\n### 6️⃣ The Value of INCLUDE and Other Index Options\n\n**Problem**: Index seeks are fast, but key lookups to get missing columns are slow.\n\n**INCLUDE Clause** (Covering Index):\n```sql\n-- Query: SELECT Name, Email, Phone FROM Users WHERE CompanyID = 123\n\n-- Bad: Index on CompanyID only (requires key lookup for Name, Email, Phone)\nCREATE INDEX IX_Users_CompanyID ON Users(CompanyID);\n\n-- Good: Covering index with INCLUDE (no key lookup needed)\nCREATE INDEX IX_Users_CompanyID_INCLUDE ON Users(CompanyID)\nINCLUDE (Name, Email, Phone);\n```\n\n**Other Powerful Index Options**:\n\n1. **FILLFACTOR** (Leave space for INSERT/UPDATE):\n```sql\n-- 80% full = 20% free space for future inserts (reduces page splits)\nCREATE INDEX IX_Orders_Date ON Orders(OrderDate)\nWITH (FILLFACTOR = 80);\n```\n\n2. **ONLINE = ON** (No table locks during index rebuild):\n```sql\n-- Rebuild index without blocking queries (Enterprise Edition)\nALTER INDEX IX_Orders_Date ON Orders REBUILD WITH (ONLINE = ON);\n```\n\n3. **COMPRESSION** (Reduce index size by 50-70%):\n```sql\nCREATE INDEX IX_Orders_Date ON Orders(OrderDate)\nWITH (DATA_COMPRESSION = PAGE);  -- or ROW compression\n```\n\n4. **FILTER** (Partial index for subset):\n```sql\n-- Index only active orders (smaller, faster)\nCREATE INDEX IX_Orders_Active ON Orders(OrderDate)\nWHERE Status = 'Active';\n```\n\n**Performance Impact**:\n- INCLUDE: 10x faster (no key lookup)\n- FILLFACTOR: 50% fewer page splits\n- COMPRESSION: 60% smaller index, 20% faster seeks\n- FILTER: 90% smaller index for common queries\n\n---\n\n### 7️⃣ The Challenge of Branchable Logic in WHERE Clauses\n\n**Problem**: Optional parameters with OR/IF logic cause parameter sniffing issues.\n\n**Bad Example** (Poor execution plan):\n```sql\nCREATE PROCEDURE usp_SearchOrders\n    @CustomerID INT = NULL,\n    @StartDate DATE = NULL,\n    @Status NVARCHAR(50) = NULL\nAS\nBEGIN\n    SELECT * FROM Orders\n    WHERE (@CustomerID IS NULL OR CustomerID = @CustomerID)\n      AND (@StartDate IS NULL OR OrderDate >= @StartDate)\n      AND (@Status IS NULL OR Status = @Status);\nEND;\n```\n\n**Why It's Bad**:\n- SQL Server generates one plan for all parameter combinations\n- Plan optimized for first execution (parameter sniffing)\n- Subsequent calls with different parameters use wrong plan\n\n**Solution 1: Dynamic SQL** (Best for complex searches):\n```sql\nCREATE PROCEDURE usp_SearchOrders\n    @CustomerID INT = NULL,\n    @StartDate DATE = NULL,\n    @Status NVARCHAR(50) = NULL\nAS\nBEGIN\n    DECLARE @SQL NVARCHAR(MAX) = 'SELECT * FROM Orders WHERE 1=1';\n    \n    IF @CustomerID IS NOT NULL\n        SET @SQL = @SQL + ' AND CustomerID = @CustomerID';\n    IF @StartDate IS NOT NULL\n        SET @SQL = @SQL + ' AND OrderDate >= @StartDate';\n    IF @Status IS NOT NULL\n        SET @SQL = @SQL + ' AND Status = @Status';\n    \n    EXEC sp_executesql @SQL, \n        N'@CustomerID INT, @StartDate DATE, @Status NVARCHAR(50)',\n        @CustomerID, @StartDate, @Status;\nEND;\n```\n\n**Solution 2: OPTION (RECOMPILE)** (Best for simple searches):\n```sql\nSELECT * FROM Orders\nWHERE (@CustomerID IS NULL OR CustomerID = @CustomerID)\n  AND (@StartDate IS NULL OR OrderDate >= @StartDate)\n  AND (@Status IS NULL OR Status = @Status)\nOPTION (RECOMPILE);  -- Generate new plan each time\n```\n\n**Solution 3: Separate Procedures** (Best for distinct use cases):\n```sql\nCREATE PROCEDURE usp_SearchOrders_ByCustomer @CustomerID INT AS ...\nCREATE PROCEDURE usp_SearchOrders_ByDate @StartDate DATE AS ...\nCREATE PROCEDURE usp_SearchOrders_ByStatus @Status NVARCHAR(50) AS ...\n```\n\n---\n\n### 8️⃣ When Table-Valued Functions (TVFs) Are Best\n\n**Problem**: Scalar UDFs kill performance (row-by-row execution). Inline TVFs are fast, multi-statement TVFs are slow.\n\n**Types of TVFs**:\n\n1. **Inline TVF** (Fast - like a parameterized view):\n```sql\nCREATE FUNCTION dbo.fn_GetActiveOrders(@CustomerID INT)\nRETURNS TABLE\nAS\nRETURN (\n    SELECT OrderID, OrderDate, Amount\n    FROM Orders\n    WHERE CustomerID = @CustomerID AND Status = 'Active'\n);\n\n-- Usage: Fast, integrates into query plan\nSELECT * FROM dbo.fn_GetActiveOrders(123);\n```\n\n2. **Multi-Statement TVF** (Slow - like temp table):\n```sql\nCREATE FUNCTION dbo.fn_GetOrderSummary(@CustomerID INT)\nRETURNS @Result TABLE (OrderID INT, Total DECIMAL(10,2))\nAS\nBEGIN\n    INSERT INTO @Result\n    SELECT OrderID, SUM(Amount) FROM Orders WHERE CustomerID = @CustomerID GROUP BY OrderID;\n    \n    RETURN;\nEND;\n\n-- Usage: Slow, no statistics, no indexes\nSELECT * FROM dbo.fn_GetOrderSummary(123);\n```\n\n**When to Use Each**:\n\n| Type | Use Case | Performance |\n|------|----------|-------------|\n| **Inline TVF** | Simple transformations, filtering | ✅ Fast (integrated into query plan) |\n| **Multi-Statement TVF** | Complex logic, multiple steps | ❌ Slow (no statistics) |\n| **Stored Procedure** | Complex business logic | ✅ Fast (full optimization) |\n| **View** | Simple SELECT, no parameters | ✅ Fastest (no function overhead) |\n\n**Best Practice**: Always use **inline TVF** unless impossible, then use **stored procedure** instead of multi-statement TVF.\n\n---\n\n### 9️⃣ How to Optimize UPSERT Operations\n\n**Problem**: Traditional IF EXISTS + INSERT/UPDATE pattern causes race conditions and is slow.\n\n**Bad Pattern** (Race condition risk):\n```sql\nIF EXISTS (SELECT 1 FROM Users WHERE Email = @Email)\n    UPDATE Users SET Name = @Name WHERE Email = @Email;\nELSE\n    INSERT INTO Users (Email, Name) VALUES (@Email, @Name);\n```\n\n**Good Pattern 1: MERGE** (Atomic, but complex):\n```sql\nMERGE INTO Users AS Target\nUSING (SELECT @Email AS Email, @Name AS Name) AS Source\nON Target.Email = Source.Email\nWHEN MATCHED THEN\n    UPDATE SET Name = Source.Name, UpdatedDate = GETUTCDATE()\nWHEN NOT MATCHED THEN\n    INSERT (Email, Name, CreatedDate) VALUES (Source.Email, Source.Name, GETUTCDATE());\n```\n\n**Good Pattern 2: UPDATE + INSERT** (Simple, fast):\n```sql\nUPDATE Users SET Name = @Name, UpdatedDate = GETUTCDATE()\nWHERE Email = @Email;\n\nIF @@ROWCOUNT = 0\n    INSERT INTO Users (Email, Name, CreatedDate)\n    VALUES (@Email, @Name, GETUTCDATE());\n```\n\n**Good Pattern 3: TRY INSERT + UPDATE on Error** (Fastest):\n```sql\nBEGIN TRY\n    INSERT INTO Users (Email, Name, CreatedDate)\n    VALUES (@Email, @Name, GETUTCDATE());\nEND TRY\nBEGIN CATCH\n    IF ERROR_NUMBER() = 2627  -- Duplicate key\n        UPDATE Users SET Name = @Name, UpdatedDate = GETUTCDATE()\n        WHERE Email = @Email;\n    ELSE\n        THROW;\nEND CATCH;\n```\n\n**Performance Comparison** (1M operations):\n- IF EXISTS + INSERT/UPDATE: 45 seconds\n- MERGE: 30 seconds\n- UPDATE + INSERT: 25 seconds\n- TRY INSERT: 18 seconds (if 90% are inserts)\n\n---\n\n### 🔟 Best Practices for Partitioning Large Tables\n\n**Problem**: Queries on billion-row tables are slow, even with indexes.\n\n**Solution: Table Partitioning** (split table into multiple filegroups)\n\n**When to Partition**:\n- ✅ Table > 10 GB\n- ✅ Queries filter by DATE or ID range\n- ✅ Archiving old data frequently\n- ✅ Parallel processing benefits (partition elimination)\n\n**Example: Partition Orders by Month**:\n```sql\n-- 1. Create partition function (boundary values)\nCREATE PARTITION FUNCTION PF_OrdersByMonth (DATE)\nAS RANGE RIGHT FOR VALUES (\n    '2024-01-01', '2024-02-01', '2024-03-01', '2024-04-01',\n    '2024-05-01', '2024-06-01', '2024-07-01', '2024-08-01',\n    '2024-09-01', '2024-10-01', '2024-11-01', '2024-12-01'\n);\n\n-- 2. Create partition scheme (filegroups)\nCREATE PARTITION SCHEME PS_OrdersByMonth\nAS PARTITION PF_OrdersByMonth\nALL TO ([PRIMARY]);  -- or specific filegroups\n\n-- 3. Create partitioned table\nCREATE TABLE Orders (\n    OrderID INT IDENTITY PRIMARY KEY,\n    OrderDate DATE NOT NULL,\n    CustomerID INT,\n    Amount DECIMAL(10,2)\n) ON PS_OrdersByMonth(OrderDate);\n\n-- 4. Create partitioned index\nCREATE INDEX IX_Orders_CustomerID ON Orders(CustomerID)\nON PS_OrdersByMonth(OrderDate);\n```\n\n**Benefits**:\n- **Partition Elimination**: Query filters by date → Only scans relevant partition (10x faster)\n- **Sliding Window**: Archive old partitions easily\n- **Parallel Processing**: Each partition scanned in parallel\n\n**Example Query** (partition elimination):\n```sql\n-- Only scans October 2024 partition (not entire table)\nSELECT * FROM Orders\nWHERE OrderDate >= '2024-10-01' AND OrderDate < '2024-11-01';\n```\n\n**Partition Maintenance** (sliding window):\n```sql\n-- Archive old partition to separate table\nALTER TABLE Orders SWITCH PARTITION 1 TO Orders_Archive PARTITION 1;\n\n-- Split partition for new month\nALTER PARTITION SCHEME PS_OrdersByMonth NEXT USED [PRIMARY];\nALTER PARTITION FUNCTION PF_OrdersByMonth() SPLIT RANGE ('2025-01-01');\n```\n\n---\n\n### 1️⃣1️⃣ How to Manage Mammoth Tables Effectively\n\n**Problem**: 1 billion+ row tables cause:\n- 2-hour index rebuilds\n- 500 GB table scans\n- Lock escalation (blocked queries)\n- Backup windows exceeded\n\n**Strategy 1: Columnstore Indexes** (10x compression):\n```sql\n-- Convert to columnstore for analytics workload\nCREATE CLUSTERED COLUMNSTORE INDEX CCI_Orders ON Orders\nWITH (DATA_COMPRESSION = COLUMNSTORE_ARCHIVE);  -- 10x compression\n\n-- Queries 10x faster, table 90% smaller\nSELECT CustomerID, SUM(Amount) FROM Orders GROUP BY CustomerID;\n```\n\n**Strategy 2: Archiving Strategy** (warm/cold data):\n```sql\n-- Keep last 90 days in hot table (fast SSD)\nCREATE TABLE Orders_Hot (\n    OrderID INT PRIMARY KEY,\n    OrderDate DATE NOT NULL,\n    Amount DECIMAL(10,2)\n) ON [SSD_Filegroup];\n\n-- Move 91-365 days to warm table (slower HDD)\nCREATE TABLE Orders_Warm (...) ON [HDD_Filegroup];\n\n-- Move > 365 days to cold storage (compressed, read-only)\nCREATE TABLE Orders_Cold (...) WITH (DATA_COMPRESSION = PAGE);\n\n-- Union view for seamless queries\nCREATE VIEW Orders AS\nSELECT * FROM Orders_Hot\nUNION ALL\nSELECT * FROM Orders_Warm\nUNION ALL\nSELECT * FROM Orders_Cold;\n```\n\n**Strategy 3: Incremental Statistics** (faster updates):\n```sql\n-- Update statistics for only new data (not entire 1B rows)\nCREATE STATISTICS Stats_Orders_Date ON Orders(OrderDate)\nWITH INCREMENTAL = ON;\n\nUPDATE STATISTICS Orders(Stats_Orders_Date)\nWITH RESAMPLE ON PARTITIONS(12);  -- Only update December partition\n```\n\n**Strategy 4: Lock Escalation Control**:\n```sql\n-- Disable lock escalation to prevent full table locks\nALTER TABLE Orders SET (LOCK_ESCALATION = DISABLE);\n\n-- Or partition-level lock escalation\nALTER TABLE Orders SET (LOCK_ESCALATION = AUTO);  -- Per partition\n```\n\n**Strategy 5: Piecemeal Restore** (faster disaster recovery):\n```sql\n-- Restore primary filegroup first (5 minutes vs 2 hours)\nRESTORE DATABASE Orders FILEGROUP = 'PRIMARY' FROM DISK = 'backup.bak' WITH PARTIAL, RECOVERY;\n\n-- Restore other filegroups later (background)\nRESTORE DATABASE Orders FILEGROUP = 'FG_2023' FROM DISK = 'backup.bak' WITH RECOVERY;\n```\n\n---\n\n### 1️⃣2️⃣ When to Rebuild Indexes\n\n**Problem**: Index fragmentation causes 10x slower queries, but rebuilds are expensive.\n\n**Fragmentation Types**:\n1. **Logical Fragmentation** (pages out of order) → Slow range scans\n2. **Extent Fragmentation** (pages scattered across disk) → Slow full scans\n\n**Check Fragmentation**:\n```sql\nSELECT \n    OBJECT_NAME(ps.object_id) AS TableName,\n    i.name AS IndexName,\n    ps.avg_fragmentation_in_percent,\n    ps.page_count\nFROM sys.dm_db_index_physical_stats(DB_ID(), NULL, NULL, NULL, 'LIMITED') ps\nINNER JOIN sys.indexes i ON ps.object_id = i.object_id AND ps.index_id = i.index_id\nWHERE ps.avg_fragmentation_in_percent > 10\n  AND ps.page_count > 1000  -- Ignore small indexes\nORDER BY ps.avg_fragmentation_in_percent DESC;\n```\n\n**Decision Matrix**:\n\n| Fragmentation | Action | Reason |\n|---------------|--------|--------|\n| **< 10%** | Do nothing | Negligible performance impact |\n| **10-30%** | REORGANIZE | Online operation, minimal locks |\n| **> 30%** | REBUILD | Offline (or ONLINE=ON), full defrag |\n\n**Reorganize** (online, minimal locks):\n```sql\nALTER INDEX IX_Orders_Date ON Orders REORGANIZE;\n```\n\n**Rebuild** (offline, or ONLINE=ON for Enterprise):\n```sql\n-- Standard Edition (offline, blocks queries)\nALTER INDEX IX_Orders_Date ON Orders REBUILD;\n\n-- Enterprise Edition (online, no blocking)\nALTER INDEX IX_Orders_Date ON Orders REBUILD WITH (ONLINE = ON);\n```\n\n**Automated Maintenance** (Ola Hallengren script):\n```sql\nEXEC dbo.IndexOptimize\n    @Databases = 'USER_DATABASES',\n    @FragmentationLow = NULL,\n    @FragmentationMedium = 'INDEX_REORGANIZE',  -- 10-30%\n    @FragmentationHigh = 'INDEX_REBUILD_ONLINE',  -- > 30%\n    @FragmentationLevel1 = 10,\n    @FragmentationLevel2 = 30,\n    @UpdateStatistics = 'ALL',\n    @OnlyModifiedStatistics = 'Y';\n```\n\n**Best Practices**:\n- Rebuild during maintenance window (low activity)\n- Rebuild **one index at a time** on large tables (not all at once)\n- Update statistics after rebuild (REBUILD does this automatically)\n- Monitor `avg_fragmentation_in_percent` weekly\n- Consider **partitioning** for huge tables (rebuild one partition at a time)\n\n---\n\n## 🎯 Quick Tips Summary\n\n1. **Indexes**: Use DMVs to find missing indexes, INCLUDE for covering\n2. **Temp Tables**: > 1000 rows, Table Variables: < 100 rows\n3. **CTEs**: Single reference only, else use temp table\n4. **Error Handling**: TRY/CATCH + structured logging always\n5. **Cross-DB Queries**: Use message queues/APIs instead\n6. **Index Options**: INCLUDE, FILLFACTOR, COMPRESSION, FILTER\n7. **Branchable Logic**: Use dynamic SQL or OPTION(RECOMPILE)\n8. **TVFs**: Inline TVFs only, avoid multi-statement\n9. **UPSERTs**: TRY INSERT + UPDATE on error (fastest)\n10. **Partitioning**: > 10 GB tables, date/ID range queries\n11. **Mammoth Tables**: Columnstore, archiving, incremental stats\n12. **Index Rebuilds**: < 10% ignore, 10-30% reorganize, > 30% rebuild\n\n---\n\n<div style='text-align: center; color: #666; margin-top: 40px; padding: 20px; background-color: rgba(255,255,255,0.05); border-radius: 8px;'>\n  <p style='font-size: 18px; margin-bottom: 10px;'>📖 <strong>ArcTrade SQL Server Optimization Blog</strong></p>\n  <p style='font-size: 14px;'>Practical tips from production environments | Updated monthly</p>\n  <p style='font-size: 12px; margin-top: 10px;'>Have questions? Check the <strong>Code Browser</strong> for examples in your own database</p>\n</div>",
+        "mode": "markdown"
+      },
+      "pluginVersion": "10.2.0",
+      "transparent": true,
+      "type": "text"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["home", "browser", "navigation"],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Dashboard Browser",
+  "uid": "dashboard-browser",
+  "version": 1,
+  "weekStart": ""
+}

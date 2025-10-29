@@ -1,0 +1,385 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "${DS_MONITORINGDB}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "MetricValue"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 70
+                    },
+                    {
+                      "color": "red",
+                      "value": 85
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "CollectionTime"
+          }
+        ]
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "monitoringdb"
+          },
+          "format": "table",
+          "rawSql": "SELECT TOP 100\n  pm.CollectionTime,\n  s.ServerName,\n  pm.MetricCategory,\n  pm.MetricName,\n  pm.MetricValue,\n  pm.DatabaseName\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.CollectionTime >= $__timeFrom()\n  AND pm.CollectionTime <= $__timeTo()\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n  AND ('$__all' IN (${MetricCategory:singlequote}) OR pm.MetricCategory IN (${MetricCategory:singlequote}))\n  AND (pm.DatabaseName IS NULL OR pm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb'))\nORDER BY pm.CollectionTime DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "Recent Metrics (Filtered)",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "${DS_MONITORINGDB}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max",
+            "min"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "monitoringdb"
+          },
+          "format": "time_series",
+          "rawSql": "SELECT\n  DATEADD(SECOND, DATEDIFF(SECOND, '2000-01-01', pm.CollectionTime) / (${TimeInterval} * 60) * (${TimeInterval} * 60), '2000-01-01') AS time,\n  AVG(pm.MetricValue) AS value,\n  s.ServerName + ' - ' + pm.MetricCategory + ' - ' + pm.MetricName AS metric\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.CollectionTime >= $__timeFrom()\n  AND pm.CollectionTime <= $__timeTo()\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n  AND ('$__all' IN (${MetricCategory:singlequote}) OR pm.MetricCategory IN (${MetricCategory:singlequote}))\n  AND (pm.DatabaseName IS NULL OR pm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb'))\nGROUP BY \n  DATEADD(SECOND, DATEDIFF(SECOND, '2000-01-01', pm.CollectionTime) / (${TimeInterval} * 60) * (${TimeInterval} * 60), '2000-01-01'),\n  s.ServerName + ' - ' + pm.MetricCategory + ' - ' + pm.MetricName\nORDER BY time ASC",
+          "refId": "A"
+        }
+      ],
+      "title": "Metrics Time Series (Filtered)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "${DS_MONITORINGDB}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 20
+      },
+      "id": 100,
+      "options": {
+        "content": "# \ud83d\udcca SQL Server Metrics - Developer Guide\n\n## What Are These Metrics?\n\nThis dashboard shows **performance metrics** collected from SQL Server instances every 5 minutes. Think of it like a health monitor for your databases.\n\n### Common Metrics Explained\n\n| Metric Category | What It Measures | Why It Matters | Good Range |\n|----------------|------------------|----------------|------------|\n| **CPU** | Processor usage (%) | How hard the server is working | < 70% normal, > 85% concerning |\n| **Memory** | RAM usage (%) | Available memory for queries | < 75% good, > 90% problematic |\n| **Disk I/O** | Read/Write operations | Database access speed | Depends on workload |\n| **Wait Statistics** | What queries are waiting for | Performance bottlenecks | Low waits = good performance |\n| **Connections** | Active database connections | User/app activity | Depends on app usage |\n\n## \ud83c\udfaf How to Use This Dashboard\n\n### 1. Filter by Server\nUse the **Server** dropdown at the top to:\n- View all servers (select \"All\")\n- Focus on one specific server\n- Compare multiple servers (select 2+)\n\n### 2. Filter by Metric Type  \nUse the **Metric Category** dropdown to:\n- See all metrics (select \"All\")\n- Focus on CPU, Memory, or specific categories\n- Troubleshoot specific issues\n\n### 3. Adjust Time Range\nUse the time picker (top right) to:\n- View last hour, day, week, etc.\n- Set custom date ranges\n- Zoom in on specific time periods\n\n## \ud83d\udd0d Common Scenarios\n\n### \"My application is slow\"\n1. Set time range to when slowness occurred\n2. Check **CPU** and **Memory** metrics\n3. Look for spikes above 85% (CPU) or 90% (Memory)\n4. Check **Wait Statistics** dashboard for what queries waited on\n\n### \"I want to see server health over time\"\n1. Select \"All\" servers\n2. Select \"CPU\" and \"Memory\" categories\n3. Set time range to \"Last 7 days\"\n4. Look for patterns or unusual spikes\n\n### \"Did our deployment cause issues?\"\n1. Set time range around deployment time\n2. Compare metrics before/after\n3. Look for sudden changes in CPU, Memory, or Connections\n\n## \ud83d\udca1 Tips for Non-SQL Developers\n\n- **Green values** = healthy\n- **Yellow values** = monitor closely\n- **Red values** = potential issue\n- **Hover over charts** to see exact values\n- **Click legend items** to hide/show specific metrics\n- **Share dashboard URL** with filters applied for team collaboration\n\n## \ud83d\udcda Related Dashboards\n\n- **SQL Server Overview** - High-level health metrics\n- **Database Performance** - Specific database metrics\n- **Wait Statistics** - Query performance bottlenecks\n- **Code Browser** - View stored procedures and dependencies\n\n## \ud83c\udd98 Need Help?\n\nIf you see concerning metrics:\n1. Note the time range and server name\n2. Check application logs for errors\n3. Contact your DBA team with dashboard link\n4. Include screenshot of unusual patterns\n\n---\n*This dashboard auto-refreshes every 1 minute. Last updated: dashboard refresh time*\n",
+        "mode": "markdown"
+      },
+      "pluginVersion": "10.2.0",
+      "title": "\ud83d\udcd6 Developer Guide - Understanding SQL Server Metrics",
+      "type": "text"
+    }
+  ],
+  "refresh": "1m",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [
+    "sql-server",
+    "metrics",
+    "detailed"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "MonitoringDB",
+          "value": "MonitoringDB"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Datasource",
+        "multi": false,
+        "name": "DS_MONITORINGDB",
+        "options": [],
+        "query": "mssql",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "${DS_MONITORINGDB}"
+        },
+        "definition": "SELECT ServerName FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Server",
+        "multi": true,
+        "name": "ServerName",
+        "options": [],
+        "query": "SELECT ServerName FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "${DS_MONITORINGDB}"
+        },
+        "definition": "SELECT DISTINCT MetricCategory FROM dbo.PerformanceMetrics ORDER BY MetricCategory",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Metric Category",
+        "multi": true,
+        "name": "MetricCategory",
+        "options": [],
+        "query": "SELECT DISTINCT MetricCategory FROM dbo.PerformanceMetrics ORDER BY MetricCategory",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "5 minutes",
+          "value": "5"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Time Interval",
+        "multi": false,
+        "name": "TimeInterval",
+        "options": [
+          {
+            "selected": false,
+            "text": "1 minute",
+            "value": "1"
+          },
+          {
+            "selected": true,
+            "text": "5 minutes",
+            "value": "5"
+          },
+          {
+            "selected": false,
+            "text": "15 minutes",
+            "value": "15"
+          },
+          {
+            "selected": false,
+            "text": "30 minutes",
+            "value": "30"
+          },
+          {
+            "selected": false,
+            "text": "1 hour",
+            "value": "60"
+          },
+          {
+            "selected": false,
+            "text": "3 hours",
+            "value": "180"
+          },
+          {
+            "selected": false,
+            "text": "6 hours",
+            "value": "360"
+          },
+          {
+            "selected": false,
+            "text": "12 hours",
+            "value": "720"
+          },
+          {
+            "selected": false,
+            "text": "24 hours",
+            "value": "1440"
+          }
+        ],
+        "query": "1 : 1 minute,5 : 5 minutes,15 : 15 minutes,30 : 30 minutes,60 : 1 hour,180 : 3 hours,360 : 6 hours,720 : 12 hours,1440 : 24 hours",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Detailed Metrics View",
+  "uid": "detailed-metrics",
+  "version": 1,
+  "weekStart": ""
+}

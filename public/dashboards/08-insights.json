@@ -1,0 +1,304 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "${DS_MONITORINGDB}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Priority"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "CRITICAL": {
+                        "color": "red",
+                        "index": 0
+                      }
+                    },
+                    "type": "value"
+                  },
+                  {
+                    "options": {
+                      "HIGH": {
+                        "color": "orange",
+                        "index": 1
+                      }
+                    },
+                    "type": "value"
+                  },
+                  {
+                    "options": {
+                      "MEDIUM": {
+                        "color": "yellow",
+                        "index": 2
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ServerName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Server Overview",
+                    "url": "/d/sql-server-monitoring?var-ServerName=${__data.fields.ServerName}"
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Category"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Performance Analysis",
+                    "url": "/d/performance-analysis?var-server=${__data.fields.ServerName}&from=now-24h&to=now"
+                  },
+                  {
+                    "title": "SQL Server Overview",
+                    "url": "/d/sql-server-monitoring?var-ServerName=${__data.fields.ServerName}"
+                  },
+                  {
+                    "title": "Table Browser",
+                    "url": "/d/table-browser?var-server=${__data.fields.ServerName}"
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "purple"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Insight"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Investigate Performance",
+                    "url": "/d/performance-analysis?var-server=${__data.fields.ServerName}&from=now-24h&to=now"
+                  },
+                  {
+                    "title": "View Server Details",
+                    "url": "/d/sql-server-monitoring?var-ServerName=${__data.fields.ServerName}"
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 400
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 20,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": false,
+            "displayName": "Priority"
+          }
+        ]
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "${DS_MONITORINGDB}"
+          },
+          "format": "table",
+          "rawSql": "-- SQL Monitor: 24-Hour Prioritized Insights by Server\n-- Aggregates key issues and opportunities from the last 24 hours\n\nWITH SlowQueries AS (\n    SELECT\n        s.ServerName,\n        'CRITICAL' AS Priority,\n        'Performance' AS Category,\n        'Top Slow Query: ' + LEFT(qm.QueryText, 100) + '...' AS Insight,\n        'Query averaging ' + CAST(CAST(qm.AvgDurationMs AS DECIMAL(10,2)) AS VARCHAR) + 'ms - investigate execution plan' AS Recommendation,\n        qm.ExecutionCount AS Occurrences,\n        qm.CollectionTime AS LastSeen\n    FROM dbo.QueryMetrics qm\n    INNER JOIN dbo.Servers s ON qm.ServerID = s.ServerID\n    WHERE qm.CollectionTime >= DATEADD(HOUR, -24, GETUTCDATE())\n        AND qm.AvgDurationMs > 1000  -- Queries over 1 second\n        AND qm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n        AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n),\nSlowProcedures AS (\n    SELECT TOP 5\n        s.ServerName,\n        'HIGH' AS Priority,\n        'Performance' AS Category,\n        'Slow Procedure: ' + pm.DatabaseName + '.' + pm.ProcedureName AS Insight,\n        'Avg ' + CAST(CAST(pm.AvgDurationMs AS DECIMAL(10,2)) AS VARCHAR) + 'ms (' + CAST(pm.ExecutionCount AS VARCHAR) + ' calls) - consider optimization' AS Recommendation,\n        pm.ExecutionCount AS Occurrences,\n        pm.CollectionTime AS LastSeen\n    FROM dbo.ProcedureMetrics pm\n    INNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\n    WHERE pm.CollectionTime >= DATEADD(HOUR, -24, GETUTCDATE())\n        AND pm.AvgDurationMs > 500\n        AND pm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n        AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n    ORDER BY pm.AvgDurationMs DESC\n),\nBlockingEvents AS (\n    SELECT\n        s.ServerName,\n        'CRITICAL' AS Priority,\n        'Blocking' AS Category,\n        'Blocking Detected: ' + CAST(COUNT(*) AS VARCHAR) + ' blocking chains' AS Insight,\n        'Review blocking sessions - avg wait time ' + CAST(CAST(AVG(be.WaitDurationMs) AS DECIMAL(10,2)) AS VARCHAR) + 'ms' AS Recommendation,\n        COUNT(*) AS Occurrences,\n        MAX(be.EventTime) AS LastSeen\n    FROM dbo.BlockingEvents be\n    INNER JOIN dbo.Servers s ON be.ServerID = s.ServerID\n    WHERE be.EventTime >= DATEADD(HOUR, -24, GETUTCDATE())\n        AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n    GROUP BY s.ServerName\n    HAVING COUNT(*) > 0\n),\nDeadlocks AS (\n    SELECT\n        s.ServerName,\n        'CRITICAL' AS Priority,\n        'Deadlock' AS Category,\n        'Deadlocks: ' + CAST(COUNT(*) AS VARCHAR) + ' deadlock(s) detected' AS Insight,\n        'Review deadlock graphs and adjust transaction isolation or query order' AS Recommendation,\n        COUNT(*) AS Occurrences,\n        MAX(de.EventTime) AS LastSeen\n    FROM dbo.DeadlockEvents de\n    INNER JOIN dbo.Servers s ON de.ServerID = s.ServerID\n    WHERE de.EventTime >= DATEADD(HOUR, -24, GETUTCDATE())\n        AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n    GROUP BY s.ServerName\n    HAVING COUNT(*) > 0\n),\nHighCPU AS (\n    SELECT\n        s.ServerName,\n        'HIGH' AS Priority,\n        'Resource' AS Category,\n        'High CPU Usage Detected' AS Insight,\n        'Average CPU: ' + CAST(CAST(AVG(pm.MetricValue) AS DECIMAL(5,2)) AS VARCHAR) + '% - investigate top queries' AS Recommendation,\n        COUNT(*) AS Occurrences,\n        MAX(pm.CollectionTime) AS LastSeen\n    FROM dbo.PerformanceMetrics pm\n    INNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\n    WHERE pm.CollectionTime >= DATEADD(HOUR, -24, GETUTCDATE())\n        AND pm.MetricCategory = 'CPU'\n        AND pm.MetricName LIKE '%Processor Time%'\n        AND pm.MetricValue > 80\n        AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n    GROUP BY s.ServerName\n    HAVING COUNT(*) > 5  -- More than 5 samples over 80%\n),\nHighMemory AS (\n    SELECT\n        s.ServerName,\n        'HIGH' AS Priority,\n        'Resource' AS Category,\n        'High Memory Pressure' AS Insight,\n        'Average Memory: ' + CAST(CAST(AVG(pm.MetricValue) AS DECIMAL(5,2)) AS VARCHAR) + '% - consider adding RAM or optimize queries' AS Recommendation,\n        COUNT(*) AS Occurrences,\n        MAX(pm.CollectionTime) AS LastSeen\n    FROM dbo.PerformanceMetrics pm\n    INNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\n    WHERE pm.CollectionTime >= DATEADD(HOUR, -24, GETUTCDATE())\n        AND pm.MetricCategory = 'Memory'\n        AND pm.MetricName LIKE '%Available%'\n        AND pm.MetricValue < 20  -- Less than 20% available\n        AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n    GROUP BY s.ServerName\n    HAVING COUNT(*) > 5\n),\nFragmentedIndexes AS (\n    SELECT\n        s.ServerName,\n        'MEDIUM' AS Priority,\n        'Maintenance' AS Category,\n        'Fragmented Indexes: ' + CAST(COUNT(*) AS VARCHAR) + ' indexes need attention' AS Insight,\n        'Run index maintenance - avg fragmentation ' + CAST(CAST(AVG(ia.AvgFragmentationPercent) AS DECIMAL(5,2)) AS VARCHAR) + '%' AS Recommendation,\n        COUNT(*) AS Occurrences,\n        MAX(ia.AnalysisTime) AS LastSeen\n    FROM dbo.IndexAnalysis ia\n    INNER JOIN dbo.Servers s ON ia.ServerID = s.ServerID\n    WHERE ia.AnalysisTime >= DATEADD(HOUR, -24, GETUTCDATE())\n        AND ia.AvgFragmentationPercent > 30\n        AND ia.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n        AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n    GROUP BY s.ServerName\n    HAVING COUNT(*) > 10\n),\nCombinedInsights AS (\n    SELECT * FROM SlowQueries\n    UNION ALL\n    SELECT * FROM SlowProcedures\n    UNION ALL\n    SELECT * FROM BlockingEvents\n    UNION ALL\n    SELECT * FROM Deadlocks\n    UNION ALL\n    SELECT * FROM HighCPU\n    UNION ALL\n    SELECT * FROM HighMemory\n    UNION ALL\n    SELECT * FROM FragmentedIndexes\n)\nSELECT\n    ServerName,\n    Priority,\n    Category,\n    Insight,\n    Recommendation,\n    Occurrences,\n    FORMAT(LastSeen, 'yyyy-MM-dd HH:mm:ss') AS LastSeen\nFROM CombinedInsights\nORDER BY \n    CASE Priority\n        WHEN 'CRITICAL' THEN 1\n        WHEN 'HIGH' THEN 2\n        WHEN 'MEDIUM' THEN 3\n        ELSE 4\n    END,\n    LastSeen DESC;",
+          "refId": "A"
+        }
+      ],
+      "title": "24-Hour Prioritized Insights by Server",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "${DS_MONITORINGDB}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 20
+      },
+      "id": 2,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "# 📊 Insights Dashboard - User Guide\n\n## Purpose\n\nThis dashboard provides **prioritized, actionable insights** from the last 24 hours across all monitored SQL Servers. It automatically analyzes performance metrics, blocking events, resource usage, and maintenance needs to help you focus on what matters most.\n\n---\n\n## 🎯 Priority Levels\n\n| Priority | Color | Meaning | Action Required |\n|----------|-------|---------|------------------|\n| **CRITICAL** | 🔴 Red | Immediate attention needed | Investigate within 1 hour |\n| **HIGH** | 🟠 Orange | Important issue affecting performance | Review within 4 hours |\n| **MEDIUM** | 🟡 Yellow | Maintenance or optimization opportunity | Schedule within 24 hours |\n\n---\n\n## 📂 Insight Categories\n\n### Performance\n- **Slow Queries**: Queries averaging >1 second execution time\n- **Slow Procedures**: Stored procedures averaging >500ms\n- Includes execution counts and average durations\n- **Action**: Review execution plans, add indexes, optimize T-SQL\n\n### Blocking\n- **Blocking Chains**: Multiple sessions waiting on locks\n- Shows number of blocking chains and average wait time\n- **Action**: Identify blocking query, optimize transaction scope, add NOLOCK hints where appropriate\n\n### Deadlocks\n- **Deadlock Events**: Circular lock dependencies\n- Shows deadlock frequency\n- **Action**: Review deadlock graphs, adjust isolation levels, reorder operations\n\n### Resource\n- **High CPU**: Server CPU >80% for extended periods\n- **High Memory**: Available memory <20%\n- Shows average resource utilization\n- **Action**: Identify resource-intensive queries, add capacity, optimize workload\n\n### Maintenance\n- **Fragmented Indexes**: Indexes >30% fragmented\n- Shows count of indexes needing maintenance\n- **Action**: Schedule index rebuild/reorganize during maintenance window\n\n---\n\n## 🔍 How to Use This Dashboard\n\n### 1. **Filter by Server**\nUse the **Server** dropdown at the top to:\n- View insights for all servers (default)\n- Focus on a specific server\n- Compare issues across multiple servers\n\n### 2. **Sort by Priority**\nThe table is pre-sorted by priority (CRITICAL → HIGH → MEDIUM), then by most recent occurrence.\n\n### 3. **Review Recommendations**\nEach insight includes:\n- **Insight**: What was detected\n- **Recommendation**: Specific action to take\n- **Occurrences**: How many times it happened\n- **LastSeen**: When it last occurred\n\n### 4. **Take Action**\n- **CRITICAL items**: Investigate immediately using linked dashboards\n- **HIGH items**: Schedule for review within your current shift\n- **MEDIUM items**: Add to weekly maintenance tasks\n\n### 5. **Drill Down**\nFrom this dashboard, navigate to:\n- **Performance Analysis**: Detailed query performance data\n- **Query Store**: Plan regression analysis\n- **SQL Server Overview**: Real-time resource metrics\n- **Code Browser**: View procedure source code\n\n---\n\n## 📈 Common Scenarios\n\n### Morning Review (Daily Standup)\n1. Open this dashboard with \"All\" servers selected\n2. Review CRITICAL and HIGH priority items\n3. Assign issues to team members\n4. Check back in 4 hours to verify resolution\n\n### Single Server Troubleshooting\n1. Select problematic server from dropdown\n2. Identify top 3 issues by priority\n3. Use recommendations to guide investigation\n4. Navigate to specialized dashboards for deep dive\n\n### Weekly Planning\n1. Review MEDIUM priority items across all servers\n2. Group similar issues (e.g., all fragmented indexes)\n3. Schedule batch maintenance windows\n4. Track completion over time\n\n---\n\n## ⚙️ Thresholds and Detection Logic\n\n| Issue Type | Detection Threshold | Data Source |\n|------------|---------------------|-------------|\n| Slow Query | >1000ms avg duration | QueryMetrics |\n| Slow Procedure | >500ms avg duration | ProcedureMetrics |\n| High CPU | >80% for 5+ samples | PerformanceMetrics |\n| High Memory | <20% available for 5+ samples | PerformanceMetrics |\n| Fragmented Index | >30% fragmentation, 10+ indexes | IndexAnalysis |\n| Blocking | Any blocking chains detected | BlockingEvents |\n| Deadlock | Any deadlocks detected | DeadlockEvents |\n\n---\n\n## 🔔 No Insights?\n\nIf this dashboard shows **no data**, it means:\n- ✅ **Good news!** No critical or high-priority issues detected in last 24 hours\n- ✅ All queries performing well\n- ✅ No blocking or deadlocks\n- ✅ Resources within normal ranges\n- ✅ Indexes in good health\n\nThis is the desired state for a healthy SQL Server environment.\n\n---\n\n## 🎓 Best Practices\n\n1. **Daily Review**: Check this dashboard every morning\n2. **Proactive Monitoring**: Don't wait for user complaints\n3. **Track Trends**: Same issue appearing daily? Time for permanent fix\n4. **Prioritize Correctly**: CRITICAL > user experience, MEDIUM = future planning\n5. **Document Actions**: Keep notes on resolutions for knowledge base\n6. **Automate Where Possible**: Fragmented indexes? Set up SQL Agent job\n\n---\n\n## 🆘 Need Help?\n\n- **Query too slow**: → Performance Analysis dashboard\n- **Blocking issues**: → SQL Server Overview → Active Sessions\n- **Index problems**: → Table Details → Index tab\n- **Code changes**: → Code Browser → Search by object name\n\n---\n\n**ArcTrade**\n\nBuilt for DBAs, developers, and DevOps teams managing enterprise SQL Server environments.",
+        "mode": "markdown"
+      },
+      "pluginVersion": "10.2.0",
+      "title": "📖 How to Use This Dashboard",
+      "type": "text"
+    }
+  ],
+  "refresh": "5m",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["insights", "priorities", "daily-review"],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "MonitoringDB",
+          "value": "MonitoringDB"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Data Source",
+        "multi": false,
+        "name": "DS_MONITORINGDB",
+        "options": [],
+        "query": "mssql",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "${DS_MONITORINGDB}"
+        },
+        "definition": "SELECT DISTINCT ServerName FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Server",
+        "multi": true,
+        "name": "ServerName",
+        "options": [],
+        "query": "SELECT DISTINCT ServerName FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Insights - 24h Priorities",
+  "uid": "insights-24h",
+  "version": 1,
+  "weekStart": ""
+}
