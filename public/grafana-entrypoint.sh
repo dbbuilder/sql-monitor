@@ -21,8 +21,31 @@ mkdir -p "$PROVISIONING_DIR/datasources"
 
 # Download provisioning configurations
 echo "Downloading provisioning configs..."
-wget -q -O "$PROVISIONING_DIR/datasources/monitoringdb.yaml" \
-    "$GITHUB_REPO/provisioning/datasources/monitoringdb.yaml" || echo "Datasource config download failed (will configure manually)"
+
+# Generate datasource YAML dynamically from environment variables
+cat > "$PROVISIONING_DIR/datasources/monitoringdb.yaml" <<EOF
+apiVersion: 1
+
+datasources:
+  - name: MonitoringDB
+    type: mssql
+    access: proxy
+    url: ${MONITORINGDB_SERVER}:${MONITORINGDB_PORT}
+    database: ${MONITORINGDB_DATABASE}
+    user: ${MONITORINGDB_USER}
+    secureJsonData:
+      password: ${MONITORINGDB_PASSWORD}
+    jsonData:
+      maxOpenConns: 10
+      maxIdleConns: 2
+      connMaxLifetime: 14400
+      encrypt: 'true'
+      tlsSkipVerify: true
+    editable: false
+    isDefault: true
+EOF
+
+echo "  Datasource config generated from environment variables"
 
 wget -q -O "$PROVISIONING_DIR/dashboards/dashboards.yaml" \
     "$GITHUB_REPO/provisioning/dashboards/dashboards.yaml" || echo "Dashboard provider config download failed"
