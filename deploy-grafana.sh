@@ -234,8 +234,11 @@ deploy_azure() {
 
     # Get ACR credentials
     print_step "Retrieving ACR credentials..."
-    local acr_username=$(az acr credential show --name $acr_name --query username -o tsv)
-    local acr_password=$(az acr credential show --name $acr_name --query "passwords[0].value" -o tsv)
+    local acr_creds=$(az acr credential show --name $acr_name -o json)
+    local acr_username=$(echo "$acr_creds" | jq -r '.username')
+    local acr_password=$(echo "$acr_creds" | jq -r '.passwords[0].value')
+
+    print_step "ACR Username: $acr_username"
 
     # Deploy container instance with custom Grafana image from ACR
     # The image has the entrypoint script baked in - no command-line override needed
