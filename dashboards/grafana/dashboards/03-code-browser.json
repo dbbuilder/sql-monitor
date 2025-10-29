@@ -75,6 +75,72 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ObjectName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Select Object (View Dependencies & Code)",
+                    "url": "/d/${__dashboard.uid}?var-DatabaseName=${__data.fields.DatabaseName}&var-ObjectType=${__data.fields.ObjectType}&var-ObjectName=${__data.fields.ObjectName}&var-SchemaName=${__data.fields.SchemaName}&var-SelectedObject=${__data.fields.ObjectName}&var-SelectedSchema=${__data.fields.SchemaName}"
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ViewCode"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View Code",
+                    "url": "/d/${__dashboard.uid}/code-popup?var-DatabaseName=${__data.fields.DatabaseName}&var-SchemaName=${__data.fields.SchemaName}&var-ObjectName=${__data.fields.ObjectName}",
+                    "targetBlank": true
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "blue",
+                      "value": null
+                    }
+                  ]
+                }
+              }
+            ]
           }
         ]
       },
@@ -111,11 +177,11 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n    s.ServerName,\n    co.DatabaseName,\n    co.SchemaName,\n    co.ObjectName,\n    co.ObjectType,\n    co.LineCount,\n    co.CharacterCount,\n    co.DependencyCount,\n    co.CreatedDate,\n    co.ModifiedDate\nFROM dbo.CodeObjectMetadata co\nINNER JOIN dbo.Servers s ON co.ServerID = s.ServerID\nWHERE 1=1\n  AND (${DatabaseName:sqlstring} = 'All' OR co.DatabaseName = ${DatabaseName:sqlstring})\n  AND (${ObjectType:sqlstring} = 'All' OR co.ObjectType = ${ObjectType:sqlstring})\n  AND (${ObjectName:sqlstring} = '' OR co.ObjectName LIKE '%' + ${ObjectName:sqlstring} + '%')\nORDER BY co.LineCount DESC;",
+          "rawSql": "SELECT\n    s.ServerName,\n    co.DatabaseName,\n    co.SchemaName,\n    co.ObjectName,\n    co.ObjectType,\n    co.LineCount,\n    co.CharacterCount,\n    co.DependencyCount,\n    'View Code' AS ViewCode,\n    co.CreatedDate,\n    co.ModifiedDate\nFROM dbo.CodeObjectMetadata co\nINNER JOIN dbo.Servers s ON co.ServerID = s.ServerID\nWHERE 1=1\n  AND (${DatabaseName:sqlstring} = 'All' OR co.DatabaseName = ${DatabaseName:sqlstring})\n  AND (${ObjectType:sqlstring} = 'All' OR co.ObjectType = ${ObjectType:sqlstring})\n  AND (${ObjectName:sqlstring} = '' OR co.ObjectName LIKE '%' + ${ObjectName:sqlstring} + '%')\nORDER BY co.LineCount DESC;",
           "refId": "A"
         }
       ],
-      "title": "Code Objects",
+      "title": "Code Objects (Click ObjectName to View Dependencies, Click 'View Code' for Source)",
       "type": "table"
     },
     {
@@ -146,7 +212,38 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "To"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Jump to Object",
+                    "url": "/d/${__dashboard.uid}?var-DatabaseName=${DatabaseName}&var-ObjectName=${__data.fields.To:percentencode}"
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 10,
@@ -175,11 +272,95 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "-- Dependencies for selected object (what does this object depend on?)\nSELECT\n    dm.ReferencingSchemaName + '.' + dm.ReferencingObjectName AS [From],\n    dm.ReferencingObjectType AS [From Type],\n    dm.ReferencedSchemaName + '.' + dm.ReferencedObjectName AS [To],\n    dm.ReferencedObjectType AS [To Type],\n    CASE WHEN dm.IsSchemaDependent = 1 THEN 'Yes' ELSE 'No' END AS IsSchemaDependent,\n    CASE WHEN dm.IsAmbiguous = 1 THEN 'Yes' ELSE 'No' END AS IsAmbiguous\nFROM dbo.DependencyMetadata dm\nWHERE dm.DatabaseName = ${DatabaseName:sqlstring}\n  AND (${ObjectName:sqlstring} = '' OR dm.ReferencingObjectName LIKE '%' + ${ObjectName:sqlstring} + '%')\nORDER BY dm.ReferencingObjectName, dm.ReferencedObjectName;",
+          "rawSql": "-- Dependencies for selected object (what does this object depend on?)\nSELECT\n    dm.ReferencingSchemaName + '.' + dm.ReferencingObjectName AS [From],\n    dm.ReferencingObjectType AS [From Type],\n    dm.ReferencedSchemaName + '.' + dm.ReferencedObjectName AS [To],\n    dm.ReferencedObjectType AS [To Type],\n    CASE WHEN dm.IsSchemaDependent = 1 THEN 'Yes' ELSE 'No' END AS IsSchemaDependent,\n    CASE WHEN dm.IsAmbiguous = 1 THEN 'Yes' ELSE 'No' END AS IsAmbiguous\nFROM dbo.DependencyMetadata dm\nWHERE dm.DatabaseName = ${DatabaseName:sqlstring}\n  AND (\n    -- If object selected, show its dependencies\n    (${SelectedObject:sqlstring} != '' AND dm.ReferencingSchemaName = ${SelectedSchema:sqlstring} AND dm.ReferencingObjectName = ${SelectedObject:sqlstring})\n    OR\n    -- Otherwise, show all matching ObjectName search\n    (${SelectedObject:sqlstring} = '' AND (${ObjectName:sqlstring} = '' OR dm.ReferencingObjectName LIKE '%' + ${ObjectName:sqlstring} + '%'))\n  )\nORDER BY dm.ReferencingObjectName, dm.ReferencedObjectName;",
           "refId": "A"
         }
       ],
-      "title": "Dependencies (What does this object call?)",
+      "title": "Dependencies for: ${SelectedSchema}.${SelectedObject} (Click 'To' object to jump)",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "MonitoringDB"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "SourceCode"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "mode": "basic"
+                }
+              },
+              {
+                "id": "custom.width",
+                "value": 800
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 15,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "id": 3,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "MonitoringDB"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "-- Show source code for selected object\nSELECT\n    oc.ServerID,\n    oc.DatabaseName,\n    oc.SchemaName,\n    oc.ObjectName,\n    oc.ObjectType,\n    oc.SourceCode,\n    oc.LineCount,\n    oc.CharacterCount,\n    oc.CachedDate\nFROM dbo.ObjectCode oc\nWHERE oc.DatabaseName = ${DatabaseName:sqlstring}\n  AND oc.SchemaName = ${SelectedSchema:sqlstring}\n  AND oc.ObjectName = ${SelectedObject:sqlstring}\nORDER BY oc.CachedDate DESC;",
+          "refId": "A"
+        }
+      ],
+      "title": "Source Code for: ${SelectedSchema}.${SelectedObject}",
       "type": "table"
     }
   ],
@@ -246,6 +427,66 @@
         "hide": 0,
         "label": "Object Name (search)",
         "name": "ObjectName",
+        "options": [
+          {
+            "selected": true,
+            "text": "",
+            "value": ""
+          }
+        ],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "hide": 0,
+        "label": "Selected Schema",
+        "name": "SelectedSchema",
+        "options": [
+          {
+            "selected": true,
+            "text": "",
+            "value": ""
+          }
+        ],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "hide": 0,
+        "label": "Selected Object",
+        "name": "SelectedObject",
+        "options": [
+          {
+            "selected": true,
+            "text": "",
+            "value": ""
+          }
+        ],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "hide": 2,
+        "label": "Schema Name",
+        "name": "SchemaName",
         "options": [
           {
             "selected": true,
