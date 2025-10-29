@@ -482,7 +482,7 @@
             "uid": "${DS_MONITORINGDB}"
           },
           "format": "time_series",
-          "rawSql": "SELECT\n  CollectionTime AS time,\n  AVG(MetricValue) AS value,\n  s.ServerName AS metric\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.MetricCategory = 'CPU'\n  AND pm.MetricName = 'Percent'\n  AND pm.CollectionTime >= $__timeFrom()\n  AND pm.CollectionTime <= $__timeTo()\nGROUP BY CollectionTime, s.ServerName\nORDER BY CollectionTime ASC",
+          "rawSql": "SELECT\n  CollectionTime AS time,\n  AVG(MetricValue) AS value,\n  s.ServerName AS metric\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.MetricCategory = 'CPU'\n  AND pm.MetricName = 'Percent'\n  AND pm.CollectionTime >= $__timeFrom()\n  AND pm.CollectionTime <= $__timeTo()\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\nGROUP BY CollectionTime, s.ServerName\nORDER BY CollectionTime ASC",
           "refId": "A"
         }
       ],
@@ -580,7 +580,7 @@
             "uid": "${DS_MONITORINGDB}"
           },
           "format": "time_series",
-          "rawSql": "SELECT\n  CollectionTime AS time,\n  AVG(MetricValue) AS value,\n  s.ServerName AS metric\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.MetricCategory = 'Memory'\n  AND pm.MetricName = 'Percent'\n  AND pm.CollectionTime >= $__timeFrom()\n  AND pm.CollectionTime <= $__timeTo()\nGROUP BY CollectionTime, s.ServerName\nORDER BY CollectionTime ASC",
+          "rawSql": "SELECT\n  CollectionTime AS time,\n  AVG(MetricValue) AS value,\n  s.ServerName AS metric\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.MetricCategory = 'Memory'\n  AND pm.MetricName = 'Percent'\n  AND pm.CollectionTime >= $__timeFrom()\n  AND pm.CollectionTime <= $__timeTo()\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\nGROUP BY CollectionTime, s.ServerName\nORDER BY CollectionTime ASC",
           "refId": "A"
         }
       ],
@@ -921,7 +921,11 @@
   "refresh": "30s",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["sql-server", "monitoring", "performance"],
+  "tags": [
+    "sql-server",
+    "monitoring",
+    "performance"
+  ],
   "templating": {
     "list": [
       {
@@ -941,6 +945,62 @@
         "regex": "",
         "skipUrlSync": false,
         "type": "datasource"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "${DS_MONITORINGDB}"
+        },
+        "definition": "SELECT ServerName FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Server",
+        "multi": true,
+        "name": "ServerName",
+        "options": [],
+        "query": "SELECT ServerName FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "${DS_MONITORINGDB}"
+        },
+        "definition": "SELECT DISTINCT MetricCategory FROM dbo.PerformanceMetrics ORDER BY MetricCategory",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Metric Category",
+        "multi": true,
+        "name": "MetricCategory",
+        "options": [],
+        "query": "SELECT DISTINCT MetricCategory FROM dbo.PerformanceMetrics ORDER BY MetricCategory",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
       }
     ]
   },
