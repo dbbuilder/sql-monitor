@@ -916,6 +916,26 @@
       ],
       "title": "Top 15 Wait Events by Database (Last Hour)",
       "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "${DS_MONITORINGDB}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 32
+      },
+      "id": 104,
+      "options": {
+        "content": "# \ud83d\udcca SQL Server Monitoring - Developer Guide\n\n## What You're Seeing\n\nThis dashboard provides a **real-time overview** of all monitored SQL Server instances. Think of it as your \"mission control\" for database health.\n\n### Key Metrics Explained\n\n| Metric | What It Means | When to Worry |\n|--------|---------------|---------------|\n| **Active Servers** | How many SQL Servers we're monitoring | Should match your expected count |\n| **Active Alerts** | Current performance issues detected | >0 means investigate |\n| **Metrics Collected Today** | Data points gathered (every 5 min) | Low number = collection problem |\n| **CPU Usage** | Processor utilization per server | >85% sustained = performance issue |\n| **Memory Usage** | RAM consumption per server | >90% = potential out-of-memory |\n\n## \ud83c\udfaf How to Use This Dashboard\n\n### Filter by Server\nUse the **Server** dropdown (top) to:\n- View all servers (select \"All\")\n- Focus on specific server (select one)\n- Compare multiple servers (select 2+)\n\n### Filter by Metric Type\nUse the **Metric Category** dropdown to:\n- See all metrics (select \"All\")\n- Focus on CPU, Memory, Disk I/O, etc.\n- Troubleshoot specific subsystems\n\n### Adjust Time Range\nClick the time picker (top right) to:\n- View last 6 hours (default)\n- Zoom to specific incident time\n- Compare week-over-week trends\n\n## \ud83d\udd0d Common Scenarios\n\n### \"Is the database healthy right now?\"\n- Check **Active Alerts** (should be 0)\n- CPU gauges should be green (<70%)\n- Memory gauges should be green (<85%)\n- No red panels = all good!\n\n### \"Which server is having issues?\"\n- Red/orange gauges indicate problems\n- Click server name to drill down\n- Check Wait Statistics dashboard for details\n\n### \"Why is my application slow?\"\n1. Note the time when slowness occurred\n2. Filter to that server in the dropdown\n3. Check CPU/Memory charts for spikes\n4. Look at Database Performance table for slow queries\n5. Review Wait Statistics (what was SQL waiting for?)\n\n## \ud83d\udcc8 Understanding the Charts\n\n### Performance Trends (Time Series)\n- **Blue line**: CPU usage over time\n- **Purple line**: Memory usage over time\n- Spikes = temporary load\n- Sustained elevation = capacity issue\n\n### Database Performance Table\n- **SizeMB**: How much disk space database uses\n- **AvgDuration**: How long typical queries take\n- Long durations + small database = bad queries\n- Long durations + huge database = missing indexes\n\n### Wait Statistics\n- Shows what SQL Server spends time waiting for\n- **PAGEIOLATCH_\\***: Disk I/O slow\n- **LCK_M_\\***: Blocking between queries\n- **SOS_SCHEDULER_YIELD**: CPU maxed out\n- Low waits = good performance!\n\n## \ud83d\udca1 Tips for Non-DBA Developers\n\n- **Green = Good**, Yellow = Watch, Red = Problem\n- Hover over any chart point to see exact values\n- Click legend items to show/hide specific servers\n- Use time range picker to zoom into incidents\n- Refresh button (top right) for latest data\n- Share URL with filters applied to team members\n\n## \ud83d\udd17 Related Dashboards\n\nNavigate to these dashboards for deeper analysis:\n\n- **Detailed Metrics View** - Raw metric time series\n- **Performance Analysis** - Query and index performance\n- **Code Browser** - View stored procedures and dependencies\n- **Table Browser** - Database schema and sizes\n\n## \ud83c\udd98 When to Escalate\n\nContact your DBA team if you see:\n- CPU or Memory sustained >90% for >10 minutes\n- Active Alerts count increasing\n- Database sizes growing rapidly (>10% per day)\n- Wait times consistently high\n- Application timeouts correlating with metric spikes\n\n## \ud83d\udcda Learn More\n\n- **What are Wait Statistics?** https://sqlskills.com/help/waits/\n- **SQL Server Performance Tuning** https://learn.microsoft.com/en-us/sql/relational-databases/performance/\n- **Index Tuning** https://learn.microsoft.com/en-us/sql/relational-databases/indexes/\n\n---\n*Dashboard auto-refreshes every 1 minute | Last manual refresh: Use browser refresh or click refresh icon*\n",
+        "mode": "markdown"
+      },
+      "pluginVersion": "10.2.0",
+      "title": "\ud83d\udcd6 Developer Guide",
+      "type": "text"
     }
   ],
   "refresh": "30s",
