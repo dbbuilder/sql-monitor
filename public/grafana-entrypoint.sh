@@ -81,7 +81,8 @@ echo "Setting permissions..."
 chown -R 472:472 "$DASHBOARDS_DIR"
 chown -R 472:472 "$PROVISIONING_DIR"
 
-echo "Starting Grafana..."
+echo "Starting Grafana as grafana user..."
 
-# Start Grafana with original entrypoint
-exec /run.sh
+# Switch to grafana user (UID 472) and start Grafana
+# Note: Use 'su' to drop privileges from root to grafana user
+exec su -s /bin/sh grafana -c '/run.sh'
