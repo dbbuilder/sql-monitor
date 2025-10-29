@@ -232,6 +232,7 @@ deploy_azure() {
     print_step "Entrypoint script: $entrypoint_url"
 
     # Deploy container instance with GitHub-based dashboard download
+    # Split environment variables: regular (non-sensitive) and secure (passwords)
     az container create \
         --resource-group "$AZURE_RESOURCE_GROUP" \
         --name "$AZURE_CONTAINER_NAME" \
@@ -242,7 +243,6 @@ deploy_azure() {
         --cpu 2 \
         --memory 4 \
         --environment-variables \
-            GF_SECURITY_ADMIN_PASSWORD="$GRAFANA_ADMIN_PASSWORD" \
             GF_SERVER_ROOT_URL="http://${AZURE_DNS_LABEL}.${AZURE_LOCATION}.azurecontainer.io" \
             GF_AUTH_ANONYMOUS_ENABLED=false \
             GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/00-dashboard-browser.json \
@@ -251,6 +251,8 @@ deploy_azure() {
             MONITORINGDB_PORT="$MONITORINGDB_PORT" \
             MONITORINGDB_DATABASE="$MONITORINGDB_DATABASE" \
             MONITORINGDB_USER="$MONITORINGDB_USER" \
+        --secure-environment-variables \
+            GF_SECURITY_ADMIN_PASSWORD="$GRAFANA_ADMIN_PASSWORD" \
             MONITORINGDB_PASSWORD="$MONITORINGDB_PASSWORD" \
         --command-line "/bin/sh -c 'apk add --no-cache wget && wget -O /tmp/entrypoint.sh ${entrypoint_url} && chmod +x /tmp/entrypoint.sh && /tmp/entrypoint.sh'" \
         --location "$AZURE_LOCATION"

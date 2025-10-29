@@ -52,6 +52,12 @@ for dashboard in "${DASHBOARDS[@]}"; do
 done
 
 echo "Dashboard download complete!"
+
+# Fix permissions (Grafana runs as user 472)
+echo "Setting permissions..."
+chown -R 472:472 "$DASHBOARDS_DIR"
+chown -R 472:472 "$PROVISIONING_DIR"
+
 echo "Starting Grafana..."
 
 # Start Grafana with original entrypoint
