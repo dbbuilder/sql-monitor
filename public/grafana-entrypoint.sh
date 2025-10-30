@@ -98,6 +98,7 @@ DASHBOARDS=(
     "06-query-store.json"
     "07-audit-logging.json"
     "08-insights.json"
+    "08-aws-rds-performance-insights.json"
     "09-dbcc-integrity-checks.json"
     "detailed-metrics.json"
     "sql-server-overview.json"
