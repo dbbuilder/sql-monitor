@@ -795,7 +795,7 @@
         },
         "datasource": {
           "type": "mssql",
-          "uid": "monitoringdb"
+          "uid": "PACBEEDECF159CDCA"
         },
         "definition": "SELECT 'All' AS ServerName UNION SELECT DISTINCT ServerName FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
         "hide": 0,

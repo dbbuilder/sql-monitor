@@ -25,7 +25,7 @@
     {
       "datasource": {
         "type": "mssql",
-        "uid": "monitoringdb"
+        "uid": "PACBEEDECF159CDCA"
       },
       "fieldConfig": {
         "defaults": {
@@ -107,7 +107,7 @@
         {
           "datasource": {
             "type": "mssql",
-            "uid": "monitoringdb"
+            "uid": "PACBEEDECF159CDCA"
           },
           "format": "time_series",
           "rawSql": "SELECT\n  CollectionTime AS time,\n  MetricValue AS value,\n  s.ServerName AS metric\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.MetricCategory = 'CPU'\n  AND pm.MetricName = 'Percent'\n  AND pm.CollectionTime >= DATEADD(day, -7, GETUTCDATE())\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\nORDER BY pm.CollectionTime ASC",
@@ -120,7 +120,7 @@
     {
       "datasource": {
         "type": "mssql",
-        "uid": "monitoringdb"
+        "uid": "PACBEEDECF159CDCA"
       },
       "fieldConfig": {
         "defaults": {
@@ -202,7 +202,7 @@
         {
           "datasource": {
             "type": "mssql",
-            "uid": "monitoringdb"
+            "uid": "PACBEEDECF159CDCA"
           },
           "format": "time_series",
           "rawSql": "SELECT\n  CollectionTime AS time,\n  MetricValue AS value,\n  s.ServerName AS metric\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.MetricCategory = 'Memory'\n  AND pm.MetricName = 'Percent'\n  AND pm.CollectionTime >= DATEADD(day, -7, GETUTCDATE())\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\nORDER BY pm.CollectionTime ASC",
@@ -215,7 +215,7 @@
     {
       "datasource": {
         "type": "mssql",
-        "uid": "monitoringdb"
+        "uid": "PACBEEDECF159CDCA"
       },
       "fieldConfig": {
         "defaults": {
@@ -268,7 +268,7 @@
         {
           "datasource": {
             "type": "mssql",
-            "uid": "monitoringdb"
+            "uid": "PACBEEDECF159CDCA"
           },
           "format": "table",
           "rawSql": "SELECT TOP 1\n  MetricValue\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.MetricCategory = 'CPU'\n  AND pm.MetricName = 'Percent'\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\nORDER BY pm.CollectionTime DESC",
@@ -281,7 +281,7 @@
     {
       "datasource": {
         "type": "mssql",
-        "uid": "monitoringdb"
+        "uid": "PACBEEDECF159CDCA"
       },
       "fieldConfig": {
         "defaults": {
@@ -334,7 +334,7 @@
         {
           "datasource": {
             "type": "mssql",
-            "uid": "monitoringdb"
+            "uid": "PACBEEDECF159CDCA"
           },
           "format": "table",
           "rawSql": "SELECT TOP 1\n  MetricValue\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.MetricCategory = 'Memory'\n  AND pm.MetricName = 'Percent'\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\nORDER BY pm.CollectionTime DESC",
@@ -347,7 +347,7 @@
     {
       "datasource": {
         "type": "mssql",
-        "uid": "monitoringdb"
+        "uid": "PACBEEDECF159CDCA"
       },
       "fieldConfig": {
         "defaults": {
@@ -394,7 +394,7 @@
         {
           "datasource": {
             "type": "mssql",
-            "uid": "monitoringdb"
+            "uid": "PACBEEDECF159CDCA"
           },
           "format": "table",
           "rawSql": "SELECT COUNT(*) AS value\nFROM dbo.Servers s\nWHERE s.IsActive = 1\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))",
@@ -407,7 +407,7 @@
     {
       "datasource": {
         "type": "mssql",
-        "uid": "monitoringdb"
+        "uid": "PACBEEDECF159CDCA"
       },
       "fieldConfig": {
         "defaults": {
@@ -454,7 +454,7 @@
         {
           "datasource": {
             "type": "mssql",
-            "uid": "monitoringdb"
+            "uid": "PACBEEDECF159CDCA"
           },
           "format": "table",
           "rawSql": "SELECT COUNT(*) AS value\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.CollectionTime >= DATEADD(day, -7, GETUTCDATE())\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))",
@@ -467,7 +467,7 @@
     {
       "datasource": {
         "type": "mssql",
-        "uid": "monitoringdb"
+        "uid": "PACBEEDECF159CDCA"
       },
       "fieldConfig": {
         "defaults": {
@@ -545,7 +545,7 @@
         {
           "datasource": {
             "type": "mssql",
-            "uid": "monitoringdb"
+            "uid": "PACBEEDECF159CDCA"
           },
           "format": "time_series",
           "rawSql": "SELECT\n  pm.CollectionTime AS time,\n  pm.MetricValue AS value,\n  s.ServerName + ' - ' + pm.MetricName AS metric\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.MetricCategory = 'Disk'\n  AND pm.MetricName IN ('ReadMBps', 'WriteMBps')\n  AND pm.CollectionTime >= DATEADD(day, -7, GETUTCDATE())\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\nORDER BY pm.CollectionTime ASC",
@@ -558,7 +558,7 @@
     {
       "datasource": {
         "type": "mssql",
-        "uid": "monitoringdb"
+        "uid": "PACBEEDECF159CDCA"
       },
       "fieldConfig": {
         "defaults": {
@@ -641,7 +641,7 @@
         {
           "datasource": {
             "type": "mssql",
-            "uid": "monitoringdb"
+            "uid": "PACBEEDECF159CDCA"
           },
           "format": "table",
           "rawSql": "SELECT\n  s.ServerName,\n  s.Environment,\n  CASE WHEN s.IsActive = 1 THEN 1 ELSE 0 END AS IsActive,\n  s.CreatedDate\nFROM dbo.Servers s\nWHERE ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\nORDER BY s.IsActive DESC, s.ServerName ASC",
@@ -691,7 +691,7 @@
         },
         "datasource": {
           "type": "mssql",
-          "uid": "monitoringdb"
+          "uid": "PACBEEDECF159CDCA"
         },
         "definition": "SELECT DISTINCT ServerName FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
         "hide": 0,
