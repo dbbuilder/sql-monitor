@@ -459,6 +459,42 @@ EXEC dbo.usp_AddServer
 "
 ```
 
+## DNS Configuration
+
+### Custom Domain Setup (sqlmonitor.servicevision.io)
+
+Configure DNS using Name.com API for any deployment platform:
+
+```bash
+# Quick Setup (Auto-detects deployment platform)
+cd deployment
+./configure-dns-namecom.sh
+
+# Manual Setup (Specify platform)
+./configure-dns-namecom.sh --platform aws --target my-alb.us-east-1.elb.amazonaws.com
+./configure-dns-namecom.sh --platform azure --target sqlmonitor.westus2.azurecontainer.io
+./configure-dns-namecom.sh --platform gcp --target ghs.googlehosted.com
+./configure-dns-namecom.sh --platform onprem --target 203.0.113.45
+```
+
+**Features:**
+- ✅ Auto-detects AWS/Azure/GCP/On-Premise deployments
+- ✅ Creates DNS records via Name.com API
+- ✅ Verifies DNS propagation
+- ✅ Tests HTTPS connectivity
+- ✅ Configures GCP Cloud Run domain mapping
+
+**Complete Guide:** See [CONFIGURE-DNS-NAMECOM.md](CONFIGURE-DNS-NAMECOM.md)
+
+### DNS Record Types by Platform
+
+| Platform | Record Type | Target Value | Notes |
+|----------|-------------|--------------|-------|
+| AWS ECS | CNAME | ALB DNS name | Get with `aws elbv2 describe-load-balancers` |
+| Azure ACI | CNAME | Azure FQDN | Get with `az container show` |
+| GCP Cloud Run | CNAME | ghs.googlehosted.com | Requires domain mapping in GCP |
+| On-Premise | A | Public IP address | Get with `curl ifconfig.me` |
+
 ## SSL/TLS Configuration
 
 ### Option 1: Cloudflare (FREE, Recommended)

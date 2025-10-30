@@ -310,20 +310,49 @@ gcloud run deploy $SERVICE_NAME \
 
 ### Step 7: Configure Custom Domain and SSL (Optional)
 
+**Option A: Automated Setup with Name.com API (Recommended)**
+
+```bash
+# Navigate to deployment directory
+cd /path/to/sql-monitor/deployment
+
+# Run automated DNS configuration script
+# Auto-detects GCP Cloud Run deployment and configures DNS
+./configure-dns-namecom.sh
+
+# Script will:
+# 1. Detect Cloud Run service URL
+# 2. Create CNAME record: sqlmonitor.servicevision.io → ghs.googlehosted.com
+# 3. Create GCP domain mapping
+# 4. Provision SSL certificate automatically (5-30 minutes)
+# 5. Verify DNS propagation
+# 6. Test HTTPS connectivity
+
+# Expected output:
+# ✅ DNS record created successfully!
+# ✅ GCP domain mapping configured
+# ✅ DNS propagated successfully!
+# Grafana URL: https://sqlmonitor.servicevision.io
+```
+
+**Option B: Manual DNS Configuration**
+
 ```bash
 # Map custom domain
-gcloud run domain-mappings create --service=$SERVICE_NAME --domain=grafana.example.com --region=$REGION
+gcloud run domain-mappings create --service=$SERVICE_NAME --domain=sqlmonitor.servicevision.io --region=$REGION
 
 # Get DNS records to add to your DNS provider
-gcloud run domain-mappings describe --domain=grafana.example.com --region=$REGION
+gcloud run domain-mappings describe --domain=sqlmonitor.servicevision.io --region=$REGION
 
 # Add DNS records (from output above)
-# Type: CNAME, Name: grafana, Value: ghs.googlehosted.com
+# Type: CNAME, Name: sqlmonitor, Value: ghs.googlehosted.com
 # SSL certificate will be provisioned automatically (5-30 minutes)
 
 # Verify certificate status
-gcloud run domain-mappings describe --domain=grafana.example.com --region=$REGION --format='value(status.certificate.status)'
+gcloud run domain-mappings describe --domain=sqlmonitor.servicevision.io --region=$REGION --format='value(status.certificate.status)'
 ```
+
+**Complete DNS Guide:** See [CONFIGURE-DNS-NAMECOM.md](CONFIGURE-DNS-NAMECOM.md) for detailed instructions
 
 ## Verification
 
