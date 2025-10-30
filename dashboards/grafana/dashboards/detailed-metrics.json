@@ -101,7 +101,7 @@
         {
           "datasource": {
             "type": "mssql",
-            "uid": "monitoringdb"
+            "uid": "PACBEEDECF159CDCA"
           },
           "format": "table",
           "rawSql": "SELECT TOP 100\n  pm.CollectionTime,\n  s.ServerName,\n  pm.MetricCategory,\n  pm.MetricName,\n  pm.MetricValue,\n  pm.DatabaseName\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.CollectionTime >= $__timeFrom()\n  AND pm.CollectionTime <= $__timeTo()\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n  AND ('$__all' IN (${MetricCategory:singlequote}) OR pm.MetricCategory IN (${MetricCategory:singlequote}))\n  AND (pm.DatabaseName IS NULL OR pm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb'))\nORDER BY pm.CollectionTime DESC",
@@ -192,7 +192,7 @@
         {
           "datasource": {
             "type": "mssql",
-            "uid": "monitoringdb"
+            "uid": "PACBEEDECF159CDCA"
           },
           "format": "time_series",
           "rawSql": "SELECT\n  DATEADD(SECOND, DATEDIFF(SECOND, '2000-01-01', pm.CollectionTime) / (${TimeInterval} * 60) * (${TimeInterval} * 60), '2000-01-01') AS time,\n  AVG(pm.MetricValue) AS value,\n  s.ServerName + ' - ' + pm.MetricCategory + ' - ' + pm.MetricName AS metric\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.CollectionTime >= $__timeFrom()\n  AND pm.CollectionTime <= $__timeTo()\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n  AND ('$__all' IN (${MetricCategory:singlequote}) OR pm.MetricCategory IN (${MetricCategory:singlequote}))\n  AND (pm.DatabaseName IS NULL OR pm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb'))\nGROUP BY \n  DATEADD(SECOND, DATEDIFF(SECOND, '2000-01-01', pm.CollectionTime) / (${TimeInterval} * 60) * (${TimeInterval} * 60), '2000-01-01'),\n  s.ServerName + ' - ' + pm.MetricCategory + ' - ' + pm.MetricName\nORDER BY time ASC",
