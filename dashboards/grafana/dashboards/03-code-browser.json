@@ -11,6 +11,32 @@
   "panels": [
     {
       "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 999,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "## \ud83d\udcbb Code Browser Dashboard\n\n### Purpose\nSearch, browse, and analyze SQL Server code objects (stored procedures, functions, views, triggers) across all monitored databases.\n\n### Features\n\n**Code Search**\n- Full-text search across all code\n- Search by object name\n- Filter by object type\n- Filter by database\n- Case-insensitive search\n\n**Object Metadata**\n- Line count and character count\n- Created/modified dates\n- Dependency tracking\n- Cross-database references\n\n**Code Analysis**\n- Find unused procedures\n- Identify complex code (high line count)\n- Track recent modifications\n- Dependency impact analysis\n\n### Search Examples\n\n**Find all procedures with specific table reference**:\n```\nSearch: \"FROM dbo.Customers\"\nFilter: Type = PROCEDURE\n```\n\n**Find error handling patterns**:\n```\nSearch: \"BEGIN TRY\"\nResult: All procedures using try/catch\n```\n\n**Find dynamic SQL**:\n```\nSearch: \"EXEC sp_executesql\" OR \"EXEC(\"\n```\n\n**Find deprecated features**:\n```\nSearch: \"SET ROWCOUNT\" OR \"NOLOCK\"\n```\n\n### Object Types\n\n- **PROCEDURE**: Stored procedures\n- **FUNCTION**: Scalar, inline, and table-valued functions\n- **VIEW**: Database views\n- **TRIGGER**: DML and DDL triggers\n\n### Hyperlinks\n\nClick on any object to view:\n- **Full source code** (sp_helptext style)\n- **Dependencies**: What it uses\n- **Referenced by**: What uses it\n- **Metadata**: Size, dates, complexity\n\nClick on database/table names to:\n- **Database**: View all objects in that database\n- **Table**: View table structure (sp_help style)\n- **Schema**: Filter objects by schema\n\n### Common Use Cases\n\n**Use Case 1: Impact Analysis**\n```\nScenario: Need to modify the Customers table\nSteps:\n1. Search for \"Customers\" in Code Browser\n2. Review all procedures/views that reference it\n3. Click each object to see usage context\n4. Document affected objects before making changes\n```\n\n**Use Case 2: Code Review**\n```\nScenario: Review all procedures modified in last 30 days\nSteps:\n1. Sort by \"Modified Date\" descending\n2. Filter date range to last 30 days\n3. Review code for standards compliance\n4. Check for missing error handling\n```\n\n**Use Case 3: Find Similar Code**\n```\nScenario: Standardize error handling across all procs\nSteps:\n1. Search for error handling patterns\n2. Export list of procedures\n3. Review each for consistency\n4. Create template for future development\n```\n\n**Use Case 4: Unused Code Detection**\n```sql\n-- Find procedures never executed (via Query Store)\nSELECT\n    com.SchemaName + '.' + com.ObjectName AS ProcedureName,\n    com.ModifiedDate,\n    com.LineCount\nFROM dbo.CodeObjectMetadata com\nWHERE com.ObjectType = 'PROCEDURE'\n  AND NOT EXISTS (\n      SELECT 1\n      FROM sys.dm_exec_procedure_stats ps\n      INNER JOIN sys.objects o ON ps.object_id = o.object_id\n      WHERE o.name = com.ObjectName\n  )\nORDER BY com.LineCount DESC;\n```\n\n### Code Standards Checks\n\n**Check 1: Error Handling**\n```\nSearch: Procedures WITHOUT \"BEGIN TRY\"\nResult: Procedures lacking error handling\n```\n\n**Check 2: SET NOCOUNT ON**\n```\nSearch: Procedures WITHOUT \"SET NOCOUNT ON\"\nResult: Procedures that may cause network chattiness\n```\n\n**Check 3: Parameter Sniffing Protection**\n```\nSearch: \"RECOMPILE\" OR \"OPTIMIZE FOR UNKNOWN\"\nResult: Procedures with parameter sniffing mitigation\n```\n\n**Check 4: Transaction Management**\n```\nSearch: \"BEGIN TRAN\" AND NOT \"COMMIT\" AND NOT \"ROLLBACK\"\nResult: Potential transaction issues\n```\n\n### Metadata Queries\n\n**Top 10 Largest Procedures**:\n```sql\nSELECT TOP 10\n    ServerName, DatabaseName, SchemaName, ObjectName,\n    LineCount, CharacterCount,\n    ModifiedDate\nFROM dbo.CodeObjectMetadata\nWHERE ObjectType = 'PROCEDURE'\nORDER BY LineCount DESC;\n```\n\n**Recently Modified Objects**:\n```sql\nSELECT\n    ServerName, DatabaseName, SchemaName, ObjectName, ObjectType,\n    ModifiedDate\nFROM dbo.CodeObjectMetadata\nWHERE ModifiedDate >= DATEADD(day, -7, GETUTCDATE())\nORDER BY ModifiedDate DESC;\n```\n\n**Cross-Database Dependencies**:\n```sql\nSELECT\n    dm.ReferencingSchemaName + '.' + dm.ReferencingObjectName AS [Referencing Object],\n    dm.ReferencedSchemaName + '.' + dm.ReferencedObjectName AS [Referenced Object],\n    dm.ReferencingDatabaseName,\n    dm.ReferencedDatabaseName\nFROM dbo.DependencyMetadata dm\nWHERE dm.ReferencingDatabaseName != dm.ReferencedDatabaseName\nORDER BY dm.ReferencingObjectName;\n```\n\n### Dashboard Variables\n\n- **$ServerName**: Filter by SQL Server instance\n- **$DatabaseName**: Filter by database\n- **$ObjectType**: Filter by object type (Procedure, Function, View, Trigger)\n- **$SearchText**: Full-text search across all code\n\n### System Database Exclusion\n\nThe following system databases are automatically excluded:\n- master\n- model\n- msdb\n- tempdb\n- MonitoringDB\n- DBATools\n\n### Refresh Rate\n- Code metadata: Refreshed nightly at 2 AM\n- Search index: Updated every 4 hours\n- Dashboard: Real-time filtering\n\n---\n**Pro Tip**: Use the Code Browser before making schema changes to identify all dependent objects and prevent breaking changes.\n",
+        "mode": "markdown"
+      },
+      "pluginVersion": "10.2.0",
+      "title": "About Code Browser",
+      "type": "text",
+      "transparent": false
+    },
+    {
+      "datasource": {
         "type": "mssql",
         "uid": "MonitoringDB"
       },
@@ -148,7 +174,7 @@
         "h": 12,
         "w": 24,
         "x": 0,
-        "y": 0
+        "y": 12
       },
       "id": 1,
       "options": {
@@ -251,7 +277,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 12
+        "y": 24
       },
       "id": 2,
       "options": {
@@ -337,7 +363,7 @@
         "h": 15,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 34
       },
       "id": 3,
       "options": {
@@ -378,7 +404,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 37
+        "y": 49
       },
       "id": 4,
       "options": {

@@ -10,12 +10,38 @@
   "liveNow": false,
   "panels": [
     {
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 999,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "## \u26a1 Performance Analysis Dashboard\n\n### Purpose\nDeep-dive into SQL Server performance metrics with historical trending, correlation analysis, and bottleneck identification.\n\n### Key Metrics\n\n**CPU Analysis**\n- SQL Server CPU vs System CPU\n- Top CPU-consuming procedures\n- CPU pressure indicators\n- Signal wait percentage\n\n**Memory Analysis**\n- Buffer pool utilization\n- Page life expectancy (PLE)\n- Memory grants pending\n- Buffer cache hit ratio\n\n**Disk I/O**\n- Read/write IOPS\n- Latency (avg/max)\n- Top I/O consuming queries\n- Tempdb pressure\n\n**Wait Statistics**\n- Top wait types by duration\n- Wait time trends\n- Resource contention patterns\n- Lock waits vs latch waits\n\n### Time Interval Selection\n\nUse the time picker to analyze different periods:\n\n- **Last 1 hour**: Real-time troubleshooting\n- **Last 6 hours**: Identify patterns during business hours\n- **Last 24 hours**: Daily performance review\n- **Last 7 days**: Weekly trending and capacity planning\n- **Custom range**: Incident investigation\n\n### Correlation Analysis\n\nLook for patterns across metrics:\n\n1. **High CPU + High Signal Waits** = CPU bottleneck\n2. **High Memory + Low PLE** = Memory pressure\n3. **High Disk Latency + PAGEIOLATCH waits** = Storage bottleneck\n4. **High Lock waits + Blocking** = Concurrency issues\n\n### Common Scenarios\n\n**Scenario 1: Sudden CPU Spike**\n```sql\n-- Find CPU-intensive procedures during spike\nSELECT TOP 10\n    DatabaseName, ProcedureName,\n    AvgCPUMs, ExecutionCount,\n    CollectionTime\nFROM dbo.ProcedureMetrics\nWHERE CollectionTime BETWEEN '2025-10-30 09:00' AND '2025-10-30 09:30'\nORDER BY AvgCPUMs * ExecutionCount DESC;\n```\n\n**Scenario 2: Memory Pressure**\n```sql\n-- Check PLE trend\nSELECT\n    CollectionTime,\n    MetricValue AS PageLifeExpectancy\nFROM dbo.PerformanceMetrics\nWHERE MetricCategory = 'Memory'\n  AND MetricName = 'PageLifeExpectancy'\n  AND CollectionTime >= DATEADD(day, -1, GETUTCDATE())\nORDER BY CollectionTime;\n\n-- Target: PLE > 300 (5 minutes)\n```\n\n**Scenario 3: Disk I/O Investigation**\n```sql\n-- Find queries causing high physical reads\nSELECT TOP 10\n    QueryHash, DatabaseName,\n    TotalLogicalReads, TotalPhysicalReads,\n    PhysicalReadPct = CAST(TotalPhysicalReads * 100.0 / NULLIF(TotalLogicalReads, 0) AS DECIMAL(5,2))\nFROM dbo.QueryMetrics\nWHERE CollectionTime >= DATEADD(hour, -1, GETUTCDATE())\nORDER BY TotalPhysicalReads DESC;\n```\n\n### Thresholds\n\n| Metric | Good | Warning | Critical |\n|--------|------|---------|----------|\n| CPU % | < 60 | 60-80 | > 80 |\n| Memory % | < 80 | 80-90 | > 90 |\n| Disk Latency | < 10ms | 10-20ms | > 20ms |\n| PLE | > 300s | 100-300s | < 100s |\n| Buffer Cache Hit | > 95% | 90-95% | < 90% |\n\n### Dashboard Variables\n\n- **$ServerName**: Filter by specific SQL Server instance\n- **$TimeRange**: Adjust time window for analysis\n- **$Interval**: Data aggregation interval (1m, 5m, 15m, 1h)\n\n---\n**Pro Tip**: Compare weekday vs weekend performance to identify workload patterns.\n",
+        "mode": "markdown"
+      },
+      "pluginVersion": "10.2.0",
+      "title": "About Performance Analysis",
+      "type": "text",
+      "transparent": false
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 0
+        "y": 12
       },
       "id": 10,
       "panels": [],
@@ -188,7 +214,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 1
+        "y": 13
       },
       "id": 1,
       "options": {
@@ -233,7 +259,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 11
+        "y": 23
       },
       "id": 11,
       "panels": [],
@@ -432,7 +458,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 12
+        "y": 24
       },
       "id": 2,
       "options": {
@@ -477,7 +503,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 34
       },
       "id": 12,
       "panels": [],
@@ -542,7 +568,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 23
+        "y": 35
       },
       "id": 3,
       "options": {
@@ -635,7 +661,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 23
+        "y": 35
       },
       "id": 4,
       "options": {
@@ -679,7 +705,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 31
+        "y": 43
       },
       "id": 13,
       "options": {

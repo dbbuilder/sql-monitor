@@ -11,6 +11,32 @@
   "panels": [
     {
       "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 999,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "## \ud83d\udca1 Insights - 24 Hour Priorities\n\n### Purpose\nThis dashboard provides actionable intelligence by analyzing your SQL Server environment and prioritizing issues that need attention. Think of it as your daily health check and to-do list.\n\n### What You'll Find Here\n\n**\ud83d\udd34 Critical Issues**\n- Severely fragmented indexes (>80% fragmentation)\n- Tables with excessive row count but no indexes\n- Blocking chains lasting > 5 minutes\n- Memory pressure indicators\n- Deadlock patterns\n\n**\ud83d\udfe0 High Priority**\n- Moderately fragmented indexes (30-80%)\n- Missing indexes with high impact\n- Long-running queries (> 1 minute)\n- High CPU procedures\n- Page life expectancy concerns\n\n**\ud83d\udfe1 Medium Priority**\n- Statistics that need updates\n- Unused indexes consuming space\n- Maintenance job failures\n- Query plan cache bloat\n\n### How to Use This Dashboard\n\n1. **Start Your Day Here**: Open this dashboard each morning to see overnight issues\n2. **Click Server Names**: Navigate directly to that server's detailed metrics\n3. **Click Issue Descriptions**: View recommendations and remediation steps\n4. **Priority Order**: Address CRITICAL first, then HIGH, then MEDIUM\n5. **Time-Based View**: Toggle between 24h, 7d, and 30d views\n\n### Common Actions\n\n**Index Fragmentation**\n```sql\n-- See recommendation\nEXEC dbo.usp_GetRecommendations @ServerID = 1, @RecommendationType = 'INDEX';\n\n-- Apply fix\nALTER INDEX [IndexName] ON [Schema].[Table] REBUILD;\n```\n\n**Missing Indexes**\n```sql\n-- View missing index details\nSELECT * FROM dbo.IndexAnalysis\nWHERE RecommendedAction = 'CREATE'\nORDER BY EstimatedImpact DESC;\n```\n\n**Blocking Chains**\n```sql\n-- Identify blocking sessions\nSELECT * FROM dbo.BlockingEvents\nWHERE EndTime IS NULL\nORDER BY StartTime;\n```\n\n### Best Practices\n\n\u2705 **Do**:\n- Review this dashboard daily\n- Address critical issues within 24 hours\n- Schedule maintenance during low-usage windows\n- Document actions taken\n\n\u274c **Don't**:\n- Ignore critical alerts\n- Rebuild all indexes without checking fragmentation\n- Run maintenance during business hours\n- Apply changes to production without testing\n\n### Refresh Rate\n- Dashboard: 30 seconds\n- Data collection: 5 minutes\n- Recommendation engine: 15 minutes\n\n---\n**Pro Tip**: Export high-priority items to a ticket system for team collaboration.\n",
+        "mode": "markdown"
+      },
+      "pluginVersion": "10.2.0",
+      "title": "About Insights Dashboard",
+      "type": "text",
+      "transparent": false
+    },
+    {
+      "datasource": {
         "type": "mssql",
         "uid": "${DS_MONITORINGDB}"
       },
@@ -181,7 +207,7 @@
         "h": 20,
         "w": 24,
         "x": 0,
-        "y": 0
+        "y": 12
       },
       "id": 1,
       "options": {
@@ -189,7 +215,9 @@
         "footer": {
           "countRows": false,
           "fields": "",
-          "reducer": ["sum"],
+          "reducer": [
+            "sum"
+          ],
           "show": false
         },
         "showHeader": true,
@@ -224,7 +252,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 32
       },
       "id": 2,
       "options": {
@@ -233,18 +261,22 @@
           "showLineNumbers": false,
           "showMiniMap": false
         },
-        "content": "# 📊 Insights Dashboard - User Guide\n\n## Purpose\n\nThis dashboard provides **prioritized, actionable insights** from the last 24 hours across all monitored SQL Servers. It automatically analyzes performance metrics, blocking events, resource usage, and maintenance needs to help you focus on what matters most.\n\n---\n\n## 🎯 Priority Levels\n\n| Priority | Color | Meaning | Action Required |\n|----------|-------|---------|------------------|\n| **CRITICAL** | 🔴 Red | Immediate attention needed | Investigate within 1 hour |\n| **HIGH** | 🟠 Orange | Important issue affecting performance | Review within 4 hours |\n| **MEDIUM** | 🟡 Yellow | Maintenance or optimization opportunity | Schedule within 24 hours |\n\n---\n\n## 📂 Insight Categories\n\n### Performance\n- **Slow Queries**: Queries averaging >1 second execution time\n- **Slow Procedures**: Stored procedures averaging >500ms\n- Includes execution counts and average durations\n- **Action**: Review execution plans, add indexes, optimize T-SQL\n\n### Blocking\n- **Blocking Chains**: Multiple sessions waiting on locks\n- Shows number of blocking chains and average wait time\n- **Action**: Identify blocking query, optimize transaction scope, add NOLOCK hints where appropriate\n\n### Deadlocks\n- **Deadlock Events**: Circular lock dependencies\n- Shows deadlock frequency\n- **Action**: Review deadlock graphs, adjust isolation levels, reorder operations\n\n### Resource\n- **High CPU**: Server CPU >80% for extended periods\n- **High Memory**: Available memory <20%\n- Shows average resource utilization\n- **Action**: Identify resource-intensive queries, add capacity, optimize workload\n\n### Maintenance\n- **Fragmented Indexes**: Indexes >30% fragmented\n- Shows count of indexes needing maintenance\n- **Action**: Schedule index rebuild/reorganize during maintenance window\n\n---\n\n## 🔍 How to Use This Dashboard\n\n### 1. **Filter by Server**\nUse the **Server** dropdown at the top to:\n- View insights for all servers (default)\n- Focus on a specific server\n- Compare issues across multiple servers\n\n### 2. **Sort by Priority**\nThe table is pre-sorted by priority (CRITICAL → HIGH → MEDIUM), then by most recent occurrence.\n\n### 3. **Review Recommendations**\nEach insight includes:\n- **Insight**: What was detected\n- **Recommendation**: Specific action to take\n- **Occurrences**: How many times it happened\n- **LastSeen**: When it last occurred\n\n### 4. **Take Action**\n- **CRITICAL items**: Investigate immediately using linked dashboards\n- **HIGH items**: Schedule for review within your current shift\n- **MEDIUM items**: Add to weekly maintenance tasks\n\n### 5. **Drill Down**\nFrom this dashboard, navigate to:\n- **Performance Analysis**: Detailed query performance data\n- **Query Store**: Plan regression analysis\n- **SQL Server Overview**: Real-time resource metrics\n- **Code Browser**: View procedure source code\n\n---\n\n## 📈 Common Scenarios\n\n### Morning Review (Daily Standup)\n1. Open this dashboard with \"All\" servers selected\n2. Review CRITICAL and HIGH priority items\n3. Assign issues to team members\n4. Check back in 4 hours to verify resolution\n\n### Single Server Troubleshooting\n1. Select problematic server from dropdown\n2. Identify top 3 issues by priority\n3. Use recommendations to guide investigation\n4. Navigate to specialized dashboards for deep dive\n\n### Weekly Planning\n1. Review MEDIUM priority items across all servers\n2. Group similar issues (e.g., all fragmented indexes)\n3. Schedule batch maintenance windows\n4. Track completion over time\n\n---\n\n## ⚙️ Thresholds and Detection Logic\n\n| Issue Type | Detection Threshold | Data Source |\n|------------|---------------------|-------------|\n| Slow Query | >1000ms avg duration | QueryMetrics |\n| Slow Procedure | >500ms avg duration | ProcedureMetrics |\n| High CPU | >80% for 5+ samples | PerformanceMetrics |\n| High Memory | <20% available for 5+ samples | PerformanceMetrics |\n| Fragmented Index | >30% fragmentation, 10+ indexes | IndexAnalysis |\n| Blocking | Any blocking chains detected | BlockingEvents |\n| Deadlock | Any deadlocks detected | DeadlockEvents |\n\n---\n\n## 🔔 No Insights?\n\nIf this dashboard shows **no data**, it means:\n- ✅ **Good news!** No critical or high-priority issues detected in last 24 hours\n- ✅ All queries performing well\n- ✅ No blocking or deadlocks\n- ✅ Resources within normal ranges\n- ✅ Indexes in good health\n\nThis is the desired state for a healthy SQL Server environment.\n\n---\n\n## 🎓 Best Practices\n\n1. **Daily Review**: Check this dashboard every morning\n2. **Proactive Monitoring**: Don't wait for user complaints\n3. **Track Trends**: Same issue appearing daily? Time for permanent fix\n4. **Prioritize Correctly**: CRITICAL > user experience, MEDIUM = future planning\n5. **Document Actions**: Keep notes on resolutions for knowledge base\n6. **Automate Where Possible**: Fragmented indexes? Set up SQL Agent job\n\n---\n\n## 🆘 Need Help?\n\n- **Query too slow**: → Performance Analysis dashboard\n- **Blocking issues**: → SQL Server Overview → Active Sessions\n- **Index problems**: → Table Details → Index tab\n- **Code changes**: → Code Browser → Search by object name\n\n---\n\n**ArcTrade**\n\nBuilt for DBAs, developers, and DevOps teams managing enterprise SQL Server environments.",
+        "content": "# \ud83d\udcca Insights Dashboard - User Guide\n\n## Purpose\n\nThis dashboard provides **prioritized, actionable insights** from the last 24 hours across all monitored SQL Servers. It automatically analyzes performance metrics, blocking events, resource usage, and maintenance needs to help you focus on what matters most.\n\n---\n\n## \ud83c\udfaf Priority Levels\n\n| Priority | Color | Meaning | Action Required |\n|----------|-------|---------|------------------|\n| **CRITICAL** | \ud83d\udd34 Red | Immediate attention needed | Investigate within 1 hour |\n| **HIGH** | \ud83d\udfe0 Orange | Important issue affecting performance | Review within 4 hours |\n| **MEDIUM** | \ud83d\udfe1 Yellow | Maintenance or optimization opportunity | Schedule within 24 hours |\n\n---\n\n## \ud83d\udcc2 Insight Categories\n\n### Performance\n- **Slow Queries**: Queries averaging >1 second execution time\n- **Slow Procedures**: Stored procedures averaging >500ms\n- Includes execution counts and average durations\n- **Action**: Review execution plans, add indexes, optimize T-SQL\n\n### Blocking\n- **Blocking Chains**: Multiple sessions waiting on locks\n- Shows number of blocking chains and average wait time\n- **Action**: Identify blocking query, optimize transaction scope, add NOLOCK hints where appropriate\n\n### Deadlocks\n- **Deadlock Events**: Circular lock dependencies\n- Shows deadlock frequency\n- **Action**: Review deadlock graphs, adjust isolation levels, reorder operations\n\n### Resource\n- **High CPU**: Server CPU >80% for extended periods\n- **High Memory**: Available memory <20%\n- Shows average resource utilization\n- **Action**: Identify resource-intensive queries, add capacity, optimize workload\n\n### Maintenance\n- **Fragmented Indexes**: Indexes >30% fragmented\n- Shows count of indexes needing maintenance\n- **Action**: Schedule index rebuild/reorganize during maintenance window\n\n---\n\n## \ud83d\udd0d How to Use This Dashboard\n\n### 1. **Filter by Server**\nUse the **Server** dropdown at the top to:\n- View insights for all servers (default)\n- Focus on a specific server\n- Compare issues across multiple servers\n\n### 2. **Sort by Priority**\nThe table is pre-sorted by priority (CRITICAL \u2192 HIGH \u2192 MEDIUM), then by most recent occurrence.\n\n### 3. **Review Recommendations**\nEach insight includes:\n- **Insight**: What was detected\n- **Recommendation**: Specific action to take\n- **Occurrences**: How many times it happened\n- **LastSeen**: When it last occurred\n\n### 4. **Take Action**\n- **CRITICAL items**: Investigate immediately using linked dashboards\n- **HIGH items**: Schedule for review within your current shift\n- **MEDIUM items**: Add to weekly maintenance tasks\n\n### 5. **Drill Down**\nFrom this dashboard, navigate to:\n- **Performance Analysis**: Detailed query performance data\n- **Query Store**: Plan regression analysis\n- **SQL Server Overview**: Real-time resource metrics\n- **Code Browser**: View procedure source code\n\n---\n\n## \ud83d\udcc8 Common Scenarios\n\n### Morning Review (Daily Standup)\n1. Open this dashboard with \"All\" servers selected\n2. Review CRITICAL and HIGH priority items\n3. Assign issues to team members\n4. Check back in 4 hours to verify resolution\n\n### Single Server Troubleshooting\n1. Select problematic server from dropdown\n2. Identify top 3 issues by priority\n3. Use recommendations to guide investigation\n4. Navigate to specialized dashboards for deep dive\n\n### Weekly Planning\n1. Review MEDIUM priority items across all servers\n2. Group similar issues (e.g., all fragmented indexes)\n3. Schedule batch maintenance windows\n4. Track completion over time\n\n---\n\n## \u2699\ufe0f Thresholds and Detection Logic\n\n| Issue Type | Detection Threshold | Data Source |\n|------------|---------------------|-------------|\n| Slow Query | >1000ms avg duration | QueryMetrics |\n| Slow Procedure | >500ms avg duration | ProcedureMetrics |\n| High CPU | >80% for 5+ samples | PerformanceMetrics |\n| High Memory | <20% available for 5+ samples | PerformanceMetrics |\n| Fragmented Index | >30% fragmentation, 10+ indexes | IndexAnalysis |\n| Blocking | Any blocking chains detected | BlockingEvents |\n| Deadlock | Any deadlocks detected | DeadlockEvents |\n\n---\n\n## \ud83d\udd14 No Insights?\n\nIf this dashboard shows **no data**, it means:\n- \u2705 **Good news!** No critical or high-priority issues detected in last 24 hours\n- \u2705 All queries performing well\n- \u2705 No blocking or deadlocks\n- \u2705 Resources within normal ranges\n- \u2705 Indexes in good health\n\nThis is the desired state for a healthy SQL Server environment.\n\n---\n\n## \ud83c\udf93 Best Practices\n\n1. **Daily Review**: Check this dashboard every morning\n2. **Proactive Monitoring**: Don't wait for user complaints\n3. **Track Trends**: Same issue appearing daily? Time for permanent fix\n4. **Prioritize Correctly**: CRITICAL > user experience, MEDIUM = future planning\n5. **Document Actions**: Keep notes on resolutions for knowledge base\n6. **Automate Where Possible**: Fragmented indexes? Set up SQL Agent job\n\n---\n\n## \ud83c\udd98 Need Help?\n\n- **Query too slow**: \u2192 Performance Analysis dashboard\n- **Blocking issues**: \u2192 SQL Server Overview \u2192 Active Sessions\n- **Index problems**: \u2192 Table Details \u2192 Index tab\n- **Code changes**: \u2192 Code Browser \u2192 Search by object name\n\n---\n\n**ArcTrade**\n\nBuilt for DBAs, developers, and DevOps teams managing enterprise SQL Server environments.",
         "mode": "markdown"
       },
       "pluginVersion": "10.2.0",
-      "title": "📖 How to Use This Dashboard",
+      "title": "\ud83d\udcd6 How to Use This Dashboard",
       "type": "text"
     }
   ],
   "refresh": "5m",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["insights", "priorities", "daily-review"],
+  "tags": [
+    "insights",
+    "priorities",
+    "daily-review"
+  ],
   "templating": {
     "list": [
       {

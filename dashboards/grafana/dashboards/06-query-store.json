@@ -11,6 +11,32 @@
   "panels": [
     {
       "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 999,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "## \ud83d\udd0d Query Store Dashboard\n\n### Purpose\nAnalyze query performance using SQL Server Query Store data to identify plan regressions, performance degradations, and optimization opportunities.\n\n### What is Query Store?\n\nQuery Store is SQL Server's built-in query performance tracking feature that captures:\n- Query execution plans\n- Runtime execution statistics\n- Plan forcing capabilities\n- Query wait statistics\n\n### Key Panels\n\n**Plan Regressions**\n- Queries with performance degradation\n- Plan changes causing slowdowns\n- Comparison: before vs after\n- Automatic detection of regressions\n\n**Top Queries by Duration**\n- Highest total duration\n- Resource-intensive queries\n- Execution frequency\n- Average vs max duration\n\n**Top Queries by CPU**\n- CPU time consumption\n- CPU-bound operations\n- Worker thread usage\n\n**Top Queries by Logical Reads**\n- I/O intensive queries\n- Buffer pool pressure\n- Missing index indicators\n\n### Query Store States\n\n- **READ_WRITE**: Actively collecting data \u2705\n- **READ_ONLY**: Disk space limit reached \u26a0\ufe0f\n- **OFF**: Not enabled \u274c\n\n**Enable Query Store**:\n```sql\nALTER DATABASE [YourDatabase]\nSET QUERY_STORE = ON (\n    OPERATION_MODE = READ_WRITE,\n    CLEANUP_POLICY = (STALE_QUERY_THRESHOLD_DAYS = 90),\n    DATA_FLUSH_INTERVAL_SECONDS = 900,\n    INTERVAL_LENGTH_MINUTES = 5,\n    MAX_STORAGE_SIZE_MB = 1000,\n    QUERY_CAPTURE_MODE = AUTO,\n    SIZE_BASED_CLEANUP_MODE = AUTO\n);\n```\n\n### Investigating Plan Regressions\n\n**Step 1: Identify Regression**\n- Look for sudden duration increases\n- Check \"Plan Changes\" column\n- Note QueryHash and PlanHash\n\n**Step 2: Compare Plans**\n```sql\n-- Get plan details\nSELECT\n    qrs.plan_id,\n    qrs.avg_duration/1000.0 AS avg_duration_ms,\n    qrs.avg_cpu_time/1000.0 AS avg_cpu_ms,\n    qrs.avg_logical_io_reads,\n    qrs.execution_type_desc,\n    qsp.query_plan\nFROM sys.query_store_runtime_stats qrs\nINNER JOIN sys.query_store_plan qsp ON qrs.plan_id = qsp.plan_id\nWHERE qsp.query_id = [QueryID]\nORDER BY qrs.last_execution_time DESC;\n```\n\n**Step 3: Force Good Plan**\n```sql\n-- Force a known-good plan\nEXEC sp_query_store_force_plan\n    @query_id = [QueryID],\n    @plan_id = [GoodPlanID];\n```\n\n**Step 4: Monitor Results**\n- Compare performance before/after\n- Verify plan stability\n- Document in change log\n\n### Common Issues\n\n**Issue 1: Query Store Full**\n```sql\n-- Check space usage\nSELECT\n    actual_state_desc,\n    current_storage_size_mb,\n    max_storage_size_mb,\n    CAST(current_storage_size_mb * 100.0 / max_storage_size_mb AS DECIMAL(5,2)) AS pct_used\nFROM sys.database_query_store_options;\n\n-- Solution: Increase size or reduce retention\nALTER DATABASE [YourDatabase]\nSET QUERY_STORE (MAX_STORAGE_SIZE_MB = 2000);\n```\n\n**Issue 2: Parameter Sniffing**\n```sql\n-- Identify parameter-sensitive queries\nSELECT\n    q.query_id,\n    qt.query_sql_text,\n    COUNT(DISTINCT p.plan_id) AS plan_count,\n    MAX(rs.avg_duration) / MIN(rs.avg_duration) AS duration_variance\nFROM sys.query_store_query q\nINNER JOIN sys.query_store_query_text qt ON q.query_text_id = qt.query_text_id\nINNER JOIN sys.query_store_plan p ON q.query_id = p.query_id\nINNER JOIN sys.query_store_runtime_stats rs ON p.plan_id = rs.plan_id\nGROUP BY q.query_id, qt.query_sql_text\nHAVING COUNT(DISTINCT p.plan_id) > 5\n   AND MAX(rs.avg_duration) / MIN(rs.avg_duration) > 10\nORDER BY duration_variance DESC;\n\n-- Solution: RECOMPILE hint or OPTIMIZE FOR UNKNOWN\n```\n\n### Best Practices\n\n\u2705 **Do**:\n- Enable Query Store on all user databases\n- Review plan regressions weekly\n- Force plans only after testing\n- Monitor Query Store space usage\n- Clear stale data regularly\n\n\u274c **Don't**:\n- Disable Query Store in production\n- Force plans without understanding why\n- Ignore \"Query Store Full\" warnings\n- Keep Query Store in READ_ONLY mode long-term\n\n### Performance Impact\n\nQuery Store overhead: **1-5% CPU** (typical)\n- Minimal in most workloads\n- Async writes to disk\n- Built-in throttling\n\n### Dashboard Refresh\n- Real-time: 30 seconds\n- Query Store flush: 15 minutes\n- Aggregated stats: 5 minutes\n\n---\n**Pro Tip**: Use Query Store to validate performance improvements after applying indexes or code changes.\n",
+        "mode": "markdown"
+      },
+      "pluginVersion": "10.2.0",
+      "title": "About Query Store",
+      "type": "text",
+      "transparent": false
+    },
+    {
+      "datasource": {
         "type": "mssql",
         "uid": "${DS_MONITORINGDB}"
       },
@@ -44,7 +70,7 @@
         "h": 4,
         "w": 6,
         "x": 0,
-        "y": 0
+        "y": 12
       },
       "id": 1,
       "options": {
@@ -103,7 +129,7 @@
         "h": 4,
         "w": 6,
         "x": 6,
-        "y": 0
+        "y": 12
       },
       "id": 2,
       "options": {
@@ -170,7 +196,7 @@
         "h": 4,
         "w": 6,
         "x": 12,
-        "y": 0
+        "y": 12
       },
       "id": 3,
       "options": {
@@ -237,7 +263,7 @@
         "h": 4,
         "w": 6,
         "x": 18,
-        "y": 0
+        "y": 12
       },
       "id": 4,
       "options": {
@@ -375,7 +401,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 4
+        "y": 16
       },
       "id": 5,
       "options": {
@@ -469,7 +495,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 14
+        "y": 26
       },
       "id": 6,
       "options": {
@@ -559,7 +585,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 14
+        "y": 26
       },
       "id": 7,
       "options": {
@@ -731,7 +757,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 34
       },
       "id": 8,
       "options": {
@@ -764,7 +790,7 @@
           "refId": "A"
         }
       ],
-      "title": "Plan Regressions (Queries ≥50% Slower Than Baseline)",
+      "title": "Plan Regressions (Queries \u226550% Slower Than Baseline)",
       "type": "table"
     },
     {
@@ -776,22 +802,26 @@
         "h": 12,
         "w": 24,
         "x": 0,
-        "y": 32
+        "y": 44
       },
       "id": 100,
       "options": {
-        "content": "# ⚡ Query Store Performance Analysis - Developer Guide\n\n## What Is Query Store?\n\n**Query Store** is SQL Server's \"flight data recorder\" for queries - it captures every query execution, plans used, and performance metrics over time. Think of it as **performance monitoring autopilot**.\n\n### Why Query Store Matters\n\n| Without Query Store | With Query Store |\n|---------------------|------------------|\n| \"Query was slow yesterday, but fast today. Why?\" | Compare execution plans before/after to find regression |\n| \"Did our deployment break performance?\" | See exact plan changes at deployment time |\n| \"Which query is causing CPU spikes?\" | Identify culprit query with historical trends |\n| \"Should I add this index?\" | A/B test plan changes and measure impact |\n\n## 📊 Dashboard Metrics Explained\n\n### Plan Regressions Detected\n**What it is**: Queries that got **≥50% slower** compared to 7-day baseline\n\n**Color coding**:\n- **Green (0-10)**: Normal variation\n- **Yellow (10-50)**: Investigate patterns\n- **Red (>50)**: Serious performance degradation\n\n**Common causes**:\n- Index dropped or disabled\n- Statistics out of date (stale estimates)\n- Parameter sniffing (wrong plan cached)\n- Server configuration changed (MAXDOP, memory)\n\n### Avg Query Duration\n**What it is**: Average execution time across all queries\n\n**Thresholds**:\n- **Green (<1000ms)**: Healthy, fast queries\n- **Yellow (1000-5000ms)**: Acceptable for complex reports\n- **Red (>5000ms)**: User-facing queries likely timing out\n\n### Total Query Executions\n**What it is**: Sum of all query runs in time window\n\n**Use case**: Correlate with application traffic\n- Spike = Traffic increase or loop bug\n- Drop = Outage or users blocked\n\n## 🎯 Common Scenarios\n\n### \"Our application got slow after deployment\"\n1. Set time range to deployment window (e.g., 2025-10-28 15:00 to 16:00)\n2. Check **Plan Regressions** table\n3. Look for queries with high **RegressionPercent** (>100% = 2x slower)\n4. Click **QueryText_Preview** to identify the query\n5. Compare **BaselineAvgDurationMs** vs **CurrentAvgDurationMs**\n6. **Root cause**:\n   - If plan changed → Recompile with `OPTION (RECOMPILE)`\n   - If statistics stale → `UPDATE STATISTICS TableName WITH FULLSCAN`\n   - If index missing → Add missing index from recommendations\n\n### \"Which query is using all the CPU?\"\n1. Open **Top 20 Slowest Queries** table\n2. Sort by **AvgCPUMs** (descending)\n3. Look for queries with high CPU but low logical reads\n   - High CPU + Low reads = CPU-bound (complex calculations, string ops)\n   - High CPU + High reads = I/O-bound (table scans, missing indexes)\n4. Click through to **Code Browser** to review query source\n5. Check for:\n   - Functions on indexed columns (kills index usage)\n   - CURSOR operations (replace with set-based logic)\n   - Excessive parallelism (tune MAXDOP)\n\n### \"Did our index help performance?\"\n1. Note time when index was added (e.g., 15:30 UTC)\n2. Split time range: Before (14:00-15:30), After (15:30-17:00)\n3. Find query in **Top 20 Slowest Queries**\n4. Compare **AvgDurationMs** before vs after\n5. Calculate improvement: `(OldDuration - NewDuration) / OldDuration * 100%`\n6. **Expected**: 50-90% improvement for good index\n7. **If no improvement**: Index not used (check execution plan)\n\n### \"Query fast in dev, slow in production\"\n**Parameter Sniffing Issue**\n\n1. Check **Query Duration Trends** chart\n2. Look for \"saw-tooth\" pattern (fast, fast, slow, fast, slow)\n3. This indicates different execution plans for same query\n4. **Root cause**: Query cached plan for parameter A (100 rows), but production uses parameter B (1 million rows)\n5. **Fix options**:\n   - `OPTION (RECOMPILE)` - Recompile every time (small overhead)\n   - `OPTION (OPTIMIZE FOR UNKNOWN)` - Generic plan (safe middle ground)\n   - `OPTION (OPTIMIZE FOR (@Param = 'typical_value'))` - Optimize for common case\n\n## 💡 Understanding the Charts\n\n### Query Duration Trends\n**Time series showing execution time over time**\n\n**Patterns to recognize**:\n- **Flat line**: Consistent performance (good!)\n- **Sudden spike**: Plan regression or lock contention\n- **Gradual climb**: Data growth, indexes need rebuilding\n- **Oscillating**: Parameter sniffing (different plans)\n\n### Query Execution Frequency\n**How often queries run over time**\n\n**What to look for**:\n- **Spikes**: Loop bug (query running in tight loop)\n- **Expected patterns**: Business hours vs off-hours\n- **Correlation**: Does high frequency correlate with slow performance?\n\n### Plan Regressions Table\n**Queries that got slower, with before/after comparison**\n\n**Key columns**:\n- **RegressionPercent**: How much slower (100% = 2x, 200% = 3x)\n- **BaselineAvgDurationMs**: Performance last week\n- **CurrentAvgDurationMs**: Performance now\n- **FirstSeenTime / LastSeenTime**: When query was captured\n\n**Action threshold**: Investigate any query >100% regression\n\n## 🔧 Optimization Workflow\n\n### Step 1: Identify Problem Query\n- Use **Top 20 Slowest Queries** or **Plan Regressions** table\n- Note **QueryText**, **DatabaseName**, **AvgDurationMs**\n\n### Step 2: Get Full Query Text\n```sql\n-- In SSMS or Azure Data Studio\nSELECT QueryText\nFROM dbo.QueryStoreSnapshots\nWHERE QueryText LIKE '%partial_text_from_dashboard%'\nORDER BY CollectionTime DESC;\n```\n\n### Step 3: Analyze Execution Plan\n- Paste query into SSMS\n- Click \"Display Estimated Execution Plan\" (Ctrl+L)\n- Look for:\n  - **Table Scans** (red!) → Add index\n  - **Key Lookups** (yellow) → Add covering index\n  - **High cost operators** (>50%) → Focus optimization here\n  - **Parallelism** (multiple threads) → May need simpler query\n  - **Missing index hints** (green) → Consider adding\n\n### Step 4: Implement Fix\nCommon fixes:\n- **Add index**: On WHERE/JOIN columns\n- **Update statistics**: `UPDATE STATISTICS TableName WITH FULLSCAN`\n- **Rewrite query**: Avoid functions on indexed columns\n- **Force recompile**: `OPTION (RECOMPILE)` or `sp_recompile`\n- **Tune parallelism**: `OPTION (MAXDOP 4)`\n\n### Step 5: Measure Impact\n- Wait 15-30 minutes for new metrics\n- Compare **AvgDurationMs** before vs after\n- Check **Query Duration Trends** for sustained improvement\n- Verify no plan regressions in other queries\n\n## ⚠️ Common Pitfalls\n\n### 1. Comparing Different Time Windows\n**Mistake**: Comparing last 7 days to last 24 hours\n**Fix**: Use same-length time windows for before/after comparison\n\n### 2. Ignoring Execution Count\n**Mistake**: Optimizing query that runs once per day\n**Fix**: Focus on high-frequency queries (ExecutionCount > 1000)\n\n### 3. Over-Indexing\n**Mistake**: Adding index for every slow query\n**Fix**: Balance read performance vs write overhead (limit 5-10 indexes per table)\n\n### 4. Not Testing in Production-Like Data\n**Mistake**: Query fast on 1000 rows (dev), slow on 10 million rows (prod)\n**Fix**: Load test with realistic data volumes\n\n## 📚 Advanced Topics\n\n### Query Store Retention\n- **Current setup**: 90 days retention\n- **Storage**: ~100MB per 1 million query executions\n- **Cleanup**: Automatic purge of oldest data when full\n\n### Forcing Query Plans\n```sql\n-- If regression detected, force \"good\" plan\nEXEC sp_query_store_force_plan @query_id = 123, @plan_id = 456;\n\n-- Revert to auto-selection\nEXEC sp_query_store_unforce_plan @query_id = 123, @plan_id = 456;\n```\n\n### Clearing Query Store\n```sql\n-- Nuclear option: Clear all Query Store data\nALTER DATABASE [YourDB] SET QUERY_STORE CLEAR ALL;\n```\n\n## 🔗 Related Dashboards\n\n- **Performance Analysis** - Stored procedure performance\n- **Code Browser** - View query source code\n- **Detailed Metrics** - Server-level performance\n- **System Overview** - Overall health check\n\n## 🆘 When to Escalate to DBA\n\n- Plan regression >200% (query 3x slower)\n- High-frequency query (>10k executions/hour) degraded >50%\n- Multiple queries regressed after same event (deployment, failover)\n- Query Store taking >500MB storage (may need purge)\n- Parameter sniffing affecting critical queries\n\n---\n*Query Store captures data every 5 minutes | 90-day retention | Plan forcing available for critical queries*",
+        "content": "# \u26a1 Query Store Performance Analysis - Developer Guide\n\n## What Is Query Store?\n\n**Query Store** is SQL Server's \"flight data recorder\" for queries - it captures every query execution, plans used, and performance metrics over time. Think of it as **performance monitoring autopilot**.\n\n### Why Query Store Matters\n\n| Without Query Store | With Query Store |\n|---------------------|------------------|\n| \"Query was slow yesterday, but fast today. Why?\" | Compare execution plans before/after to find regression |\n| \"Did our deployment break performance?\" | See exact plan changes at deployment time |\n| \"Which query is causing CPU spikes?\" | Identify culprit query with historical trends |\n| \"Should I add this index?\" | A/B test plan changes and measure impact |\n\n## \ud83d\udcca Dashboard Metrics Explained\n\n### Plan Regressions Detected\n**What it is**: Queries that got **\u226550% slower** compared to 7-day baseline\n\n**Color coding**:\n- **Green (0-10)**: Normal variation\n- **Yellow (10-50)**: Investigate patterns\n- **Red (>50)**: Serious performance degradation\n\n**Common causes**:\n- Index dropped or disabled\n- Statistics out of date (stale estimates)\n- Parameter sniffing (wrong plan cached)\n- Server configuration changed (MAXDOP, memory)\n\n### Avg Query Duration\n**What it is**: Average execution time across all queries\n\n**Thresholds**:\n- **Green (<1000ms)**: Healthy, fast queries\n- **Yellow (1000-5000ms)**: Acceptable for complex reports\n- **Red (>5000ms)**: User-facing queries likely timing out\n\n### Total Query Executions\n**What it is**: Sum of all query runs in time window\n\n**Use case**: Correlate with application traffic\n- Spike = Traffic increase or loop bug\n- Drop = Outage or users blocked\n\n## \ud83c\udfaf Common Scenarios\n\n### \"Our application got slow after deployment\"\n1. Set time range to deployment window (e.g., 2025-10-28 15:00 to 16:00)\n2. Check **Plan Regressions** table\n3. Look for queries with high **RegressionPercent** (>100% = 2x slower)\n4. Click **QueryText_Preview** to identify the query\n5. Compare **BaselineAvgDurationMs** vs **CurrentAvgDurationMs**\n6. **Root cause**:\n   - If plan changed \u2192 Recompile with `OPTION (RECOMPILE)`\n   - If statistics stale \u2192 `UPDATE STATISTICS TableName WITH FULLSCAN`\n   - If index missing \u2192 Add missing index from recommendations\n\n### \"Which query is using all the CPU?\"\n1. Open **Top 20 Slowest Queries** table\n2. Sort by **AvgCPUMs** (descending)\n3. Look for queries with high CPU but low logical reads\n   - High CPU + Low reads = CPU-bound (complex calculations, string ops)\n   - High CPU + High reads = I/O-bound (table scans, missing indexes)\n4. Click through to **Code Browser** to review query source\n5. Check for:\n   - Functions on indexed columns (kills index usage)\n   - CURSOR operations (replace with set-based logic)\n   - Excessive parallelism (tune MAXDOP)\n\n### \"Did our index help performance?\"\n1. Note time when index was added (e.g., 15:30 UTC)\n2. Split time range: Before (14:00-15:30), After (15:30-17:00)\n3. Find query in **Top 20 Slowest Queries**\n4. Compare **AvgDurationMs** before vs after\n5. Calculate improvement: `(OldDuration - NewDuration) / OldDuration * 100%`\n6. **Expected**: 50-90% improvement for good index\n7. **If no improvement**: Index not used (check execution plan)\n\n### \"Query fast in dev, slow in production\"\n**Parameter Sniffing Issue**\n\n1. Check **Query Duration Trends** chart\n2. Look for \"saw-tooth\" pattern (fast, fast, slow, fast, slow)\n3. This indicates different execution plans for same query\n4. **Root cause**: Query cached plan for parameter A (100 rows), but production uses parameter B (1 million rows)\n5. **Fix options**:\n   - `OPTION (RECOMPILE)` - Recompile every time (small overhead)\n   - `OPTION (OPTIMIZE FOR UNKNOWN)` - Generic plan (safe middle ground)\n   - `OPTION (OPTIMIZE FOR (@Param = 'typical_value'))` - Optimize for common case\n\n## \ud83d\udca1 Understanding the Charts\n\n### Query Duration Trends\n**Time series showing execution time over time**\n\n**Patterns to recognize**:\n- **Flat line**: Consistent performance (good!)\n- **Sudden spike**: Plan regression or lock contention\n- **Gradual climb**: Data growth, indexes need rebuilding\n- **Oscillating**: Parameter sniffing (different plans)\n\n### Query Execution Frequency\n**How often queries run over time**\n\n**What to look for**:\n- **Spikes**: Loop bug (query running in tight loop)\n- **Expected patterns**: Business hours vs off-hours\n- **Correlation**: Does high frequency correlate with slow performance?\n\n### Plan Regressions Table\n**Queries that got slower, with before/after comparison**\n\n**Key columns**:\n- **RegressionPercent**: How much slower (100% = 2x, 200% = 3x)\n- **BaselineAvgDurationMs**: Performance last week\n- **CurrentAvgDurationMs**: Performance now\n- **FirstSeenTime / LastSeenTime**: When query was captured\n\n**Action threshold**: Investigate any query >100% regression\n\n## \ud83d\udd27 Optimization Workflow\n\n### Step 1: Identify Problem Query\n- Use **Top 20 Slowest Queries** or **Plan Regressions** table\n- Note **QueryText**, **DatabaseName**, **AvgDurationMs**\n\n### Step 2: Get Full Query Text\n```sql\n-- In SSMS or Azure Data Studio\nSELECT QueryText\nFROM dbo.QueryStoreSnapshots\nWHERE QueryText LIKE '%partial_text_from_dashboard%'\nORDER BY CollectionTime DESC;\n```\n\n### Step 3: Analyze Execution Plan\n- Paste query into SSMS\n- Click \"Display Estimated Execution Plan\" (Ctrl+L)\n- Look for:\n  - **Table Scans** (red!) \u2192 Add index\n  - **Key Lookups** (yellow) \u2192 Add covering index\n  - **High cost operators** (>50%) \u2192 Focus optimization here\n  - **Parallelism** (multiple threads) \u2192 May need simpler query\n  - **Missing index hints** (green) \u2192 Consider adding\n\n### Step 4: Implement Fix\nCommon fixes:\n- **Add index**: On WHERE/JOIN columns\n- **Update statistics**: `UPDATE STATISTICS TableName WITH FULLSCAN`\n- **Rewrite query**: Avoid functions on indexed columns\n- **Force recompile**: `OPTION (RECOMPILE)` or `sp_recompile`\n- **Tune parallelism**: `OPTION (MAXDOP 4)`\n\n### Step 5: Measure Impact\n- Wait 15-30 minutes for new metrics\n- Compare **AvgDurationMs** before vs after\n- Check **Query Duration Trends** for sustained improvement\n- Verify no plan regressions in other queries\n\n## \u26a0\ufe0f Common Pitfalls\n\n### 1. Comparing Different Time Windows\n**Mistake**: Comparing last 7 days to last 24 hours\n**Fix**: Use same-length time windows for before/after comparison\n\n### 2. Ignoring Execution Count\n**Mistake**: Optimizing query that runs once per day\n**Fix**: Focus on high-frequency queries (ExecutionCount > 1000)\n\n### 3. Over-Indexing\n**Mistake**: Adding index for every slow query\n**Fix**: Balance read performance vs write overhead (limit 5-10 indexes per table)\n\n### 4. Not Testing in Production-Like Data\n**Mistake**: Query fast on 1000 rows (dev), slow on 10 million rows (prod)\n**Fix**: Load test with realistic data volumes\n\n## \ud83d\udcda Advanced Topics\n\n### Query Store Retention\n- **Current setup**: 90 days retention\n- **Storage**: ~100MB per 1 million query executions\n- **Cleanup**: Automatic purge of oldest data when full\n\n### Forcing Query Plans\n```sql\n-- If regression detected, force \"good\" plan\nEXEC sp_query_store_force_plan @query_id = 123, @plan_id = 456;\n\n-- Revert to auto-selection\nEXEC sp_query_store_unforce_plan @query_id = 123, @plan_id = 456;\n```\n\n### Clearing Query Store\n```sql\n-- Nuclear option: Clear all Query Store data\nALTER DATABASE [YourDB] SET QUERY_STORE CLEAR ALL;\n```\n\n## \ud83d\udd17 Related Dashboards\n\n- **Performance Analysis** - Stored procedure performance\n- **Code Browser** - View query source code\n- **Detailed Metrics** - Server-level performance\n- **System Overview** - Overall health check\n\n## \ud83c\udd98 When to Escalate to DBA\n\n- Plan regression >200% (query 3x slower)\n- High-frequency query (>10k executions/hour) degraded >50%\n- Multiple queries regressed after same event (deployment, failover)\n- Query Store taking >500MB storage (may need purge)\n- Parameter sniffing affecting critical queries\n\n---\n*Query Store captures data every 5 minutes | 90-day retention | Plan forcing available for critical queries*",
         "mode": "markdown"
       },
       "pluginVersion": "10.2.0",
-      "title": "📖 Developer Guide - Query Store Performance",
+      "title": "\ud83d\udcd6 Developer Guide - Query Store Performance",
       "type": "text"
     }
   ],
   "refresh": "1m",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["query-store", "performance", "optimization"],
+  "tags": [
+    "query-store",
+    "performance",
+    "optimization"
+  ],
   "templating": {
     "list": [
       {
