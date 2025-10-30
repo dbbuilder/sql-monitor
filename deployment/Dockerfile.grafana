@@ -1,0 +1,19 @@
+FROM grafana/grafana-oss:10.2.0
+
+# Install required packages
+USER root
+RUN apk add --no-cache curl bash
+
+# Copy provisioning files
+COPY dashboards/grafana/provisioning /etc/grafana/provisioning
+
+# Create entrypoint script
+COPY deployment/entrypoint-grafana.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Switch back to grafana user
+USER grafana
+
+EXPOSE 3000
+
+ENTRYPOINT ["/entrypoint.sh"]

@@ -1,0 +1,282 @@
+# =====================================================
+# SQL Monitor - Multi-Cloud Deployment Configuration
+# =====================================================
+# Copy this file to deployment-config.yaml and customize for your environment
+
+# =====================================================
+# Project Information
+# =====================================================
+project:
+  name: sql-monitor
+  environment: production  # development, staging, production
+  region: us-east-1       # AWS: us-east-1, GCP: us-central1, Azure: eastus
+
+# =====================================================
+# Container Registry
+# =====================================================
+registry:
+  # Options: dockerhub, ecr, gcr, acr
+  type: acr
+
+  # Docker Hub
+  dockerhub:
+    username: youruser
+    repository: youruser/sql-monitor-grafana
+
+  # AWS ECR
+  ecr:
+    account_id: "123456789012"
+    region: us-east-1
+    repository: sql-monitor-grafana
+
+  # Google GCR
+  gcr:
+    project_id: your-project-id
+    repository: sql-monitor-grafana
+
+  # Azure ACR
+  acr:
+    registry_name: sqlmonitoracr
+    repository: sql-monitor-grafana
+
+# =====================================================
+# MonitoringDB Connection
+# =====================================================
+monitoringdb:
+  # Connection details
+  server: sqltest.schoolvision.net
+  port: 14333
+  database: MonitoringDB
+  username: sv
+  password_env: MONITORINGDB_PASSWORD  # Environment variable name containing password
+
+# =====================================================
+# Monitored Servers
+# =====================================================
+# These servers will be automatically registered in MonitoringDB on deployment
+monitored_servers:
+  - name: sqltest.schoolvision.net,14333
+    environment: Test
+    collect_interval_minutes: 5
+    linked_server_name: SQLTEST
+
+  - name: suncity.schoolvision.net,14333
+    environment: Production
+    collect_interval_minutes: 5
+    linked_server_name: suncity.schoolvision.net
+
+  - name: svweb,14333
+    environment: Production
+    collect_interval_minutes: 5
+    linked_server_name: SVWEB
+
+# =====================================================
+# Grafana Configuration
+# =====================================================
+grafana:
+  admin_password_env: GRAFANA_ADMIN_PASSWORD  # Environment variable name
+  root_url: https://monitor.yourdomain.com
+
+  # Dashboard source
+  dashboards:
+    download_from_github: true
+    github_repo: https://raw.githubusercontent.com/dbbuilder/sql-monitor/main/public/dashboards
+
+  # Plugins (optional)
+  plugins: []
+
+# =====================================================
+# AWS Deployment Configuration
+# =====================================================
+aws:
+  # ECS Cluster
+  ecs:
+    cluster_name: sql-monitor-cluster
+    service_name: sql-monitor-grafana
+    task_family: sql-monitor-grafana
+
+    # Container resources
+    cpu: 1024        # 1 vCPU
+    memory: 2048     # 2 GB
+
+    # Networking
+    vpc_id: vpc-xxxxx
+    subnets:
+      - subnet-xxxxx
+      - subnet-yyyyy
+    security_groups:
+      - sg-xxxxx
+
+    # Load Balancer (optional)
+    load_balancer:
+      enabled: true
+      target_group_arn: arn:aws:elasticloadbalancing:...
+      container_port: 3000
+
+  # Secrets Manager
+  secrets:
+    enabled: true
+    monitoringdb_password_arn: arn:aws:secretsmanager:...
+    grafana_password_arn: arn:aws:secretsmanager:...
+
+# =====================================================
+# Google Cloud Configuration
+# =====================================================
+gcp:
+  # Cloud Run
+  cloud_run:
+    service_name: sql-monitor-grafana
+    region: us-central1
+
+    # Container resources
+    cpu: 1
+    memory: 2Gi
+
+    # Scaling
+    min_instances: 1
+    max_instances: 3
+
+    # Networking
+    vpc_connector: projects/PROJECT/locations/REGION/connectors/CONNECTOR
+    ingress: all  # all, internal, internal-and-cloud-load-balancing
+
+    # Custom domain (optional)
+    domain: monitor.yourdomain.com
+
+  # Secret Manager
+  secrets:
+    enabled: true
+    project_id: your-project-id
+    monitoringdb_password_secret: monitoringdb-password
+    grafana_password_secret: grafana-admin-password
+
+# =====================================================
+# Azure Configuration
+# =====================================================
+azure:
+  # Container Instances
+  container_instances:
+    resource_group: rg-sqlmonitor
+    container_name: grafana-sqlmonitor
+    location: eastus
+
+    # Container resources
+    cpu: 2
+    memory: 4
+
+    # Networking
+    dns_label: sqlmonitor-grafana
+    ports:
+      - 3000
+
+    # Virtual Network (optional)
+    vnet:
+      enabled: false
+      name: vnet-sqlmonitor
+      subnet: default
+
+  # Key Vault
+  secrets:
+    enabled: true
+    key_vault_name: kv-sqlmonitor
+    monitoringdb_password_secret: monitoringdb-password
+    grafana_password_secret: grafana-admin-password
+
+  # Container App (alternative to Container Instances)
+  container_app:
+    enabled: false
+    name: ca-sqlmonitor-grafana
+    environment: managedEnvironment-sqlmonitor
+    min_replicas: 1
+    max_replicas: 3
+
+# =====================================================
+# SSL/TLS Configuration
+# =====================================================
+ssl:
+  # Options: cloudflare, letsencrypt, bring-your-own
+  provider: cloudflare
+
+  # Cloudflare
+  cloudflare:
+    enabled: true
+    zone_id: your-zone-id
+    api_token_env: CLOUDFLARE_API_TOKEN
+
+  # Let's Encrypt (via reverse proxy container)
+  letsencrypt:
+    enabled: false
+    email: admin@yourdomain.com
+    domain: monitor.yourdomain.com
+
+  # Bring Your Own Certificate
+  custom_cert:
+    enabled: false
+    cert_path: /path/to/cert.pem
+    key_path: /path/to/key.pem
+
+# =====================================================
+# Monitoring & Logging
+# =====================================================
+monitoring:
+  # Health check endpoint
+  health_check:
+    path: /api/health
+    interval_seconds: 30
+    timeout_seconds: 5
+    healthy_threshold: 2
+    unhealthy_threshold: 3
+
+  # Logging
+  logging:
+    level: info  # debug, info, warn, error
+    format: json  # json, text
+
+    # Log aggregation
+    cloudwatch:
+      enabled: false
+      log_group: /ecs/sql-monitor-grafana
+
+    stackdriver:
+      enabled: false
+      project_id: your-project-id
+
+    azure_monitor:
+      enabled: false
+      workspace_id: your-workspace-id
+
+# =====================================================
+# Backup & Disaster Recovery
+# =====================================================
+backup:
+  # Grafana configuration backup
+  grafana_config:
+    enabled: true
+    s3_bucket: sql-monitor-backups
+    gcs_bucket: sql-monitor-backups
+    azure_storage_account: sqlmonitorbackups
+    schedule: "0 2 * * *"  # Daily at 2 AM
+
+# =====================================================
+# Cost Optimization
+# =====================================================
+cost:
+  # Auto-shutdown (development/staging only)
+  auto_shutdown:
+    enabled: false
+    schedule: "0 18 * * 1-5"  # Weekdays at 6 PM
+    timezone: America/New_York
+
+  # Spot instances (AWS)
+  spot_instances:
+    enabled: false
+    max_price: "0.05"
+
+# =====================================================
+# Tags / Labels
+# =====================================================
+tags:
+  project: sql-monitor
+  managed-by: terraform
+  cost-center: engineering
+  environment: "{{project.environment}}"
