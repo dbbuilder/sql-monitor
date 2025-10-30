@@ -27,7 +27,7 @@
           "showLineNumbers": false,
           "showMiniMap": false
         },
-        "content": "<div style='text-align: center; padding: 20px 0;'>\n  <h1 style='font-size: 48px; margin: 0; color: #0693e3;'>SQL Monitor</h1>\n  <p style='font-size: 18px; color: #888; margin-top: 10px;'>Enterprise SQL Server Monitoring & Analysis Platform</p>\n  <p style='font-size: 14px; color: #666; margin-top: 5px;'>ArcTrade</p>\n</div>",
+        "content": "<div style='text-align: center; padding: 20px 0;'>\n  <h1 style='font-size: 48px; margin: 0; color: #0693e3;'>SQL Monitor</h1>\n  <p style='font-size: 18px; color: #888; margin-top: 10px;'>Enterprise SQL Server Monitoring & Analysis Platform</p>\n  <p style='font-size: 14px; color: #666; margin-top: 5px;'>Powered by SQL Monitor</p>\n</div>",
         "mode": "html"
       },
       "pluginVersion": "10.2.0",
