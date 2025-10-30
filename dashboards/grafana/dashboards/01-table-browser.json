@@ -134,6 +134,37 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "TableName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View Table Details (sp_help style)",
+                    "url": "/d/sql-monitor-table-details/table-details?var-ServerName=${__data.fields.ServerName}&var-DatabaseName=${__data.fields.DatabaseName}&var-SchemaName=${__data.fields.SchemaName}&var-TableName=${__data.fields.TableName}",
+                    "targetBlank": true
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
           }
         ]
       },

@@ -1,0 +1,254 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "PACBEEDECF159CDCA"
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "PACBEEDECF159CDCA"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "-- Object Information Section\nSELECT\n    'Object Information' AS Section,\n    s.ServerName,\n    com.DatabaseName,\n    com.SchemaName,\n    com.ObjectName,\n    com.ObjectType,\n    com.CreatedDate,\n    com.ModifiedDate,\n    com.LineCount,\n    com.CharacterCount,\n    com.DependencyCount,\n    com.LastRefreshTime\nFROM dbo.CodeObjectMetadata com\nINNER JOIN dbo.Servers s ON com.ServerID = s.ServerID\nWHERE s.ServerName = '${ServerName}'\n  AND com.DatabaseName = '${DatabaseName}'\n  AND com.SchemaName = '${SchemaName}'\n  AND com.ObjectName = '${ObjectName}';",
+          "refId": "A"
+        }
+      ],
+      "title": "Object Information",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "PACBEEDECF159CDCA"
+      },
+      "gridPos": {
+        "h": 20,
+        "w": 24,
+        "x": 0,
+        "y": 6
+      },
+      "id": 2,
+      "options": {
+        "code": {
+          "language": "sql",
+          "showLineNumbers": true,
+          "showMiniMap": true
+        },
+        "content": "-- Code will be displayed here",
+        "mode": "code"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "PACBEEDECF159CDCA"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "-- Object Definition (Full Text)\nSELECT\n    oc.Definition AS CodeText\nFROM dbo.ObjectCode oc\nINNER JOIN dbo.Servers s ON oc.ServerID = s.ServerID\nWHERE s.ServerName = '${ServerName}'\n  AND oc.DatabaseName = '${DatabaseName}'\n  AND oc.SchemaName = '${SchemaName}'\n  AND oc.ObjectName = '${ObjectName}';",
+          "refId": "A"
+        }
+      ],
+      "title": "Object Definition (sp_helptext style)",
+      "type": "text",
+      "transformations": [
+        {
+          "id": "extractFields",
+          "options": {
+            "source": "CodeText"
+          }
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "PACBEEDECF159CDCA"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 26
+      },
+      "id": 3,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "PACBEEDECF159CDCA"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "-- Dependencies (What this object uses)\nSELECT\n    'Dependencies' AS Section,\n    dm.ReferencedSchemaName AS SchemaName,\n    dm.ReferencedObjectName AS ObjectName,\n    dm.ReferencedObjectType AS ObjectType\nFROM dbo.DependencyMetadata dm\nINNER JOIN dbo.Servers s ON dm.ServerID = s.ServerID\nWHERE s.ServerName = '${ServerName}'\n  AND dm.DatabaseName = '${DatabaseName}'\n  AND dm.ReferencingSchemaName = '${SchemaName}'\n  AND dm.ReferencingObjectName = '${ObjectName}'\nORDER BY dm.ReferencedObjectType, dm.ReferencedObjectName;",
+          "refId": "A"
+        }
+      ],
+      "title": "Dependencies (What This Uses)",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "PACBEEDECF159CDCA"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 26
+      },
+      "id": 4,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mssql",
+            "uid": "PACBEEDECF159CDCA"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "-- Referenced By (What uses this object)\nSELECT\n    'Referenced By' AS Section,\n    dm.ReferencingSchemaName AS SchemaName,\n    dm.ReferencingObjectName AS ObjectName,\n    dm.ReferencingObjectType AS ObjectType\nFROM dbo.DependencyMetadata dm\nINNER JOIN dbo.Servers s ON dm.ServerID = s.ServerID\nWHERE s.ServerName = '${ServerName}'\n  AND dm.DatabaseName = '${DatabaseName}'\n  AND dm.ReferencedSchemaName = '${SchemaName}'\n  AND dm.ReferencedObjectName = '${ObjectName}'\nORDER BY dm.ReferencingObjectType, dm.ReferencingObjectName;",
+          "refId": "A"
+        }
+      ],
+      "title": "Referenced By (What Uses This)",
+      "type": "table"
+    }
+  ],
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [
+    "code",
+    "details"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "hide": 0,
+        "name": "ServerName",
+        "options": [],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "hide": 0,
+        "name": "DatabaseName",
+        "options": [],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "hide": 0,
+        "name": "SchemaName",
+        "options": [],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "hide": 0,
+        "name": "ObjectName",
+        "options": [],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Code Viewer (sp_helptext style)",
+  "uid": "code-viewer",
+  "version": 1,
+  "weekStart": ""
+}

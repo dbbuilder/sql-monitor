@@ -112,8 +112,9 @@
                 "id": "links",
                 "value": [
                   {
-                    "title": "Select Object (View Dependencies & Code)",
-                    "url": "/d/${__dashboard.uid}?var-DatabaseName=${__data.fields.DatabaseName}&var-ObjectType=${__data.fields.ObjectType}&var-ObjectName=${__data.fields.ObjectName}&var-SchemaName=${__data.fields.SchemaName}&var-SelectedObject=${__data.fields.ObjectName}&var-SelectedSchema=${__data.fields.SchemaName}"
+                    "title": "View Code (sp_helptext style)",
+                    "url": "/d/code-viewer/code-viewer?var-ServerName=${__data.fields.ServerName}&var-DatabaseName=${__data.fields.DatabaseName}&var-SchemaName=${__data.fields.SchemaName}&var-ObjectName=${__data.fields.ObjectName}",
+                    "targetBlank": true
                   }
                 ]
               },
@@ -143,7 +144,7 @@
                 "value": [
                   {
                     "title": "View Code",
-                    "url": "/d/${__dashboard.uid}/code-popup?var-DatabaseName=${__data.fields.DatabaseName}&var-SchemaName=${__data.fields.SchemaName}&var-ObjectName=${__data.fields.ObjectName}",
+                    "url": "/d/code-viewer/code-viewer?var-ServerName=${__data.fields.ServerName}&var-DatabaseName=${__data.fields.DatabaseName}&var-SchemaName=${__data.fields.SchemaName}&var-ObjectName=${__data.fields.ObjectName}",
                     "targetBlank": true
                   }
                 ]
