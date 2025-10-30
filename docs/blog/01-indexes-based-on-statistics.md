@@ -487,6 +487,6 @@ WHERE i1.index_id <> i2.index_id
 
 ---
 
-**Author**: ArcTrade Technical Team
+**Author**: EXAMPLE_CLIENT Technical Team
 **Last Updated**: 2025-10-29
 **Version**: 1.0

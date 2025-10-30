@@ -569,6 +569,6 @@ WHERE Region = 'USA' AND TotalSpent > 1000;
 
 ---
 
-**Author**: ArcTrade Technical Team
+**Author**: EXAMPLE_CLIENT Technical Team
 **Last Updated**: 2025-10-29
 **Version**: 1.0

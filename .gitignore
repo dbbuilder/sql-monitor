@@ -74,6 +74,12 @@ tmp/
 temp/
 *.tmp
 
+# Client-specific files and analysis
+arctrade/
+
+# Archive folder (outdated/temporary files)
+archive/
+
 # Sensitive files - never commit
 .env
 .env.*

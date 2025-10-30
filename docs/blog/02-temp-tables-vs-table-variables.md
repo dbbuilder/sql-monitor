@@ -775,6 +775,6 @@ ORDER BY SizeMB DESC;
 
 ---
 
-**Author**: ArcTrade Technical Team
+**Author**: EXAMPLE_CLIENT Technical Team
 **Last Updated**: 2025-10-29
 **Version**: 1.0

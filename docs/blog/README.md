@@ -1,6 +1,6 @@
 # SQL Server Optimization Blog - Article Index
 
-**ArcTrade SQL Monitor** - Educational Resource Library
+**EXAMPLE_CLIENT SQL Monitor** - Educational Resource Library
 
 ---
 
@@ -195,7 +195,7 @@ Quick reference table and checklist.
 
 ---
 
-**Author**: ArcTrade Technical Team
+**Author**: EXAMPLE_CLIENT Technical Team
 **Last Updated**: YYYY-MM-DD
 **Version**: 1.0
 ```
@@ -264,14 +264,14 @@ Track article usefulness via:
 
 ## License
 
-All articles © 2025 ArcTrade. Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
+All articles © 2025 EXAMPLE_CLIENT. Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
 
 You are free to:
 - **Share**: Copy and redistribute
 - **Adapt**: Remix, transform, build upon
 
 Under these terms:
-- **Attribution**: Must give appropriate credit to ArcTrade
+- **Attribution**: Must give appropriate credit to EXAMPLE_CLIENT
 - **No Restrictions**: Cannot apply legal terms or technological measures that restrict others
 
 ---

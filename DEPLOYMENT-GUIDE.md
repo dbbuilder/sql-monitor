@@ -13,7 +13,7 @@ SQL Monitor uses a **two-part deployment strategy** that allows complete data is
 ### Architecture
 
 ```
-CLIENT 1 (ArcTrade)
+CLIENT 1 (EXAMPLE_CLIENT)
 ├── Central Grafana (Visualization Layer)
 │   └── Deployed to: Local Docker / Azure / AWS
 │       └── Connects to: MonitoringDB on Server X
@@ -93,7 +93,7 @@ export MONITORED_PORT="1433"
 export COLLECTION_INTERVAL="5"
 
 # Client identification
-export CLIENT_NAME="ArcTrade"
+export CLIENT_NAME="EXAMPLE_CLIENT"
 
 # Should central server monitor itself? (true/false)
 export MONITOR_CENTRAL_SERVER="true"
@@ -131,7 +131,7 @@ source .env.monitoring
 SQL Monitor - Deploy MonitoringDB and Monitored Servers
 ========================================
 
-  ℹ  Client: ArcTrade
+  ℹ  Client: EXAMPLE_CLIENT
   ℹ  Central Server: sql-prod-01:1433
   ℹ  Central Database: MonitoringDB
   ℹ  Monitored Servers: sql-prod-02,sql-prod-03,sql-prod-04,sql-prod-05
@@ -316,8 +316,8 @@ export MONITORINGDB_USER="monitor_api"
 export MONITORINGDB_PASSWORD="YourSecurePassword123"
 
 # Client identification
-export CLIENT_NAME="ArcTrade"
-export CLIENT_ORG="ArcTrade"
+export CLIENT_NAME="EXAMPLE_CLIENT"
+export CLIENT_ORG="EXAMPLE_CLIENT"
 
 # Azure-specific (if DEPLOYMENT_TARGET=azure)
 export AZURE_RESOURCE_GROUP="rg-arctrade-monitoring"
@@ -350,7 +350,7 @@ source .env.grafana
 SQL Monitor - Deploy Central Grafana Server
 ========================================
 
-  ℹ  Client: ArcTrade
+  ℹ  Client: EXAMPLE_CLIENT
   ℹ  Target: local
   ℹ  MonitoringDB: sql-prod-01:1433/MonitoringDB
 
@@ -444,7 +444,7 @@ source .env.grafana
 
 ### Scenario: Deploy for 3 Clients
 
-**Client 1: ArcTrade**
+**Client 1: EXAMPLE_CLIENT**
 - Central Server: sql-arctrade-01
 - Monitored Servers: sql-arctrade-02, sql-arctrade-03, sql-arctrade-04
 - Grafana: Local Docker (port 9002)
@@ -461,7 +461,7 @@ source .env.grafana
 
 ### Step-by-Step for Each Client
 
-**Client 1: ArcTrade**
+**Client 1: EXAMPLE_CLIENT**
 
 ```bash
 # Part 1: Deploy MonitoringDB
@@ -469,11 +469,11 @@ cat > .env.arctrade-monitoring <<EOF
 export CENTRAL_SERVER="sql-arctrade-01"
 export CENTRAL_PORT="1433"
 export CENTRAL_USER="sa"
-export CENTRAL_PASSWORD="ArcTradeMonitor123"
+export CENTRAL_PASSWORD="EXAMPLE_CLIENTMonitor123"
 export MONITORED_SERVERS="sql-arctrade-02,sql-arctrade-03,sql-arctrade-04"
 export MONITORED_USER="monitor_collector"
 export MONITORED_PASSWORD="CollectorPass123"
-export CLIENT_NAME="ArcTrade"
+export CLIENT_NAME="EXAMPLE_CLIENT"
 export MONITOR_CENTRAL_SERVER="true"
 EOF
 
@@ -484,11 +484,11 @@ source .env.arctrade-monitoring
 cat > .env.arctrade-grafana <<EOF
 export DEPLOYMENT_TARGET="local"
 export GRAFANA_PORT="9002"
-export GRAFANA_ADMIN_PASSWORD="ArcTradeAdmin!"
+export GRAFANA_ADMIN_PASSWORD="EXAMPLE_CLIENTAdmin!"
 export MONITORINGDB_SERVER="sql-arctrade-01"
 export MONITORINGDB_USER="monitor_api"
-export MONITORINGDB_PASSWORD="ArcTradeMonitor123"
-export CLIENT_NAME="ArcTrade"
+export MONITORINGDB_PASSWORD="EXAMPLE_CLIENTMonitor123"
+export CLIENT_NAME="EXAMPLE_CLIENT"
 EOF
 
 source .env.arctrade-grafana
@@ -879,4 +879,4 @@ For issues, feature requests, or questions:
 
 **Last Updated**: 2025-10-29
 **Version**: 2.0
-**Author**: ArcTrade Technical Team
+**Author**: EXAMPLE_CLIENT Technical Team
