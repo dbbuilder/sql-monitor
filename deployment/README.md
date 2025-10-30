@@ -1,6 +1,57 @@
-# SQL Monitor - Multi-Cloud Deployment Guide
+# SQL Monitor - Multi-Platform Deployment Guide
 
-Complete deployment solution for AWS, GCP, and Azure with multi-server monitoring support.
+Complete deployment solution for AWS, GCP, Azure, and On-Premise servers with multi-server monitoring support.
+
+## 📋 Platform-Specific Guides
+
+Choose your deployment platform:
+
+| Platform | Guide | Deployment Time | Monthly Cost | Best For |
+|----------|-------|-----------------|--------------|----------|
+| **AWS** | [DEPLOY-AWS.md](DEPLOY-AWS.md) | 30-45 min | $15-60 | Enterprise, HA required, existing AWS infrastructure |
+| **Azure** | [DEPLOY-AZURE.md](DEPLOY-AZURE.md) | 20-35 min | $20-350 | Microsoft shops, existing Azure infrastructure |
+| **GCP** | [DEPLOY-GCP.md](DEPLOY-GCP.md) | 15-25 min | $10-80 | Lowest cost, serverless, global distribution |
+| **On-Premise** | [DEPLOY-ONPREMISE.md](DEPLOY-ONPREMISE.md) | 15-90 min | Hardware only | Air-gapped, data sovereignty, existing hardware |
+
+## 🚀 Quick Start by Platform
+
+### AWS (ECS Fargate)
+```bash
+cd deployment
+cp config-template.yaml deployment-config.yaml
+# Edit deployment-config.yaml with your settings
+./deploy-aws.sh
+```
+**Features**: Auto-scaling, ALB integration, Secrets Manager, CloudWatch
+**See**: [DEPLOY-AWS.md](DEPLOY-AWS.md) for complete guide
+
+### Azure (Container Instances)
+```bash
+cd deployment
+cp config-template.yaml deployment-config.yaml
+# Edit deployment-config.yaml with your settings
+./deploy-azure.sh
+```
+**Features**: Simple deployment, Key Vault integration, VNET support, App Gateway
+**See**: [DEPLOY-AZURE.md](DEPLOY-AZURE.md) for complete guide
+
+### GCP (Cloud Run)
+```bash
+cd deployment
+cp config-template.yaml deployment-config.yaml
+# Edit deployment-config.yaml with your settings
+./deploy-gcp.sh
+```
+**Features**: Serverless, scale-to-zero, automatic SSL, global CDN
+**See**: [DEPLOY-GCP.md](DEPLOY-GCP.md) for complete guide
+
+### On-Premise (Docker Compose)
+```bash
+cd deployment
+docker-compose up -d
+```
+**Features**: No cloud dependencies, full control, persistent storage
+**See**: [DEPLOY-ONPREMISE.md](DEPLOY-ONPREMISE.md) for Docker Compose, Kubernetes, and bare metal options
 
 ## 📋 Table of Contents
 
