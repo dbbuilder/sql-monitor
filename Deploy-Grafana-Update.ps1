@@ -20,7 +20,7 @@ $ContainerName = "grafana-schoolvision"
 $RegistryName = "sqlmonitoracr"
 $ImageName = "sql-monitor-grafana"
 $ImageTag = "latest"
-$FullImageName = "$RegistryName.azurecr.io/$ImageName:$ImageTag"
+$FullImageName = "${RegistryName}.azurecr.io/${ImageName}:${ImageTag}"
 
 # Navigate to project directory
 $ProjectRoot = "D:\Dev2\sql-monitor"
