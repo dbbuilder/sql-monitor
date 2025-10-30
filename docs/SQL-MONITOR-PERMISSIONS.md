@@ -223,31 +223,31 @@ If you currently have `db_owner` access and want to migrate to least-privilege:
 -- Migrate from db_owner to Least Privilege
 -- =============================================
 
--- Example: Migrate arctradeprodrunner login
+-- Example: Migrate example_app_user login
 
 USE [prod];
 GO
 
 -- Remove db_owner (dangerous)
-ALTER ROLE db_owner DROP MEMBER [arctradeprodrunner];
-PRINT 'Removed db_owner role from [arctradeprodrunner] in [prod]';
+ALTER ROLE db_owner DROP MEMBER [example_app_user];
+PRINT 'Removed db_owner role from [example_app_user] in [prod]';
 
 -- Add db_datareader (read-only)
-ALTER ROLE db_datareader ADD MEMBER [arctradeprodrunner];
-PRINT 'Added db_datareader role to [arctradeprodrunner] in [prod]';
+ALTER ROLE db_datareader ADD MEMBER [example_app_user];
+PRINT 'Added db_datareader role to [example_app_user] in [prod]';
 
 -- Add Query Store access
-GRANT VIEW DATABASE STATE TO [arctradeprodrunner];
-PRINT 'Granted VIEW DATABASE STATE to [arctradeprodrunner] in [prod]';
+GRANT VIEW DATABASE STATE TO [example_app_user];
+PRINT 'Granted VIEW DATABASE STATE to [example_app_user] in [prod]';
 GO
 
 -- Repeat for other databases
 USE [produsage2];
 GO
 
-ALTER ROLE db_owner DROP MEMBER [arctradeprodrunner];
-ALTER ROLE db_datareader ADD MEMBER [arctradeprodrunner];
-GRANT VIEW DATABASE STATE TO [arctradeprodrunner];
+ALTER ROLE db_owner DROP MEMBER [example_app_user];
+ALTER ROLE db_datareader ADD MEMBER [example_app_user];
+GRANT VIEW DATABASE STATE TO [example_app_user];
 
 PRINT 'Migration complete for [produsage2]';
 GO

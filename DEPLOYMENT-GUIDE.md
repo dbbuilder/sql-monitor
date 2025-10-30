@@ -320,15 +320,15 @@ export CLIENT_NAME="EXAMPLE_CLIENT"
 export CLIENT_ORG="EXAMPLE_CLIENT"
 
 # Azure-specific (if DEPLOYMENT_TARGET=azure)
-export AZURE_RESOURCE_GROUP="rg-arctrade-monitoring"
-export AZURE_CONTAINER_NAME="grafana-arctrade"
+export AZURE_RESOURCE_GROUP="rg-example-client-monitoring"
+export AZURE_CONTAINER_NAME="grafana-example-client"
 export AZURE_LOCATION="eastus"
-export AZURE_DNS_LABEL="arctrade-monitor"
+export AZURE_DNS_LABEL="example-client-monitor"
 
 # AWS-specific (if DEPLOYMENT_TARGET=aws)
 export AWS_CLUSTER="sql-monitor-cluster"
-export AWS_TASK_DEFINITION="grafana-arctrade"
-export AWS_SERVICE_NAME="grafana-arctrade"
+export AWS_TASK_DEFINITION="grafana-example-client"
+export AWS_SERVICE_NAME="grafana-example-client"
 ```
 
 #### 2. Run Deployment Script
@@ -408,7 +408,7 @@ source .env.grafana
 
 1. **Access Grafana**:
    - Local: http://localhost:9002
-   - Azure: http://arctrade-monitor.eastus.azurecontainer.io:3000
+   - Azure: http://example-client-monitor.eastus.azurecontainer.io:3000
    - AWS: (provided in deployment output)
 
 2. **Login**: admin / Admin123! (or your configured password)
@@ -445,8 +445,8 @@ source .env.grafana
 ### Scenario: Deploy for 3 Clients
 
 **Client 1: EXAMPLE_CLIENT**
-- Central Server: sql-arctrade-01
-- Monitored Servers: sql-arctrade-02, sql-arctrade-03, sql-arctrade-04
+- Central Server: sql-example-client-01
+- Monitored Servers: sql-example-client-02, sql-example-client-03, sql-example-client-04
 - Grafana: Local Docker (port 9002)
 
 **Client 2: AcmeCorp**
@@ -465,33 +465,33 @@ source .env.grafana
 
 ```bash
 # Part 1: Deploy MonitoringDB
-cat > .env.arctrade-monitoring <<EOF
-export CENTRAL_SERVER="sql-arctrade-01"
+cat > .env.example-client-monitoring <<EOF
+export CENTRAL_SERVER="sql-example-client-01"
 export CENTRAL_PORT="1433"
 export CENTRAL_USER="sa"
 export CENTRAL_PASSWORD="EXAMPLE_CLIENTMonitor123"
-export MONITORED_SERVERS="sql-arctrade-02,sql-arctrade-03,sql-arctrade-04"
+export MONITORED_SERVERS="sql-example-client-02,sql-example-client-03,sql-example-client-04"
 export MONITORED_USER="monitor_collector"
 export MONITORED_PASSWORD="CollectorPass123"
 export CLIENT_NAME="EXAMPLE_CLIENT"
 export MONITOR_CENTRAL_SERVER="true"
 EOF
 
-source .env.arctrade-monitoring
+source .env.example-client-monitoring
 ./deploy-monitoring.sh
 
 # Part 2: Deploy Grafana (Local Docker)
-cat > .env.arctrade-grafana <<EOF
+cat > .env.example-client-grafana <<EOF
 export DEPLOYMENT_TARGET="local"
 export GRAFANA_PORT="9002"
 export GRAFANA_ADMIN_PASSWORD="EXAMPLE_CLIENTAdmin!"
-export MONITORINGDB_SERVER="sql-arctrade-01"
+export MONITORINGDB_SERVER="sql-example-client-01"
 export MONITORINGDB_USER="monitor_api"
 export MONITORINGDB_PASSWORD="EXAMPLE_CLIENTMonitor123"
 export CLIENT_NAME="EXAMPLE_CLIENT"
 EOF
 
-source .env.arctrade-grafana
+source .env.example-client-grafana
 ./deploy-grafana.sh
 ```
 
@@ -751,7 +751,7 @@ EXEC dbo.usp_CleanupOldMetrics @RetentionDays = 90;
 1. **Check MonitoringDB Server Connectivity**:
    ```bash
    # From Grafana container
-   docker exec -it sql-monitor-grafana-arctrade nc -zv sql-prod-01 1433
+   docker exec -it sql-monitor-grafana-example-client nc -zv sql-prod-01 1433
    ```
 
 2. **Verify SQL User Permissions**:
@@ -871,9 +871,9 @@ For issues, feature requests, or questions:
 1. Check this guide first
 2. Review logs:
    - SQL Agent job history
-   - Grafana logs: `docker logs sql-monitor-grafana-arctrade`
+   - Grafana logs: `docker logs sql-monitor-grafana-example-client`
    - MonitoringDB error log
-3. Contact: support@arctrade.com
+3. Contact: support@example-client.com
 
 ---
 
