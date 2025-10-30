@@ -100,6 +100,7 @@ DASHBOARDS=(
     "08-insights.json"
     "08-aws-rds-performance-insights.json"
     "09-dbcc-integrity-checks.json"
+    "99-admin-dashboard-refresh.json"
     "detailed-metrics.json"
     "sql-server-overview.json"
 )
@@ -130,8 +131,15 @@ echo "  Permissions set"
 ls -la "$DASHBOARDS_DIR" | head -5
 echo ""
 
-# Step 6: Start Grafana (simplified - run as root for now)
-echo "Step 6: Starting Grafana..."
+# Step 6: Start webhook server in background
+echo "Step 6: Starting dashboard refresh webhook server..."
+bash /dashboard-refresh-webhook.sh > /var/log/webhook.log 2>&1 &
+echo "  Webhook server started on port 8888"
+echo "  Logs: /var/log/webhook.log"
+echo ""
+
+# Step 7: Start Grafana
+echo "Step 7: Starting Grafana..."
 echo "  Command: /run.sh"
 echo "  Running as root (user switching removed for debugging)"
 echo ""

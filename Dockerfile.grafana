@@ -4,17 +4,19 @@
 
 FROM grafana/grafana-oss:10.2.0
 
-# Switch to root to install dependencies and copy script
+# Switch to root to install dependencies and copy scripts
 USER root
 
-# Install wget (needed for downloading dashboards)
-RUN apk add --no-cache wget
+# Install wget and netcat (needed for downloading dashboards and webhook server)
+RUN apk add --no-cache wget busybox-extras
 
-# Copy entrypoint script
+# Copy scripts
 COPY public/grafana-entrypoint.sh /grafana-entrypoint.sh
+COPY public/dashboard-refresh.sh /dashboard-refresh.sh
+COPY public/dashboard-refresh-webhook.sh /dashboard-refresh-webhook.sh
 
 # Make executable
-RUN chmod +x /grafana-entrypoint.sh
+RUN chmod +x /grafana-entrypoint.sh /dashboard-refresh.sh /dashboard-refresh-webhook.sh
 
 # Note: Script runs as root so it can chown files to grafana user (472)
 # The script calls 'exec /run.sh' which handles switching to grafana user

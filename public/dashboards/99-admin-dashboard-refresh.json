@@ -1,0 +1,105 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "-- Mixed --"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "# Dashboard Refresh Control\n\n## How to Use\n\n1. **Click the \"Refresh Dashboards\" button** on the right panel\n2. Wait 10-15 seconds for the refresh to complete\n3. **Reload this page** (F5 or Ctrl+R) to see new dashboards\n\n## What This Does\n\n- Downloads latest dashboard JSON files from GitHub\n- Updates existing dashboards if changed\n- Adds new dashboards automatically\n- No container restart required!\n\n## Current Dashboards\n\nThis system currently manages **14 dashboards**:\n\n1. Dashboard Browser\n2. SQL Monitor - Home\n3. SQL Server Monitoring - Overview\n4. Table Browser\n5. Table Details\n6. Code Browser\n7. Performance Analysis\n8. Query Store Analysis\n9. Audit Logging (SOC 2)\n10. Insights - 24h Priorities\n11. **AWS RDS Performance Insights** ⭐ NEW\n12. DBCC Integrity Checks\n13. Detailed Metrics View\n14. SQL Server Performance Overview\n\n## Troubleshooting\n\n**Button doesn't work?**\n- Check webhook server is running: `ps aux | grep webhook`\n- Check logs: `cat /var/log/dashboard-refresh.log`\n\n**New dashboards not appearing?**\n- Wait 30 seconds after clicking button\n- Hard refresh browser: Ctrl+Shift+R\n- Check GitHub for latest: https://github.com/dbbuilder/sql-monitor/tree/main/public/dashboards\n\n---\n\n**Last Updated:** 2025-10-30",
+        "mode": "markdown"
+      },
+      "pluginVersion": "10.2.0",
+      "title": "Dashboard Refresh Instructions",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "-- Mixed --"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "# 🔄 Refresh Dashboards\n\n<div style=\"text-align: center; padding: 40px;\">\n  <button onclick=\"refreshDashboards()\" style=\"\n    background-color: #4CAF50;\n    border: none;\n    color: white;\n    padding: 20px 40px;\n    text-align: center;\n    text-decoration: none;\n    display: inline-block;\n    font-size: 18px;\n    margin: 4px 2px;\n    cursor: pointer;\n    border-radius: 8px;\n    box-shadow: 0 4px 8px rgba(0,0,0,0.2);\n  \">\n    🔄 Refresh Dashboards from GitHub\n  </button>\n  \n  <p id=\"status\" style=\"margin-top: 20px; font-size: 16px;\"></p>\n</div>\n\n<script>\nfunction refreshDashboards() {\n  const statusEl = document.getElementById('status');\n  statusEl.textContent = '⏳ Refreshing dashboards...';\n  statusEl.style.color = 'orange';\n  \n  // Call webhook endpoint\n  fetch('http://localhost:8888/refresh', { method: 'POST' })\n    .then(response => {\n      if (response.ok) {\n        statusEl.textContent = '✅ Refresh triggered! Reload page in 15 seconds...';\n        statusEl.style.color = 'green';\n        \n        // Auto-reload after 15 seconds\n        setTimeout(() => {\n          window.location.reload();\n        }, 15000);\n      } else {\n        statusEl.textContent = '❌ Refresh failed. Check webhook server.';\n        statusEl.style.color = 'red';\n      }\n    })\n    .catch(err => {\n      statusEl.textContent = '❌ Error: ' + err.message;\n      statusEl.style.color = 'red';\n    });\n}\n</script>\n\n---\n\n## Manual Refresh\n\nIf the button doesn't work, run this in the container:\n\n```bash\nbash /dashboard-refresh.sh\n```",
+        "mode": "html"
+      },
+      "pluginVersion": "10.2.0",
+      "title": "Refresh Button",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "-- Mixed --"
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "id": 3,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "## Refresh Logs\n\nLast refresh log output:\n\n```bash\n# View in container:\ncat /var/log/dashboard-refresh.log\n\n# Or exec into container:\naz container exec --resource-group <RG> --name <NAME> \\\n  --exec-command \"cat /var/log/dashboard-refresh.log\"\n```\n\n## Expected Output\n\n```\n==========================================\nGRAFANA DASHBOARD REFRESH\n==========================================\nWed Oct 30 16:00:00 UTC 2025\n\nStep 1: Downloading latest dashboards from GitHub...\n  Downloading 00-dashboard-browser.json...\n    ○ No change\n  Downloading 00-landing-page.json...\n    ○ No change\n  ...\n  Downloading 08-aws-rds-performance-insights.json...\n    ✓ New dashboard\n  ...\n\nDownload Summary:\n  Total dashboards: 14\n  Downloaded: 14\n  Updated: 1\n  Failed: 0\n\nStep 2: Fixing permissions...\n  Permissions updated\n\nStep 3: Triggering Grafana provisioning reload...\n  ✓ Grafana API responsive\n  ✓ Dashboard count: 14\n\n==========================================\nREFRESH COMPLETE\n==========================================\n\nWhat to do next:\n  1. Dashboards updated! (1 files changed)\n  2. Restart Grafana to load new dashboards:\n     docker restart <container-name>\n  OR\n  3. Wait for Grafana's auto-reload (may take 1-2 minutes)\n```",
+        "mode": "markdown"
+      },
+      "pluginVersion": "10.2.0",
+      "title": "Refresh Logs",
+      "type": "text"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["admin", "maintenance"],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Admin - Dashboard Refresh",
+  "uid": "admin-dashboard-refresh",
+  "version": 1,
+  "weekStart": ""
+}
