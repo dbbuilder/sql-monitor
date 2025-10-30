@@ -766,6 +766,47 @@ _logger.LogInformation("User {Username} logged in successfully with MFA",
 
 ## Deployment
 
+### Azure Grafana Container Deployment (2025-10-30)
+
+**Production Container:**
+- **Name:** grafana-schoolvision
+- **Resource Group:** rg-sqlmonitor-schoolvision
+- **Subscription:** Test Environment (7b2beff3-b38a-4516-a75f-3216725cc4e9)
+- **Registry:** sqlmonitoracr.azurecr.io
+- **URL:** http://schoolvision-sqlmonitor.eastus.azurecontainer.io:3000
+- **Credentials:** admin / NewSecurePassword123
+
+**Deployment Script (No Docker Desktop Required):**
+```powershell
+# From D:\Dev2\sql-monitor
+.\Deploy-Grafana-Update-ACR.ps1
+```
+
+**This script:**
+- ✅ Uses `az acr build` (builds in Azure, not locally)
+- ✅ No Docker Desktop installation required
+- ✅ Builds image in Azure Container Registry
+- ✅ Restarts container automatically
+- ✅ Verifies deployment with logs
+- ✅ Time: 3-5 minutes
+
+**Key Features (2025-10-30):**
+- ✅ **15 dashboards** (including AWS RDS Performance Insights)
+- ✅ **Auto-refresh system** - Webhook on port 8888
+- ✅ **Dashboard refresh button** - Update from GitHub without rebuild
+- ✅ **Zero downtime updates** - Add dashboards via UI button
+
+**Dashboard Management:**
+1. Navigate to: http://schoolvision-sqlmonitor.eastus.azurecontainer.io:3000/d/admin-dashboard-refresh
+2. Click "Refresh Dashboards from GitHub"
+3. Wait 15 seconds
+4. New dashboards appear automatically!
+
+**Alternative Deployment (Requires Docker Desktop):**
+```powershell
+.\Deploy-Grafana-Update.ps1
+```
+
 ### Development Environment
 
 ```bash
