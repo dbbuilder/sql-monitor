@@ -32,7 +32,7 @@
       },
       "id": 100,
       "panels": [],
-      "title": "📊 Counter Metrics (Performance Indicators)",
+      "title": "\ud83d\udcca Counter Metrics (Performance Indicators)",
       "type": "row"
     },
     {
@@ -109,7 +109,10 @@
       "id": 1,
       "options": {
         "legend": {
-          "calcs": ["mean", "last"],
+          "calcs": [
+            "mean",
+            "last"
+          ],
           "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
@@ -208,7 +211,10 @@
       "id": 2,
       "options": {
         "legend": {
-          "calcs": ["mean", "last"],
+          "calcs": [
+            "mean",
+            "last"
+          ],
           "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
@@ -297,7 +303,10 @@
       "id": 3,
       "options": {
         "legend": {
-          "calcs": ["mean", "last"],
+          "calcs": [
+            "mean",
+            "last"
+          ],
           "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
@@ -386,7 +395,10 @@
       "id": 4,
       "options": {
         "legend": {
-          "calcs": ["mean", "last"],
+          "calcs": [
+            "mean",
+            "last"
+          ],
           "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
@@ -404,7 +416,7 @@
             "uid": "${DS_MONITORINGDB}"
           },
           "format": "time_series",
-          "rawSql": "SELECT\n  CollectionTime AS time,\n  MetricValue AS value,\n  CASE MetricName\n    WHEN 'ReadIOPS' THEN 'Read IOPS'\n    WHEN 'WriteIOPS' THEN 'Write IOPS'\n  END AS metric\nFROM dbo.PerformanceMetrics pm\nWHERE pm.MetricCategory = 'Disk'\n  AND pm.MetricName IN ('ReadIOPS', 'WriteIOPS')\n  AND pm.ServerID = $ServerID\n  AND pm.CollectionTime >= $__timeFrom()\n  AND pm.CollectionTime <= $__timeTo()\nORDER BY pm.CollectionTime",
+          "rawSql": "WITH MetricsWithPrevious AS (\n  SELECT\n    CollectionTime,\n    MetricName,\n    MetricValue,\n    LAG(MetricValue) OVER (PARTITION BY MetricName ORDER BY CollectionTime) AS PrevValue,\n    LAG(CollectionTime) OVER (PARTITION BY MetricName ORDER BY CollectionTime) AS PrevTime\n  FROM dbo.PerformanceMetrics\n  WHERE ServerID = $ServerID\n    AND MetricCategory = 'Disk'\n    AND MetricName IN ('ReadIOPS', 'WriteIOPS')\n    AND CollectionTime >= $__timeFrom()\n    AND CollectionTime <= $__timeTo()\n)\nSELECT\n  CollectionTime AS time,\n  CASE\n    WHEN PrevValue IS NOT NULL AND DATEDIFF(SECOND, PrevTime, CollectionTime) > 0\n    THEN (MetricValue - PrevValue) / DATEDIFF(SECOND, PrevTime, CollectionTime)\n    ELSE 0\n  END AS value,\n  CASE MetricName\n    WHEN 'ReadIOPS' THEN 'Read IOPS'\n    WHEN 'WriteIOPS' THEN 'Write IOPS'\n  END AS metric\nFROM MetricsWithPrevious\nWHERE PrevValue IS NOT NULL\nORDER BY CollectionTime",
           "refId": "A"
         }
       ],
@@ -475,7 +487,10 @@
       "id": 5,
       "options": {
         "legend": {
-          "calcs": ["mean", "last"],
+          "calcs": [
+            "mean",
+            "last"
+          ],
           "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
@@ -493,7 +508,7 @@
             "uid": "${DS_MONITORINGDB}"
           },
           "format": "time_series",
-          "rawSql": "SELECT\n  CollectionTime AS time,\n  MetricValue AS value,\n  CASE MetricName\n    WHEN 'ReadMB' THEN 'Read MB/s'\n    WHEN 'WriteMB' THEN 'Write MB/s'\n  END AS metric\nFROM dbo.PerformanceMetrics pm\nWHERE pm.MetricCategory = 'Disk'\n  AND pm.MetricName IN ('ReadMB', 'WriteMB')\n  AND pm.ServerID = $ServerID\n  AND pm.CollectionTime >= $__timeFrom()\n  AND pm.CollectionTime <= $__timeTo()\nORDER BY pm.CollectionTime",
+          "rawSql": "WITH MetricsWithPrevious AS (\n  SELECT\n    CollectionTime,\n    MetricName,\n    MetricValue,\n    LAG(MetricValue) OVER (PARTITION BY MetricName ORDER BY CollectionTime) AS PrevValue,\n    LAG(CollectionTime) OVER (PARTITION BY MetricName ORDER BY CollectionTime) AS PrevTime\n  FROM dbo.PerformanceMetrics\n  WHERE ServerID = $ServerID\n    AND MetricCategory = 'Disk'\n    AND MetricName IN ('ReadMB', 'WriteMB')\n    AND CollectionTime >= $__timeFrom()\n    AND CollectionTime <= $__timeTo()\n)\nSELECT\n  CollectionTime AS time,\n  CASE\n    WHEN PrevValue IS NOT NULL AND DATEDIFF(SECOND, PrevTime, CollectionTime) > 0\n    THEN (MetricValue - PrevValue) / DATEDIFF(SECOND, PrevTime, CollectionTime)\n    ELSE 0\n  END AS value,\n  CASE MetricName\n    WHEN 'ReadMB' THEN 'Read MB/s'\n    WHEN 'WriteMB' THEN 'Write MB/s'\n  END AS metric\nFROM MetricsWithPrevious\nWHERE PrevValue IS NOT NULL\nORDER BY CollectionTime",
           "refId": "A"
         }
       ],
@@ -572,7 +587,10 @@
       "id": 6,
       "options": {
         "legend": {
-          "calcs": ["mean", "last"],
+          "calcs": [
+            "mean",
+            "last"
+          ],
           "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
@@ -643,7 +661,9 @@
         "orientation": "auto",
         "reduceOptions": {
           "values": false,
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": ""
         },
         "showThresholdLabels": false,
@@ -708,7 +728,9 @@
         "orientation": "auto",
         "reduceOptions": {
           "values": false,
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": ""
         },
         "showThresholdLabels": false,
@@ -776,7 +798,9 @@
         "orientation": "auto",
         "reduceOptions": {
           "values": false,
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": ""
         },
         "textMode": "auto"
@@ -843,7 +867,9 @@
         "orientation": "auto",
         "reduceOptions": {
           "values": false,
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": ""
         },
         "textMode": "auto"
@@ -856,7 +882,7 @@
             "uid": "${DS_MONITORINGDB}"
           },
           "format": "time_series",
-          "rawSql": "SELECT TOP 1\n  CollectionTime AS time,\n  MetricValue AS value\nFROM dbo.PerformanceMetrics\nWHERE MetricCategory = 'Performance'\n  AND MetricName = 'Transactions'\n  AND ServerID = $ServerID\n  AND CollectionTime >= $__timeFrom()\n  AND CollectionTime <= $__timeTo()\nORDER BY CollectionTime DESC",
+          "rawSql": "SELECT\n  CollectionTime AS time,\n  MetricValue AS value\nFROM dbo.PerformanceMetrics\nWHERE MetricCategory = 'Performance'\n  AND MetricName = 'Transactions'\n  AND ServerID = $ServerID\n  AND CollectionTime >= $__timeFrom()\n  AND CollectionTime <= $__timeTo()\nORDER BY CollectionTime",
           "refId": "A"
         }
       ],
@@ -873,7 +899,7 @@
       },
       "id": 200,
       "panels": [],
-      "title": "📈 Database Load (Active Sessions by Wait Type)",
+      "title": "\ud83d\udcc8 Database Load (Active Sessions by Wait Type)",
       "type": "row"
     },
     {
@@ -947,7 +973,10 @@
               {
                 "id": "custom.lineStyle",
                 "value": {
-                  "dash": [10, 10],
+                  "dash": [
+                    10,
+                    10
+                  ],
                   "fill": "dash"
                 }
               },
@@ -978,7 +1007,10 @@
       "id": 11,
       "options": {
         "legend": {
-          "calcs": ["mean", "max"],
+          "calcs": [
+            "mean",
+            "max"
+          ],
           "displayMode": "table",
           "placement": "right",
           "showLegend": true,
@@ -1015,268 +1047,8 @@
       },
       "id": 300,
       "panels": [],
-      "title": "🔍 Top Dimensions (SQL, Waits, Hosts, Users, Databases)",
+      "title": "\ud83d\udd0d Top Dimensions (SQL, Waits, Hosts, Users, Databases)",
       "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "mssql",
-        "uid": "${DS_MONITORINGDB}"
-      },
-      "description": "Top SQL statements by total duration",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "left",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Total Duration (sec)"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 150
-              },
-              {
-                "id": "unit",
-                "value": "s"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "continuous-GrYlRd"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Executions"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 120
-              },
-              {
-                "id": "unit",
-                "value": "short"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Avg Duration (ms)"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 150
-              },
-              {
-                "id": "unit",
-                "value": "ms"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Query Text"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 600
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 33
-      },
-      "id": 12,
-      "options": {
-        "cellHeight": "sm",
-        "footer": {
-          "countRows": false,
-          "fields": "",
-          "reducer": ["sum"],
-          "show": false
-        },
-        "showHeader": true,
-        "sortBy": [
-          {
-            "desc": true,
-            "displayName": "Total Duration (sec)"
-          }
-        ]
-      },
-      "pluginVersion": "10.2.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "mssql",
-            "uid": "${DS_MONITORINGDB}"
-          },
-          "format": "table",
-          "rawSql": "-- Top SQL by Total Duration\nSELECT TOP 10\n  SUBSTRING(MetricDetails, 1, 100) AS [Query Text],\n  SUM(CAST(JSON_VALUE(MetricDetails, '$.ExecutionCount') AS BIGINT)) AS [Executions],\n  CAST(SUM(CAST(JSON_VALUE(MetricDetails, '$.TotalDurationMs') AS DECIMAL(18,2))) / 1000.0 AS DECIMAL(18,2)) AS [Total Duration (sec)],\n  CAST(AVG(CAST(JSON_VALUE(MetricDetails, '$.AvgDurationMs') AS DECIMAL(18,2))) AS DECIMAL(18,2)) AS [Avg Duration (ms)],\n  CAST(SUM(CAST(JSON_VALUE(MetricDetails, '$.TotalCPUMs') AS DECIMAL(18,2))) / 1000.0 AS DECIMAL(18,2)) AS [Total CPU (sec)],\n  SUM(CAST(JSON_VALUE(MetricDetails, '$.TotalReads') AS BIGINT)) / 1000000 AS [Total Reads (M)]\nFROM dbo.PerformanceMetrics\nWHERE MetricCategory = 'QueryPerformance'\n  AND ServerID = $ServerID\n  AND CollectionTime >= $__timeFrom()\n  AND CollectionTime <= $__timeTo()\nGROUP BY SUBSTRING(MetricDetails, 1, 100)\nORDER BY [Total Duration (sec)] DESC",
-          "refId": "A"
-        }
-      ],
-      "title": "Top SQL (by Total Duration)",
-      "type": "table"
-    },
-    {
-      "datasource": {
-        "type": "mssql",
-        "uid": "${DS_MONITORINGDB}"
-      },
-      "description": "Top wait types by total wait time",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "left",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Total Wait Time (sec)"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 180
-              },
-              {
-                "id": "unit",
-                "value": "s"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "continuous-GrYlRd"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Wait Count"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 150
-              },
-              {
-                "id": "unit",
-                "value": "short"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Avg Wait Time (ms)"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 180
-              },
-              {
-                "id": "unit",
-                "value": "ms"
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 41
-      },
-      "id": 13,
-      "options": {
-        "cellHeight": "sm",
-        "footer": {
-          "countRows": false,
-          "fields": "",
-          "reducer": ["sum"],
-          "show": false
-        },
-        "showHeader": true,
-        "sortBy": [
-          {
-            "desc": true,
-            "displayName": "Total Wait Time (sec)"
-          }
-        ]
-      },
-      "pluginVersion": "10.2.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "mssql",
-            "uid": "${DS_MONITORINGDB}"
-          },
-          "format": "table",
-          "rawSql": "-- Top Wait Types\nSELECT TOP 10\n  MetricName AS [Wait Type],\n  SUM(CAST(JSON_VALUE(MetricDetails, '$.WaitCount') AS BIGINT)) AS [Wait Count],\n  CAST(SUM(CAST(JSON_VALUE(MetricDetails, '$.WaitTimeMs') AS DECIMAL(18,2))) / 1000.0 AS DECIMAL(18,2)) AS [Total Wait Time (sec)],\n  CAST(AVG(CAST(JSON_VALUE(MetricDetails, '$.WaitTimeMs') AS DECIMAL(18,2))) AS DECIMAL(18,2)) AS [Avg Wait Time (ms)]\nFROM dbo.PerformanceMetrics\nWHERE MetricCategory = 'WaitStats'\n  AND ServerID = $ServerID\n  AND CollectionTime >= $__timeFrom()\n  AND CollectionTime <= $__timeTo()\nGROUP BY MetricName\nORDER BY [Total Wait Time (sec)] DESC",
-          "refId": "A"
-        }
-      ],
-      "title": "Top Waits (by Total Wait Time)",
-      "type": "table"
     },
     {
       "datasource": {
@@ -1340,7 +1112,9 @@
         "footer": {
           "countRows": false,
           "fields": "",
-          "reducer": ["sum"],
+          "reducer": [
+            "sum"
+          ],
           "show": false
         },
         "showHeader": true,
@@ -1428,7 +1202,9 @@
         "footer": {
           "countRows": false,
           "fields": "",
-          "reducer": ["sum"],
+          "reducer": [
+            "sum"
+          ],
           "show": false
         },
         "showHeader": true,
@@ -1516,7 +1292,9 @@
         "footer": {
           "countRows": false,
           "fields": "",
-          "reducer": ["sum"],
+          "reducer": [
+            "sum"
+          ],
           "show": false
         },
         "showHeader": true,
@@ -1546,7 +1324,11 @@
   "refresh": "30s",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["sql-server", "performance-insights", "rds-equivalent"],
+  "tags": [
+    "sql-server",
+    "performance-insights",
+    "rds-equivalent"
+  ],
   "templating": {
     "list": [
       {
@@ -1599,8 +1381,26 @@
     "to": "now"
   },
   "timepicker": {
-    "refresh_intervals": ["10s", "30s", "1m", "5m", "15m", "30m", "1h"],
-    "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]
+    "refresh_intervals": [
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h"
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d",
+      "7d",
+      "30d"
+    ]
   },
   "timezone": "browser",
   "title": "AWS RDS Performance Insights (SQL Server)",
