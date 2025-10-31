@@ -19,12 +19,15 @@ IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.Serve
 BEGIN
     CREATE TABLE dbo.Servers
     (
-        ServerID        INT             IDENTITY(1,1)   NOT NULL,
-        ServerName      NVARCHAR(256)                   NOT NULL,
-        Environment     NVARCHAR(50)                    NULL,        -- Production, Development, Staging, Test
-        IsActive        BIT                             NOT NULL DEFAULT 1,
-        CreatedDate     DATETIME2                       NOT NULL DEFAULT GETUTCDATE(),
-        ModifiedDate    DATETIME2                       NULL,
+        ServerID            INT             IDENTITY(1,1)   NOT NULL,
+        ServerName          NVARCHAR(256)                   NOT NULL,
+        Environment         NVARCHAR(50)                    NULL,        -- Production, Development, Staging, Test
+        IsActive            BIT                             NOT NULL DEFAULT 1,
+        CreatedDate         DATETIME2                       NOT NULL DEFAULT GETUTCDATE(),
+        ModifiedDate        DATETIME2                       NULL,
+        LinkedServerName    NVARCHAR(128)                   NULL,        -- Name of linked server (NULL=local server)
+                                                                         -- Used for remote collection via OPENQUERY
+                                                                         -- See: CRITICAL-REMOTE-COLLECTION-FIX.md
 
         CONSTRAINT PK_Servers PRIMARY KEY CLUSTERED (ServerID),
         CONSTRAINT UQ_Servers_ServerName UNIQUE (ServerName)
@@ -35,6 +38,13 @@ END
 ELSE
 BEGIN
     PRINT 'Table [dbo].[Servers] already exists.';
+
+    -- Add LinkedServerName column if it doesn't exist (backwards compatibility)
+    IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Servers') AND name = 'LinkedServerName')
+    BEGIN
+        ALTER TABLE dbo.Servers ADD LinkedServerName NVARCHAR(128) NULL;
+        PRINT 'Added [LinkedServerName] column to [dbo].[Servers].';
+    END
 END
 GO
 

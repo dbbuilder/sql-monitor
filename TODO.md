@@ -1,8 +1,93 @@
 # SQL Server Monitor - Development Roadmap
 
-**Last Updated**: October 27, 2025
-**Project Status**: Phase 1.9 (Integration Phase) - Planning
+**Last Updated**: October 31, 2025
+**Project Status**: Phase 2.1 (Query Analysis Features) - Critical Bug Fix In Progress
 **Methodology**: Test-Driven Development (TDD) - Red-Green-Refactor
+
+---
+
+## 🚨 **CRITICAL: Remote Collection Bug Fix (CURRENT SESSION)**
+
+### Status: 🔄 IN PROGRESS (2 of 8 procedures fixed)
+
+**Date Started**: 2025-10-31
+**Priority**: CRITICAL (blocks Phase 2 deployment)
+**Context Document**: `SESSION-STATUS-2025-10-31.md`
+
+### Problem Identified
+
+Remote servers were collecting **sqltest's data** instead of their own data when calling procedures via linked server (execution context issue).
+
+**Root Cause**: When remote server calls `EXEC [sqltest].[MonitoringDB].dbo.usp_CollectWaitStats @ServerID=5`, the procedure executes on sqltest and queries sqltest's DMVs, storing sqltest's data with ServerID=5 (WRONG!).
+
+**User Insight**: "make sure they capture their own data not just the destination server's data because of the linked servers issues" ✅
+
+### Solution: OPENQUERY Pattern
+
+```sql
+IF @LinkedServerName IS NULL
+    -- LOCAL: Direct DMV query
+ELSE
+    -- REMOTE: OPENQUERY([SVWEB], 'SELECT * FROM sys.dm_os_wait_stats')
+```
+
+### Progress Tracker
+
+| # | Procedure | Status | Test Results | Notes |
+|---|-----------|--------|--------------|-------|
+| 1 | `usp_CollectWaitStats` | ✅ **FIXED** | 112 vs 150 wait types (DIFFERENT ✅) | Lines 325-412 in database/32 |
+| 2 | `usp_CollectBlockingEvents` | ✅ **FIXED** | Both executed successfully ✅ | ⚠️ Needs merge to file |
+| 3 | `usp_CollectDeadlockEvents` | ❌ **NOT FIXED** | - | Extended Events (45 min) |
+| 4 | `usp_CollectIndexFragmentation` | ❌ **NOT FIXED** | - | sys.dm_db_index_physical_stats (30 min) |
+| 5 | `usp_CollectMissingIndexes` | ❌ **NOT FIXED** | - | Simple DMVs (20 min) |
+| 6 | `usp_CollectUnusedIndexes` | ❌ **NOT FIXED** | - | Simple DMVs (20 min) |
+| 7 | `usp_CollectQueryStoreStats` | ❌ **NOT FIXED** | - | Complex: database context (60 min) |
+| 8 | `usp_CollectAllQueryAnalysisMetrics` | ❌ **NOT FIXED** | - | Master procedure (10 min) |
+
+**Estimated Time Remaining**: 2-3 hours
+
+### Infrastructure Complete ✅
+
+- ✅ **LinkedServerName column** added to `dbo.Servers` table
+- ✅ **Linked servers verified**: SVWEB, suncity.schoolvision.net
+- ✅ **Trace Flag 1222** deployed to all 3 servers
+- ✅ **Test methodology proven**: Compare local vs remote data (must be DIFFERENT)
+
+### Documentation Created ✅
+
+- ✅ `CRITICAL-REMOTE-COLLECTION-FIX.md` - 900+ line solution guide
+- ✅ `REMOTE-COLLECTION-FIX-PROGRESS.md` - Test results and progress
+- ✅ `SESSION-STATUS-2025-10-31.md` - Complete session context
+
+### Next Session Action Items
+
+**Priority 1**: Merge usp_CollectBlockingEvents to file (5 min)
+**Priority 2**: Fix remaining 6 procedures with OPENQUERY pattern (2-3 hours)
+**Priority 3**: Test all procedures (local vs remote verification) (30 min)
+**Priority 4**: Delete incorrect historical data for ServerID=4, 5 (15 min)
+**Priority 5**: Final documentation update (15 min)
+
+---
+
+## 📊 Overall Progress
+
+| Phase | Status | Hours | Priority | Dependencies |
+|-------|--------|-------|----------|--------------|
+| **Phase 1: Database Foundation** | ✅ Complete | 40h | Critical | None |
+| **Phase 1.25: Schema Browser** | ✅ Complete | 4h actual | High | Phase 1 |
+| **Phase 2.0: SOC 2 (Auth/Audit)** | ✅ Complete | 80h | Critical | Phase 1.25 |
+| **Phase 2.1: Query Analysis Features** | 🔄 **IN PROGRESS** | 60h | **CRITICAL** | Phase 2.0 |
+| **Phase 2.1.1: Remote Collection Fix** | 🔄 **IN PROGRESS** | 4h (2h spent) | **CRITICAL** | Phase 2.1 |
+| **Phase 2.5: GDPR Compliance** | 📋 Planned | 60h | High | Phase 2.1 |
+| **Phase 2.6: PCI-DSS Compliance** | 📋 Planned | 48h | Medium | Phase 2.1, 2.5 |
+| **Phase 2.7: HIPAA Compliance** | 📋 Planned | 40h | Medium | Phase 2.1, 2.5, 2.6 |
+| **Phase 2.8: FERPA Compliance** | 📋 Planned | 24h | Low | Phase 2.1, 2.5, 2.6, 2.7 |
+| **Phase 3: Killer Features** | 📋 Planned | 160h | High | Phase 2.1 |
+| **Phase 4: Code Editor & Rules Engine** | 📋 Planned | 120h | Medium | Phase 2.1, 3 |
+| **Phase 5: AI Layer** | 📋 Planned | 200h | Medium | Phase 1-4 |
+| **TOTAL** | 🔄 In Progress | **836h** | — | — |
+
+**Current Phase**: Phase 2.1.1 - Remote Collection Bug Fix ← **FINISH THIS FIRST**
 
 ---
 
@@ -17,365 +102,301 @@ Build a **self-hosted, enterprise-grade SQL Server monitoring solution** that:
 
 ---
 
-## 📊 Overall Progress
+## 🚨 **PHASE 2.1.1: Remote Collection Bug Fix (CRITICAL)**
 
-| Phase | Status | Hours | Priority | Dependencies |
-|-------|--------|-------|----------|--------------|
-| **Phase 1: Database Foundation** | ✅ Complete | 40h | Critical | None |
-| **Phase 1.25: Schema Browser** | ✅ Complete | 40h (4h actual) | High | Phase 1 |
-| **Phase 1.9: sql-monitor-agent Integration** | 🔄 **IN PROGRESS** | 60h | **CRITICAL** | Phase 1, 1.25 |
-| **Phase 2: SOC 2 Compliance** | 📋 Planned | 80h | High | Phase 1.9 |
-| **Phase 2.5: GDPR Compliance** | 📋 Planned | 60h | High | Phase 2 |
-| **Phase 2.6: PCI-DSS Compliance** | 📋 Planned | 48h | Medium | Phase 2, 2.5 |
-| **Phase 2.7: HIPAA Compliance** | 📋 Planned | 40h | Medium | Phase 2, 2.5, 2.6 |
-| **Phase 2.8: FERPA Compliance** | 📋 Planned | 24h | Low | Phase 2, 2.5, 2.6, 2.7 |
-| **Phase 3: Killer Features** | 📋 Planned | 160h | High | Phase 1.9, 2 |
-| **Phase 4: Code Editor & Rules Engine** | 📋 Planned | 120h | Medium | Phase 1.9, 2, 3 |
-| **Phase 5: AI Layer** | 📋 Planned | 200h | Medium | Phase 1-4 |
-| **TOTAL** | 🔄 In Progress | **872h** | — | — |
+### Completion Checklist
 
-**Current Phase**: Phase 1.9 (sql-monitor-agent Integration) - **MUST COMPLETE BEFORE PHASE 2**
+#### Infrastructure (Complete ✅)
+- [x] Add LinkedServerName column to dbo.Servers table
+- [x] Populate LinkedServerName for all servers (NULL=local, value=remote)
+- [x] Verify linked servers exist and are accessible
+- [x] Deploy Trace Flag 1222 to all servers
 
----
+#### Procedure Fixes (2 of 8 Complete)
+- [x] **usp_CollectWaitStats** - FIXED and TESTED ✅
+- [x] **usp_CollectBlockingEvents** - FIXED and TESTED ✅ (needs file merge)
+- [ ] **usp_CollectDeadlockEvents** - Apply OPENQUERY pattern (45 min)
+- [ ] **usp_CollectIndexFragmentation** - Apply OPENQUERY pattern (30 min)
+- [ ] **usp_CollectMissingIndexes** - Apply OPENQUERY pattern (20 min)
+- [ ] **usp_CollectUnusedIndexes** - Apply OPENQUERY pattern (20 min)
+- [ ] **usp_CollectQueryStoreStats** - Apply OPENQUERY pattern (60 min, complex)
+- [ ] **usp_CollectAllQueryAnalysisMetrics** - Update to call fixed procedures (10 min)
 
-## 🚨 **PHASE 1.9: sql-monitor-agent Integration (CRITICAL)**
+#### Testing (Partial)
+- [x] Test usp_CollectWaitStats local (ServerID=1) vs remote (ServerID=5)
+- [x] Verify data is DIFFERENT (proves fix working)
+- [x] Test usp_CollectBlockingEvents local vs remote
+- [ ] Test all 8 procedures local vs remote
+- [ ] Verify all procedures collect different data for different servers
 
-### Rationale
+#### Data Cleanup
+- [ ] Delete incorrect historical data for ServerID=4 (suncity)
+- [ ] Delete incorrect historical data for ServerID=5 (svweb)
+- [ ] Tables to clean: WaitStatsSnapshot, QueryStoreQueries, BlockingEvents, DeadlockEvents, etc.
 
-**sql-monitor-agent** is a proven, production-deployed lightweight monitoring system with superior schema design and feedback capabilities. Instead of building from scratch, we need to:
-1. **Leverage** the 20+ tables and comprehensive DMV collection from sql-monitor-agent
-2. **Unify** the database naming (configurable DBATools/MonitoringDB)
-3. **Bridge** the two schemas using views and stored procedures
-4. **Adopt** the feedback/ranges system for intelligent analysis
-5. **Evaluate** sql-http-bridge as a lightweight API alternative
+#### Documentation
+- [x] CRITICAL-REMOTE-COLLECTION-FIX.md (solution guide)
+- [x] REMOTE-COLLECTION-FIX-PROGRESS.md (progress report)
+- [x] SESSION-STATUS-2025-10-31.md (session context)
+- [x] Update database/02-create-tables.sql with LinkedServerName
+- [x] Update database/32-create-query-analysis-procedures.sql header
+- [ ] Update header with final status (all procedures ✅)
+- [ ] Create REMOTE-COLLECTION-FIX-COMPLETE.md (final summary)
 
-### Schema Comparison
+#### Files Modified
+- [x] database/02-create-tables.sql (LinkedServerName column)
+- [x] database/32-create-query-analysis-procedures.sql (header + usp_CollectWaitStats)
+- [ ] database/32-create-query-analysis-procedures.sql (merge usp_CollectBlockingEvents)
+- [ ] database/32-create-query-analysis-procedures.sql (fix remaining 6 procedures)
+- [ ] Git commit with all changes
 
-| Feature | sql-monitor-agent (DBATools) | sql-monitor (MonitoringDB) | Decision |
-|---------|------------------------------|----------------------------|----------|
-| **Core Tables** | 5 (Run, DB, Workload, ErrorLog, LogEntry) | 2 (Servers, PerformanceMetrics) | **Adopt sql-monitor-agent schema** |
-| **Enhanced Tables** | 17+ (Query Stats, IO, Memory, Backups, Indexes, Waits, etc.) | None | **Migrate all to MonitoringDB** |
-| **Feedback System** | ✅ FeedbackRule, FeedbackMetadata, ranges/insights | ❌ None | **Adopt feedback system** |
-| **Priority Levels** | ✅ P0-P3 modular collectors | ❌ None | **Adopt priority system** |
-| **Config System** | ✅ ConfigSetting, fn_GetConfigBit | ❌ None | **Adopt config system** |
-| **Database Filter** | ✅ vw_MonitoredDatabases | ❌ None | **Adopt filter system** |
-| **Collection Method** | ✅ SQL Agent + modular SPs | ❌ Planned | **Use sql-monitor-agent approach** |
-| **Partitioning** | ❌ None | ✅ Monthly partitions + columnstore | **Keep MonitoringDB partitioning** |
-| **Multi-Server** | ❌ Single-server focus | ✅ Servers table | **Extend sql-monitor-agent for multi-server** |
+### Success Criteria
 
-### Integration Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                   UNIFIED DATABASE LAYER                         │
-│  (Configurable: DBATools [default] or MonitoringDB)            │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  CORE SCHEMA (from sql-monitor-agent)                          │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │ PerfSnapshotRun (server-level metrics)                    │ │
-│  │ PerfSnapshotDB (database-level stats)                     │ │
-│  │ PerfSnapshotWorkload (active sessions/requests)           │ │
-│  │ PerfSnapshotErrorLog (SQL Server error log)               │ │
-│  │ LogEntry (diagnostic logging)                             │ │
-│  └───────────────────────────────────────────────────────────┘ │
-│                                                                 │
-│  ENHANCED SCHEMA (from sql-monitor-agent)                      │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │ P0: QueryStats, IOStats, Memory, BackupHistory (critical) │ │
-│  │ P1: IndexUsage, MissingIndexes, WaitStats, TempDB, Plans │ │
-│  │ P2: ServerConfig, VLF, Deadlocks, Schedulers, Counters   │ │
-│  │ P3: LatchStats, JobHistory, SpinlockStats                │ │
-│  └───────────────────────────────────────────────────────────┘ │
-│                                                                 │
-│  FEEDBACK SYSTEM (from sql-monitor-agent)                      │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │ FeedbackRule (ranges, severity, recommendations)          │ │
-│  │ FeedbackMetadata (result set descriptions)                │ │
-│  │ fn_GetMetricFeedback (intelligent analysis)               │ │
-│  └───────────────────────────────────────────────────────────┘ │
-│                                                                 │
-│  MULTI-SERVER EXTENSION (from sql-monitor)                     │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │ Servers (inventory of monitored instances)                │ │
-│  │ ServerConfigs (server-specific settings)                  │ │
-│  │ LinkedServerMappings (cross-server collection)            │ │
-│  └───────────────────────────────────────────────────────────┘ │
-│                                                                 │
-│  MAPPING LAYER (compatibility views)                           │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │ vw_PerformanceMetrics → PerfSnapshot* tables              │ │
-│  │ vw_ServerMetrics → aggregated PerfSnapshotRun             │ │
-│  │ vw_DatabaseMetrics → PerfSnapshotDB                       │ │
-│  └───────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### Implementation Plan (60 hours)
-
-#### Week 1: Database Configuration & Core Migration (24 hours)
-
-**Day 1-2: Configurable Database Name (8h)**
-- [ ] Create configuration system for database selection
-- [ ] Add `@TargetDatabase` parameter to all stored procedures
-- [ ] Default: `DBATools` (backwards compatible with sql-monitor-agent)
-- [ ] Option: `MonitoringDB` (new enterprise solution)
-- [ ] Create `fn_GetTargetDatabase()` function
-- [ ] Update all `USE [DBATools]` to dynamic SQL or synonyms
-
-**Day 3-4: Schema Unification (8h)**
-- [ ] Create MonitoringDB with DBATools-compatible schema
-- [ ] Add `Servers` table to DBATools for multi-server support
-- [ ] Extend `PerfSnapshotRun` with `ServerID` foreign key
-- [ ] Create migration script: DBATools (single-server) → MonitoringDB (multi-server)
-- [ ] Add partitioning to existing PerfSnapshot* tables (monthly by SnapshotUTC)
-- [ ] Add columnstore indexes for fast aggregation
-
-**Day 5: Mapping Views (8h)**
-- [ ] Create `vw_PerformanceMetrics` (maps to PerfSnapshotRun + detail tables)
-- [ ] Create `vw_ServerSummary` (server-level aggregates)
-- [ ] Create `vw_DatabaseSummary` (database-level aggregates)
-- [ ] Create `vw_WorkloadHistory` (active workload trends)
-- [ ] Test compatibility with existing sql-monitor API expectations
-
-#### Week 2: Enhanced Tables & Feedback System (24 hours)
-
-**Day 1-2: Enhanced Table Migration (8h)**
-- [ ] Create all 17 enhanced tables in MonitoringDB
-- [ ] Add ServerID foreign keys to all PerfSnapshot* tables
-- [ ] Create indexes optimized for multi-server queries
-- [ ] Add partitioning for high-volume tables (QueryStats, WaitStats)
-- [ ] Test modular collectors (P0-P3) against MonitoringDB
-
-**Day 3: Feedback System Migration (8h)**
-- [ ] Create FeedbackRule and FeedbackMetadata tables in MonitoringDB
-- [ ] Create `fn_GetMetricFeedback()` function
-- [ ] Seed 50+ feedback rules (from sql-monitor-agent)
-- [ ] Create `DBA_GetDailyOverview` with intelligent feedback
-- [ ] Test feedback system with real metrics
-
-**Day 4: Configuration System (8h)**
-- [ ] Create ConfigSetting table in MonitoringDB
-- [ ] Create `fn_GetConfigBit()`, `fn_GetConfigValue()` functions
-- [ ] Create `vw_MonitoredDatabases` (database filter system)
-- [ ] Seed default configuration:
-  - `EnableP0Collection = 1`
-  - `EnableP1Collection = 1`
-  - `EnableP2Collection = 0` (optional, performance-intensive)
-  - `EnableP3Collection = 0` (optional, low priority)
-  - `RetentionDays = 90`
-  - `DatabaseFilter = ALL` (or comma-separated list)
-
-#### Week 3: API Integration & Testing (12 hours)
-
-**Day 1-2: Stored Procedure Updates (6h)**
-- [ ] Update `DBA_CollectPerformanceSnapshot` to use configurable database
-- [ ] Update all P0-P3 collectors to support ServerID parameter
-- [ ] Create `usp_CollectMetrics_RemoteServer` (wraps DBA_CollectPerformanceSnapshot)
-- [ ] Add server selection logic (if ServerID provided, filter by server)
-- [ ] Create `usp_GetServerMetrics` (API endpoint, returns vw_PerformanceMetrics)
-- [ ] Create `usp_GetDailyOverview` (API endpoint, returns feedback-enhanced report)
-
-**Day 3: API Compatibility Layer (3h)**
-- [ ] Create wrapper stored procedures for existing sql-monitor API
-  - `usp_GetServers` → `SELECT * FROM Servers WHERE IsActive = 1`
-  - `usp_GetMetricHistory` → `SELECT * FROM vw_PerformanceMetrics WHERE ...`
-  - `usp_GetServerSummary` → `SELECT * FROM vw_ServerSummary WHERE ...`
-- [ ] Test with existing ASP.NET Core API controllers
-- [ ] Verify Grafana dashboards work with new views
-
-**Day 4: Integration Testing (3h)**
-- [ ] Test single-server mode (DBATools, no ServerID, backwards compatible)
-- [ ] Test multi-server mode (MonitoringDB with Servers table)
-- [ ] Test collection from multiple servers via linked servers
-- [ ] Test feedback system with various metric ranges
-- [ ] Performance test: collection overhead <3% CPU
-- [ ] Performance test: dashboard queries <500ms
+- [ ] All 8 procedures use OPENQUERY pattern for remote collection
+- [ ] All procedures tested: local (ServerID=1) vs remote (ServerID=5)
+- [ ] Data verification: Results are DIFFERENT for each server
+- [ ] Incorrect historical data deleted
+- [ ] All fixes committed to database/32 script file
+- [ ] Documentation complete
 
 ---
 
-## 🔧 **sql-http-bridge Evaluation**
+## 📋 **PHASE 2.1: Query Analysis Features (CURRENT PHASE)**
 
-### Current State
-- **Production-ready**: Python-based HTTP-to-sqlcmd bridge
-- **Security-first**: Localhost-only (127.0.0.1:8080), SQL auth required per request
-- **Least-privilege**: Execute-only permissions on allowlisted stored procedures
-- **Audit logging**: All requests logged to `DBATools.dbo.Api_AccessLog`
-- **Cross-platform**: Linux (systemd) and Windows (NSSM service)
+### Status: 85% Complete (4 of 4 features deployed, bug discovered)
 
-### Comparison with ASP.NET Core API
+**Date Started**: 2025-10-30
+**Date Target**: 2025-11-01 (completion after bug fix)
+**Document**: `PHASE-2-QUERY-ANALYSIS-IMPLEMENTATION.md`
 
-| Feature | sql-http-bridge | ASP.NET Core API (current) | Recommendation |
-|---------|-----------------|----------------------------|----------------|
-| **Deployment** | Single Python file + systemd/NSSM | Docker container (API + dependencies) | **Bridge simpler for quick setups** |
-| **Security** | SQL auth per request | JWT + MFA + session management | **API more enterprise-grade** |
-| **Performance** | sqlcmd overhead per request | Connection pooling, async | **API faster at scale** |
-| **Features** | Simple SP execution | Rich middleware, RBAC, audit | **API more feature-rich** |
-| **Maintenance** | Minimal (Python + sqlcmd) | Complex (.NET, Docker, config) | **Bridge easier to maintain** |
-| **Use Case** | Small deployments, air-gap, simplicity | Enterprise multi-server monitoring | **Both have value** |
+### Overview
 
-### Recommendation: **Hybrid Approach**
+Implemented 4 competitive features from analysis:
+1. ✅ Query Store Integration
+2. ✅ Real-time Blocking Detection
+3. ✅ Deadlock Monitoring (Trace Flag 1222)
+4. ✅ Wait Statistics Analysis
 
-1. **Keep sql-http-bridge for**:
-   - Quick deployments (single server, no Docker)
-   - Air-gap environments (no internet, minimal dependencies)
-   - SQL-only shops (no .NET/Docker expertise)
-   - Testing/development (fast iteration)
+### Deliverables
 
-2. **Use ASP.NET Core API for**:
-   - Enterprise multi-server deployments
-   - Compliance requirements (SOC 2, GDPR, etc.)
-   - Advanced features (MFA, RBAC, AI)
-   - Grafana integration (needs consistent JSON API)
+#### Database Objects (Complete ✅)
+- ✅ 11 new tables (QueryStoreQueries, BlockingEvents, WaitStatsSnapshot, etc.)
+- ✅ 8 collection procedures (now fixing with OPENQUERY pattern)
+- ✅ 4 analysis procedures (baseline, anomaly detection)
+- ✅ Trace Flag 1222 configuration script
 
-3. **Integration**:
-   - [ ] Expose same stored procedures via both interfaces
-   - [ ] Add sql-http-bridge to docker-compose as optional service
-   - [ ] Document when to use each approach
-   - [ ] Create `docker-compose.lightweight.yml` (sql-http-bridge only, no .NET)
+#### Features Deployed
+- ✅ **Query Store Integration** - Captures query metadata, runtime stats, execution plans
+- ✅ **Real-time Blocking Detection** - Tracks blocking chains with 5+ second threshold
+- ✅ **Deadlock Monitoring** - TF 1222 enabled, captures deadlock graphs
+- ✅ **Wait Statistics** - Snapshot-based wait analysis with delta calculation
+
+#### Critical Issue Discovered
+- ❌ **Remote Collection Bug** - Procedures collect wrong server's data via linked server
+- 🔄 **Fix In Progress** - OPENQUERY pattern implementation (2 of 8 procedures fixed)
+
+### Remaining Work
+
+1. **Complete Remote Collection Fix** (2-3 hours)
+   - Fix 6 remaining procedures with OPENQUERY pattern
+   - Test all procedures local vs remote
+   - Delete incorrect historical data
+
+2. **Grafana Dashboards** (4 hours)
+   - Query Store Performance dashboard
+   - Blocking/Deadlock dashboard
+   - Wait Statistics dashboard
+   - Top Queries by metric dashboard
+
+3. **Documentation** (2 hours)
+   - User guide for Query Analysis features
+   - Troubleshooting guide
+   - Dashboard usage guide
+
+**Total Remaining**: 8-10 hours
 
 ---
 
-## 📋 Phase 1.9 Deliverables
+## ✅ **PHASE 2.0: SOC 2 Compliance (COMPLETE)**
 
-### Database Changes
-- ✅ Configurable database name (DBATools default, MonitoringDB option)
-- ✅ All sql-monitor-agent tables migrated to MonitoringDB
-- ✅ Multi-server extensions (Servers table, ServerID foreign keys)
-- ✅ Partitioning + columnstore on high-volume tables
-- ✅ Feedback system (FeedbackRule, FeedbackMetadata, fn_GetMetricFeedback)
-- ✅ Configuration system (ConfigSetting, fn_GetConfigBit, vw_MonitoredDatabases)
+### Status: 100% Complete ✅
 
-### Stored Procedures
-- ✅ `DBA_CollectPerformanceSnapshot` (configurable database)
-- ✅ All P0-P3 collectors (support ServerID)
-- ✅ `usp_CollectMetrics_RemoteServer` (multi-server wrapper)
-- ✅ `usp_GetServerMetrics` (API endpoint)
-- ✅ `usp_GetDailyOverview` (feedback-enhanced report)
-- ✅ API compatibility wrappers (usp_GetServers, usp_GetMetricHistory, etc.)
+**Completion Date**: 2025-10-29
+**Document**: `docs/phases/PHASE-02-SOC2-COMPLIANCE-PLAN.md`
 
-### Mapping Views
-- ✅ `vw_PerformanceMetrics` (unified time-series view)
-- ✅ `vw_ServerSummary` (server-level aggregates)
-- ✅ `vw_DatabaseSummary` (database-level aggregates)
-- ✅ `vw_WorkloadHistory` (active workload trends)
+### Deliverables Completed
 
-### Documentation
-- ✅ Migration guide (DBATools → MonitoringDB)
-- ✅ Configuration reference (all ConfigSetting options)
-- ✅ Feedback system guide (how to add custom rules)
-- ✅ API compatibility guide (sql-http-bridge vs ASP.NET Core)
+#### Authentication & Authorization
+- ✅ JWT token authentication (8-hour expiration, 5-min clock skew)
+- ✅ MFA support (TOTP with QR code generation)
+- ✅ Backup codes (10 single-use codes)
+- ✅ Password hashing (BCrypt with automatic salt)
+- ✅ Session management (server-side tracking, auto-cleanup)
 
-### Testing
-- ✅ Single-server mode (backwards compatible)
-- ✅ Multi-server mode (enterprise deployment)
-- ✅ Collection performance (<3% CPU overhead)
-- ✅ Query performance (<500ms dashboard queries)
-- ✅ Feedback system accuracy (50+ rules tested)
+#### Database Schema
+- ✅ Users, Roles, Permissions tables
+- ✅ UserRoles, RolePermissions (many-to-many)
+- ✅ UserSessions (active session tracking)
+- ✅ UserMFA (TOTP secrets, backup codes)
+- ✅ AuditLog (comprehensive audit trail)
+
+#### API Endpoints
+- ✅ POST /api/auth/register, /login
+- ✅ POST /api/mfa/setup, /verify, /validate
+- ✅ GET/DELETE /api/session
+
+#### Middleware
+- ✅ AuditMiddleware (logs all requests before auth)
+- ✅ AuthorizationMiddleware (enforces permissions)
+- ✅ [RequirePermission] attribute for declarative checks
+
+#### Security Features
+- ✅ Row-level security via @UserID parameter
+- ✅ Permissions cached in IMemoryCache
+- ✅ All passwords hashed with BCrypt
+- ✅ MFA secrets stored encrypted
+
+---
+
+## ✅ **PHASE 1.25: Schema Browser (COMPLETE)**
+
+### Status: 100% Complete ✅
+
+**Completion Date**: 2025-10-27
+**Actual Time**: 4 hours (vs 40 hours planned)
+**Document**: `docs/phases/PHASE-01.25-COMPLETE.md`
+
+### Deliverables
+
+- ✅ Schema metadata tables (ObjectCode, ObjectDependencies, ObjectParameters)
+- ✅ Metadata caching system (615 objects cached in 250ms)
+- ✅ Code Browser Grafana dashboard
+- ✅ SSMS integration (search by name, view dependencies)
+- ✅ Full-text search on code
 
 ---
 
 ## 📁 Phase Documentation
 
-All phase plans are documented in **[docs/phases/](docs/phases/)** with detailed implementation guides:
+All phase plans are documented in **[docs/phases/](docs/phases/)** with detailed implementation guides.
 
-### ✅ Completed Phases
+### Completed Phases ✅
 
-| Phase | Document | Status | Deliverables |
-|-------|----------|--------|--------------|
-| **1.0** | [PHASE-01-IMPLEMENTATION-COMPLETE.md](docs/phases/PHASE-01-IMPLEMENTATION-COMPLETE.md) | ✅ Done | Database schema, stored procedures, SQL Agent jobs |
-| **1.25** | [PHASE-01.25-SCHEMA-BROWSER-PLAN.md](docs/phases/PHASE-01.25-SCHEMA-BROWSER-PLAN.md) | ✅ Done | Schema caching, metadata tables, Code Browser dashboard |
-| | [PHASE-01.25-COMPLETE.md](docs/phases/PHASE-01.25-COMPLETE.md) | ✅ Done | Completion report (4 hours vs 40 planned) |
+| Phase | Document | Status | Key Deliverables |
+|-------|----------|--------|------------------|
+| **1.0** | [PHASE-01-IMPLEMENTATION-COMPLETE.md](docs/phases/PHASE-01-IMPLEMENTATION-COMPLETE.md) | ✅ Complete | Database schema, stored procedures, SQL Agent jobs |
+| **1.25** | [PHASE-01.25-COMPLETE.md](docs/phases/PHASE-01.25-COMPLETE.md) | ✅ Complete | Schema caching (4h vs 40h planned) |
+| **2.0** | [PHASE-02-SOC2-COMPLIANCE-PLAN.md](docs/phases/PHASE-02-SOC2-COMPLIANCE-PLAN.md) | ✅ Complete | Auth, MFA, RBAC, Audit logging |
 
-### 🔄 Current Phase
+### Current Phase 🔄
 
-| Phase | Document | Status | Deliverables |
-|-------|----------|--------|--------------|
-| **1.9** | PHASE-01.9-INTEGRATION-PLAN.md (this file) | 🔄 **IN PROGRESS** | Unified schema, feedback system, multi-server support |
+| Phase | Document | Status | Key Deliverables |
+|-------|----------|--------|------------------|
+| **2.1** | PHASE-2-QUERY-ANALYSIS-IMPLEMENTATION.md | 🔄 85% | Query Store, Blocking, Deadlocks, Wait Stats |
+| **2.1.1** | SESSION-STATUS-2025-10-31.md | 🔄 50% | OPENQUERY pattern fix (2 of 8 procedures) |
 
-**Key Achievements (Planned)**:
-- ✅ 20+ tables from sql-monitor-agent integrated
-- ✅ Feedback system with 50+ intelligent rules
-- ✅ Configurable database name (DBATools/MonitoringDB)
-- ✅ Multi-server support via Servers table
-- ✅ API compatibility layer (views + wrapper SPs)
-- ✅ sql-http-bridge evaluation and integration path
+**Current Blocker**: Remote collection bug (2-3 hours to fix)
 
----
+### Planned Phases 📋
 
-### 📋 Planned Phases (After Phase 1.9)
-
-#### Phase 2: Compliance Framework (252 hours total)
-
-Complete enterprise compliance coverage across 5 major frameworks:
-
-| Phase | Framework | Document | Hours | Market |
-|-------|-----------|----------|-------|--------|
-| **2.0** | **SOC 2** | [PHASE-02-SOC2-COMPLIANCE-PLAN.md](docs/phases/PHASE-02-SOC2-COMPLIANCE-PLAN.md) | 80h | All industries |
-| **2.5** | **GDPR** | [PHASE-02.5-GDPR-COMPLIANCE-PLAN.md](docs/phases/PHASE-02.5-GDPR-COMPLIANCE-PLAN.md) | 60h | EU data processing |
-| **2.6** | **PCI-DSS** | [PHASE-02.6-PCI-DSS-COMPLIANCE-PLAN.md](docs/phases/PHASE-02.6-PCI-DSS-COMPLIANCE-PLAN.md) | 48h | Payment processing |
-| **2.7** | **HIPAA** | [PHASE-02.7-HIPAA-COMPLIANCE-PLAN.md](docs/phases/PHASE-02.7-HIPAA-COMPLIANCE-PLAN.md) | 40h | Healthcare |
-| **2.8** | **FERPA** | [PHASE-02.8-FERPA-COMPLIANCE-PLAN.md](docs/phases/PHASE-02.8-FERPA-COMPLIANCE-PLAN.md) | 24h | Education |
+| Phase | Document | Hours | Dependencies |
+|-------|----------|-------|--------------|
+| **2.5** | PHASE-02.5-GDPR-COMPLIANCE-PLAN.md | 60h | Phase 2.1 complete |
+| **2.6** | PHASE-02.6-PCI-DSS-COMPLIANCE-PLAN.md | 48h | Phase 2.1, 2.5 |
+| **2.7** | PHASE-02.7-HIPAA-COMPLIANCE-PLAN.md | 40h | Phase 2.1, 2.5, 2.6 |
+| **2.8** | PHASE-02.8-FERPA-COMPLIANCE-PLAN.md | 24h | Phase 2.1, 2.5, 2.6, 2.7 |
+| **3** | PHASE-03-KILLER-FEATURES-PLAN.md | 160h | Phase 2.1 |
+| **4** | PHASE-04-CODE-EDITOR-PLAN.md | 120h | Phase 2.1, 3 |
+| **5** | PHASE-05-AI-LAYER-PLAN.md | 200h | Phase 1-4 |
 
 ---
 
-#### Phase 3: Killer Features (160 hours)
+## 🚀 Implementation Path Forward
 
-**Document**: [PHASE-03-KILLER-FEATURES-PLAN.md](docs/phases/PHASE-03-KILLER-FEATURES-PLAN.md)
+### Immediate: Fix Remote Collection Bug (2-3 hours)
 
-High-value features that provide competitive advantages:
+**Priority**: CRITICAL (blocks Phase 2.1 completion)
 
-| Feature | Impact | Hours | Competitive Edge |
-|---------|--------|-------|------------------|
-| **Automated Baseline + Anomaly Detection** | Very High | 48h | Match Redgate ML alerting |
-| **SQL Server Health Score** | Very High | 40h | Unique in market |
-| **Query Performance Impact Analysis** | Very High | 32h | Unique in market |
-| **Multi-Server Query Search** | Medium | 24h | Unique for large estates |
-| **Schema Change Tracking** | Medium-High | 16h | Free (vs Redgate paid) |
+**Action Items**:
+1. Merge usp_CollectBlockingEvents to database/32 file (5 min)
+2. Fix 6 remaining procedures with OPENQUERY pattern:
+   - usp_CollectDeadlockEvents (45 min)
+   - usp_CollectIndexFragmentation (30 min)
+   - usp_CollectMissingIndexes (20 min)
+   - usp_CollectUnusedIndexes (20 min)
+   - usp_CollectQueryStoreStats (60 min, complex)
+   - usp_CollectAllQueryAnalysisMetrics (10 min)
+3. Test all procedures local vs remote (30 min)
+4. Delete incorrect historical data (15 min)
+5. Update documentation (15 min)
 
-**Foundation**: Phase 1.9 feedback system provides baseline detection infrastructure
+**Reference**: `SESSION-STATUS-2025-10-31.md` for complete context
+
+### Short-term: Complete Phase 2.1 (8-10 hours)
+
+**After bug fix is complete**:
+
+1. **Grafana Dashboards** (4 hours)
+   - Query Store Performance dashboard
+   - Blocking/Deadlock dashboard
+   - Wait Statistics dashboard
+   - Top Queries dashboard
+
+2. **Documentation** (2 hours)
+   - Query Analysis user guide
+   - Troubleshooting guide
+   - Dashboard usage guide
+
+3. **Deployment** (2 hours)
+   - Deploy to production servers
+   - Verify data collection on all 3 servers
+   - Monitor for 24 hours
+
+### Medium-term: Phase 2.5 GDPR (60 hours)
+
+**After Phase 2.1 complete**:
+
+- Data subject rights (access, deletion, portability)
+- Consent management
+- Data retention policies
+- Privacy impact assessments
+- EU-specific compliance
+
+### Long-term: Phases 2.6-2.8, 3, 4, 5 (592 hours)
+
+Complete compliance frameworks and competitive features.
 
 ---
 
-#### Phase 4: Code Editor & Rules Engine (120 hours)
+## 📊 Success Metrics
 
-**Document**: [PHASE-04-CODE-EDITOR-PLAN.md](docs/phases/PHASE-04-CODE-EDITOR-PLAN.md)
+### Phase 2.1.1 (Remote Collection Fix)
 
-SQL code editor with intelligent rules engine:
-- Monaco Editor integration (VS Code engine)
-- 50+ rules across 8 categories
-- IntelliSense (autocomplete from Phase 1.25 metadata)
-- Query Store integration
-- Foundation for Phase 5 AI
+- [ ] All 8 procedures collect correct server data
+- [ ] Test results show DIFFERENT data for local vs remote
+- [ ] Incorrect historical data deleted
+- [ ] All fixes committed to scripts
+- [ ] Documentation complete
 
----
+### Phase 2.1 (Query Analysis Features)
 
-#### Phase 5: AI Layer (200 hours)
+- [ ] Remote collection bug fixed ✅
+- [ ] 4 Grafana dashboards deployed
+- [ ] Data collection verified on all 3 servers
+- [ ] User documentation complete
+- [ ] 24-hour monitoring shows no errors
 
-**Document**: [PHASE-05-AI-LAYER-PLAN.md](docs/phases/PHASE-05-AI-LAYER-PLAN.md)
+### Feature Parity vs Competitors
 
-AI-powered optimization using **Claude 3.7 Sonnet** (91% accuracy):
-- 8 AI capability levels
-- Text2SQL (natural language to SQL)
-- Opt-in design (system/database/user levels)
-- Cost: ~$5/month per developer
-
----
-
-## 🎯 Updated Implementation Path
-
-### Path 1: Integration-First (RECOMMENDED)
-
-**Rationale**: Leverage proven sql-monitor-agent foundation before adding new features
-
-1. **Phase 1.9** - Integration (60h) ← **START HERE**
-2. Phase 2.0 - SOC 2 (80h)
-3. Phase 3 - Killer Features (160h) ← Leverage feedback system from 1.9
-4. Phase 4 - Code Editor (120h)
-5. Phase 5 - AI Layer (200h)
-
-**Total**: 620 hours (15.5 weeks)
-**Market Impact**: Production-ready monitoring → Enterprise compliance → Market-leading features
+| Phase | Feature Parity | Unique Features | Cost Savings (5yr, 10 servers) |
+|-------|----------------|-----------------|-------------------------------|
+| Phase 1.25 (Schema Browser) | 88% | 3 | $53,200 vs Redgate |
+| Phase 2.0 (SOC 2) | 90% | 5 | $53,200 vs Redgate |
+| **Phase 2.1 (Query Analysis)** | **95%** | **9** | **$53,200 vs Redgate** |
+| Phase 2.5-2.8 (All Compliance) | 98% | 11 | $150,540 vs AWS RDS |
+| Phase 3 (Killer Features) | 100% | 16 | $150,540 vs AWS RDS |
+| Phase 4 (Code Editor) | 105% | 18 | $150,540 vs AWS RDS |
+| Phase 5 (AI Layer) | 110% | 23 | $150,540 vs AWS RDS |
 
 ---
 
@@ -391,151 +412,58 @@ AI-powered optimization using **Claude 3.7 Sonnet** (91% accuracy):
 
 - All data access via stored procedures
 - No dynamic SQL in application code
+- Exception: OPENQUERY pattern for remote collection (uses dynamic SQL by necessity)
 
-### 3. Material Design Aesthetic
+### 3. Backwards Compatibility
 
-- Minimalist color palette
-- Roboto typography
-- Grafana dashboards
+- LinkedServerName column added with ALTER TABLE IF NOT EXISTS
+- Local collection still works (LinkedServerName=NULL)
+- Remote collection enhanced with OPENQUERY
 
-### 4. Backwards Compatibility
+### 4. Data Verification
 
-- sql-monitor-agent must continue to work in single-server mode
-- DBATools database remains default for existing deployments
-- Migration to MonitoringDB is optional, not required
-
----
-
-## 📊 Success Metrics
-
-### Phase 1.9 Completion Criteria
-
-- [ ] All sql-monitor-agent tables exist in MonitoringDB
-- [ ] Feedback system operational with 50+ rules
-- [ ] Single-server mode: collection works with DBATools (backwards compatible)
-- [ ] Multi-server mode: collection works with MonitoringDB + Servers table
-- [ ] API compatibility: existing controllers work with new views
-- [ ] Grafana compatibility: existing dashboards work with new views
-- [ ] Performance: collection <3% CPU, queries <500ms
-- [ ] sql-http-bridge: evaluated, integration path documented
-
-### Feature Parity vs Competitors (Updated)
-
-| Phase | Feature Parity | Unique Features |
-|-------|----------------|-----------------|
-| Phase 1.9 (Current Target) | **92%** | **6** (feedback, ranges, P0-P3 collectors) |
-| Phase 2 (Compliance) | 95% | 8 |
-| Phase 3 (Killer Features) | 98% | 13 |
-| Phase 4 (Code Editor) | 100% | 14 |
-| Phase 5 (AI Layer) | 105% | 19 |
-
-### Cost Comparison (5 Years, 10 Servers)
-
-| Solution | Cost | Savings |
-|----------|------|---------|
-| **Our Solution** | **$1,500** | — |
-| Redgate | $54,700 | **$53,200** |
-| AWS RDS | $152,040 | **$150,540** |
+- Always test local vs remote collection
+- Data must be DIFFERENT for different servers
+- If data is IDENTICAL → bug still exists
 
 ---
 
-## 🚀 Getting Started
+## 🎯 Quick Reference
 
-### For Contributors
+### Current Session Status
+**File**: `SESSION-STATUS-2025-10-31.md`
+**Status**: Remote collection bug - 2 of 8 procedures fixed
+**Next**: Fix remaining 6 procedures (2-3 hours)
 
-1. **Strategic Planning**: Review this file (TODO.md) for Phase 1.9 integration plan
-2. **sql-monitor-agent**: Review `/sql-monitor-agent/` folder for existing schema
-3. **Tactical Implementation**: Follow Week 1-3 plan above
-4. **Follow TDD**: Write tests first, then implementation
-5. **Review Guidelines**: See [CLAUDE.md](CLAUDE.md) for project-specific conventions
+### Key Documents
+- **CRITICAL-REMOTE-COLLECTION-FIX.md** - Complete solution guide (900+ lines)
+- **REMOTE-COLLECTION-FIX-PROGRESS.md** - Progress report with test results
+- **PHASE-2-QUERY-ANALYSIS-IMPLEMENTATION.md** - Phase 2.1 implementation guide
+- **COMPETITIVE-FEATURE-ANALYSIS.md** - Market analysis of 13 features
 
-### For Users
+### Database Changes This Session
+- `database/02-create-tables.sql` - Added LinkedServerName column
+- `database/32-create-query-analysis-procedures.sql` - Fixed usp_CollectWaitStats
+- Live database - Fixed usp_CollectWaitStats, usp_CollectBlockingEvents
 
-**Current Capabilities** (Phase 1.25):
-- Real-time performance monitoring
-- Schema browser with caching
-- SSMS integration
-- Grafana dashboards
-
-**Coming in Phase 1.9** (Integration):
-- Unified monitoring with sql-monitor-agent's proven schema
-- Intelligent feedback system with 50+ rules
-- Multi-server support
-- Configurable database (DBATools or MonitoringDB)
-
-**Coming in Phase 2.0** (After Integration):
-- SOC 2 compliance automation
-- Comprehensive audit logging
-- Role-based access control
+### Test Results
+- Local (ServerID=1): 112 wait types, 19.2B ms
+- Remote (ServerID=5): 150 wait types, 73.6B ms
+- **Verification**: DIFFERENT ✅ (proves fix working)
 
 ---
 
-## 📝 Phase 1.9 Migration Example
+## 🚀 Getting Started (Next Session)
 
-### Before (sql-monitor current state)
-
-```sql
--- Simple, generic time-series
-CREATE TABLE dbo.PerformanceMetrics (
-    MetricID BIGINT IDENTITY(1,1),
-    ServerID INT,
-    CollectionTime DATETIME2,
-    MetricCategory NVARCHAR(50),  -- "CPU", "Memory", etc.
-    MetricName NVARCHAR(100),      -- "SignalWaitPct", "PageLifeExpectancy"
-    MetricValue DECIMAL(18,4)
-);
-
--- Query for CPU metrics
-SELECT MetricValue
-FROM dbo.PerformanceMetrics
-WHERE MetricCategory = 'CPU' AND MetricName = 'SignalWaitPct';
-```
-
-### After (Phase 1.9 integrated)
-
-```sql
--- Rich, structured schema from sql-monitor-agent
-CREATE TABLE dbo.PerfSnapshotRun (
-    PerfSnapshotRunID BIGINT IDENTITY(1,1),
-    SnapshotUTC DATETIME2(3),
-    ServerID INT,  -- NEW: multi-server support
-    ServerName SYSNAME,
-    SqlVersion NVARCHAR(200),
-    CpuSignalWaitPct DECIMAL(9,4),  -- Typed column, not generic MetricValue
-    TopWaitType NVARCHAR(120),
-    TopWaitMsPerSec DECIMAL(18,4),
-    SessionsCount INT,
-    RequestsCount INT,
-    BlockingSessionCount INT,
-    DeadlockCountRecent INT,
-    MemoryGrantWarningCount INT
-);
-
--- Query with intelligent feedback
-SELECT
-    psr.CpuSignalWaitPct,
-    f.Severity,
-    f.FeedbackText,
-    f.Recommendation
-FROM dbo.PerfSnapshotRun psr
-CROSS APPLY dbo.fn_GetMetricFeedback(
-    'DBA_GetDailyOverview',
-    1,  -- Result set #1
-    'CpuSignalWaitPct',
-    psr.CpuSignalWaitPct
-) f
-WHERE psr.ServerID = @ServerID
-ORDER BY psr.SnapshotUTC DESC;
-
--- Example feedback:
--- CpuSignalWaitPct = 45.2%
--- Severity: WARNING
--- FeedbackText: "High CPU signal wait percentage indicates CPU pressure"
--- Recommendation: "Review query plans, consider adding indexes, check for parameter sniffing"
-```
+1. **Read SESSION-STATUS-2025-10-31.md** - Complete context
+2. **Reference CRITICAL-REMOTE-COLLECTION-FIX.md** - OPENQUERY pattern details
+3. **Start with usp_CollectMissingIndexes** - Simplest remaining procedure
+4. **Use usp_CollectWaitStats as template** - Lines 325-412 in database/32
+5. **Test each procedure after fixing** - Local vs remote comparison
+6. **Update header comment** - Mark each procedure as ✅ when complete
 
 ---
 
-**Last Updated**: October 27, 2025
-**Next Milestone**: Phase 1.9 - sql-monitor-agent Integration (60 hours)
-**Project Status**: Phase 1.9 Planning Complete ✅ → Implementation Next
+**Last Updated**: October 31, 2025 17:30 UTC
+**Next Milestone**: Complete Remote Collection Fix (2-3 hours)
+**Project Status**: Phase 2.1.1 - Critical Bug Fix In Progress (50% complete)
