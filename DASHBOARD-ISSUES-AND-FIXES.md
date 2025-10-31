@@ -76,7 +76,7 @@ svweb SQL Agent Job (2 steps):
 
 ---
 
-## Issue 2: Disk I/O Panels Showing "No Data" ⚠️ INVESTIGATING
+## Issue 2: Disk I/O Panels Showing "No Data" ⚠️ ROOT CAUSE IDENTIFIED
 
 ### Problem
 Dashboard panels showing "No data":
@@ -84,89 +84,172 @@ Dashboard panels showing "No data":
 - Read/Write Throughput (MB/s)
 - Disk Latency
 
-### Test Results
+### Test Results (2025-10-31)
+
 ✅ **SQL Query Works**: Rate calculation query returns data when executed directly:
 ```sql
--- Returns: 0.16 to 323 IOPS/sec
+-- Executed via sqlcmd against sqltest.schoolvision.net,14333
+-- Returns: 0.16 to 323 IOPS/sec (Read), 2.5 to 30 IOPS/sec (Write)
+-- Sample data from 07:00-07:10 UTC, ServerID=5 (svweb)
 WITH MetricsWithPrevious AS (
   SELECT CollectionTime, MetricValue,
-         LAG(MetricValue) OVER (...) AS PrevValue,
-         LAG(CollectionTime) OVER (...) AS PrevTime
+         LAG(MetricValue) OVER (PARTITION BY MetricName ORDER BY CollectionTime) AS PrevValue,
+         LAG(CollectionTime) OVER (PARTITION BY MetricName ORDER BY CollectionTime) AS PrevTime
   FROM dbo.PerformanceMetrics
-  WHERE ServerID = 5 AND MetricCategory = 'Disk'...
+  WHERE ServerID = 5 AND MetricCategory = 'Disk' AND MetricName IN ('ReadIOPS', 'WriteIOPS')
 )
 SELECT (MetricValue - PrevValue) / DATEDIFF(SECOND, PrevTime, CollectionTime) AS value
+FROM MetricsWithPrevious WHERE PrevValue IS NOT NULL;
 ```
 
 ✅ **Dashboard Query Format**: Correct format for Grafana SQL datasource:
-- `time` column (datetime)
-- `value` column (numeric)
-- `metric` column (string)
+- `time` column (datetime) ✓
+- `value` column (numeric) ✓
+- `metric` column (string) ✓
 
-### Potential Causes
+✅ **Dashboard Variable Configuration**: ServerID variable query is correct:
+```sql
+SELECT ServerID AS __value, ServerName AS __text FROM dbo.Servers WHERE IsActive = 1
+-- Returns: 3 servers (sqltest=1, suncity=4, svweb=5)
+```
 
-1. **Grafana Variable Not Populated**:
-   - `$ServerID` variable might be empty or null
-   - Check: View Grafana dashboard variables dropdown
+✅ **Datasource Configuration**: Verified `dashboards/grafana/provisioning/datasources/monitoringdb.yaml`:
+- Connection string: sqltest.schoolvision.net:14333
+- Database: MonitoringDB
+- Credentials: sv / Gv51076!
+- TLS skip verify: true
 
-2. **Time Range Macros Not Working**:
-   - `$__timeFrom()` / `$__timeTo()` might not be converting to datetime
-   - Grafana SQL datasource expects specific macro format
+❌ **Grafana Container Status**: **Container does not exist in Azure**
+- Searched all 18 Azure subscriptions
+- No container instances found matching "grafana" or "sqlmonitor"
+- Resource group `rg-sqlmonitor-schoolvision` not found
+- Cannot access Grafana UI for testing
 
-3. **Dashboard Not Refreshed After Container Restart**:
-   - Grafana may be caching old dashboard JSON
-   - Dashboard files downloaded from GitHub at container startup
+### Root Cause
 
-4. **Datasource Connection Issue**:
-   - MonitoringDB datasource might not be configured correctly
-   - Check Grafana datasource settings
+**PRIMARY ISSUE**: Grafana container instance does not exist. Cannot test dashboard panels until container is deployed.
 
-### Debugging Steps
+**SECONDARY ISSUES** (when container exists):
 
-1. **Check Grafana Datasource**:
-   - Log into Grafana: http://schoolvision-sqlmonitor.eastus.azurecontainer.io:3000
-   - Navigate to: Configuration → Data Sources → MonitoringDB
-   - Test connection
-   - Verify server/database/credentials
+1. **Time Range Macros May Not Convert Correctly**:
+   - `$__timeFrom()` / `$__timeTo()` might not convert to SQL Server DATETIME2
+   - Grafana MSSQL plugin may require explicit `CAST($__timeFrom() AS DATETIME2)`
 
-2. **Check Dashboard Variables**:
-   - Open AWS RDS Performance Insights dashboard
-   - Top of dashboard should show "ServerID" dropdown
-   - Select a server (e.g., svweb,14333)
-   - Check browser console for JavaScript errors
+2. **Dashboard Variable Refresh Timing**:
+   - `refresh: 1` (on time range change) may not load options on dashboard open
+   - Should be `refresh: 2` (on dashboard load)
 
-3. **Test Query in Grafana Explore**:
-   - Navigate to: Explore (compass icon in sidebar)
-   - Select MonitoringDB datasource
-   - Paste the IOPS query
-   - Manually replace `$ServerID` with `5`
-   - Manually replace `$__timeFrom()` with `DATEADD(HOUR, -1, GETUTCDATE())`
-   - Manually replace `$__timeTo()` with `GETUTCDATE()`
-   - Run query
-   - If this works, problem is with variables/macros
+3. **Dashboard Cache After Container Recreation**:
+   - If container was recreated, Grafana may use cached old dashboard
+   - Requires browser cache clear or dashboard re-import
 
-4. **Check Grafana Logs**:
+### Debugging Steps (After Grafana Container is Deployed)
+
+**PREREQUISITE**: Deploy Grafana container to Azure Container Instances first.
+
+1. **Verify Grafana Container Exists**:
    ```bash
-   az container logs --resource-group rg-sqlmonitor-schoolvision --name grafana-schoolvision
+   # Find Grafana container in all subscriptions
+   for sub in $(az account list --query "[].id" -o tsv); do
+     az account set --subscription "$sub"
+     az container list --query "[?contains(name, 'grafana')].[name, resourceGroup, ipAddress.ip]" -o table
+   done
+   ```
+
+2. **Access Grafana UI**:
+   - URL: http://<GRAFANA_IP>:3000 (or FQDN if configured)
+   - Credentials: admin / Admin123!
+
+3. **Test Datasource Connection**:
+   - Log into Grafana
+   - Navigate to: **Configuration** → **Data Sources** → **MonitoringDB**
+   - Click **Save & Test**
+   - Expected: "Database Connection OK"
+
+4. **Check Dashboard Variables**:
+   - Open **AWS RDS Performance Insights** dashboard
+   - Top of dashboard should show **Server** dropdown
+   - Verify it shows 3 options:
+     - sqltest.schoolvision.net,14333
+     - suncity.schoolvision.net,14333
+     - svweb,14333
+   - Select "svweb,14333"
+
+5. **Test Query in Grafana Explore** (Manual Test):
+   - Navigate to: **Explore** (compass icon in sidebar)
+   - Select **MonitoringDB** datasource
+   - Switch to **Code** mode
+   - Paste manual test query (see DISK-IO-PANELS-ROOT-CAUSE-ANALYSIS.md)
+   - Click **Run Query**
+   - Expected: Time series graph with Read IOPS and Write IOPS
+
+6. **Test Query With Variables**:
+   - In Grafana Explore, paste dashboard query with `$ServerID`, `$__timeFrom()`, `$__timeTo()`
+   - Run query
+   - If manual works but variables don't: Time range macro issue
+   - If both fail: Check Query Inspector for SQL errors
+
+7. **Check Query Inspector**:
+   - On any panel showing "No data"
+   - Click panel title → **Inspect** → **Query**
+   - Check **Query** tab for actual SQL sent to database
+   - Check **Response** tab for raw database response
+   - Look for null variable values or SQL syntax errors
+
+8. **Check Grafana Logs**:
+   ```bash
+   az container logs --resource-group <RG_NAME> --name <CONTAINER_NAME>
    ```
    - Look for SQL query errors
    - Look for datasource connection errors
 
-### Workaround (If Variables Are Issue)
-Create a simplified query without rate calculation to verify basic connectivity:
+9. **Check Browser Console**:
+   - Open browser Developer Tools (F12)
+   - Look for JavaScript errors
+   - Check Network tab for failed API requests
+
+### Potential Fixes (After Diagnosis)
+
+**Fix 1: Explicit DATETIME2 Casting** (if time macros fail):
 ```sql
+AND CollectionTime >= CAST($__timeFrom() AS DATETIME2)
+AND CollectionTime <= CAST($__timeTo() AS DATETIME2)
+```
+
+**Fix 2: Variable Refresh Trigger** (if ServerID dropdown empty):
+```json
+{
+  "name": "ServerID",
+  "refresh": 2  // Change from 1 to 2 (load on dashboard open)
+}
+```
+
+**Fix 3: Simplified Fallback Query** (if rate calc fails):
+```sql
+-- Shows cumulative values (millions), not per-second rates
 SELECT
   CollectionTime AS time,
   MetricValue AS value,
-  MetricName AS metric
+  CASE MetricName
+    WHEN 'ReadIOPS' THEN 'Read IOPS (cumulative)'
+    WHEN 'WriteIOPS' THEN 'Write IOPS (cumulative)'
+  END AS metric
 FROM dbo.PerformanceMetrics
 WHERE MetricCategory = 'Disk'
   AND MetricName IN ('ReadIOPS', 'WriteIOPS')
   AND ServerID = $ServerID
   AND CollectionTime >= $__timeFrom()
   AND CollectionTime <= $__timeTo()
-ORDER BY CollectionTime
+ORDER BY CollectionTime;
 ```
+
+### Detailed Diagnostic Document
+
+See `DISK-IO-PANELS-ROOT-CAUSE-ANALYSIS.md` for:
+- Complete test results with sample data
+- Step-by-step diagnostic procedures
+- All potential fixes with examples
+- Next steps after container deployment
 
 ---
 
@@ -174,15 +257,37 @@ ORDER BY CollectionTime
 
 | Issue | Status | Fix Complexity | Impact |
 |-------|--------|---------------|--------|
-| CPU metrics identical | ✅ IDENTIFIED | Medium (update 3 SQL Agent jobs) | HIGH - All servers show wrong CPU |
-| Disk I/O "No data" | ⚠️ INVESTIGATING | Low (likely config) | MEDIUM - Dashboard incomplete |
+| CPU metrics identical | ✅ DEPLOYED (pending validation) | Medium (updated 3 SQL Agent jobs) | HIGH - All servers showed wrong CPU |
+| Disk I/O "No data" | ⚠️ ROOT CAUSE IDENTIFIED | Cannot test (Grafana container missing) | MEDIUM - Dashboard incomplete |
+
+**Status as of 2025-10-31 07:30 UTC**:
+
+### Issue 1: CPU Metrics (DEPLOYED)
+- ✅ Root cause identified: Remote DMV execution via linked server
+- ✅ Solution implemented: Local-collect-then-forward pattern
+- ✅ Procedures deployed: usp_GetLocalCPUMetrics, usp_CollectAndInsertCPUMetrics
+- ✅ SQL Agent jobs updated: sqltest (local), svweb (2-step local+remote)
+- ⏳ **Validation pending**: Waiting for next scheduled collection cycle (5 min intervals)
+- 📋 **Next step**: Verify ServerID 1, 4, 5 show different CPU values in PerformanceMetrics table
+
+### Issue 2: Disk I/O Panels (BLOCKED)
+- ✅ SQL queries verified working (returns 0.16-323 IOPS/sec rates)
+- ✅ Dashboard configuration verified correct (variables, datasource, query format)
+- ❌ **BLOCKER**: Grafana container does not exist in Azure
+- 📋 **Next step**: Deploy Grafana container to Azure Container Instances
+- 📋 **After deployment**: Follow diagnostic steps in DISK-IO-PANELS-ROOT-CAUSE-ANALYSIS.md
+- 📋 **Likely fixes**: Time macro casting, variable refresh timing, or dashboard cache
+
+**Files Created**:
+- `fix-cpu-collection-architecture.sql` - New CPU collection procedures (deployed to sqltest, svweb)
+- `update-sql-agent-jobs-for-cpu-fix.sql` - SQL Agent job updates (executed on sqltest, svweb)
+- `deploy-cpu-fix-to-remote-servers.sql` - Remote deployment script (attempted, revised to inline T-SQL)
+- `DASHBOARD-ISSUES-AND-FIXES.md` - This document
+- `DISK-IO-PANELS-ROOT-CAUSE-ANALYSIS.md` - Detailed diagnostic guide for disk I/O issue
 
 **Next Steps**:
-1. Deploy CPU collection fix to all 3 servers
-2. Debug Grafana datasource and variables for disk I/O panels
-3. Test all panels after fixes
-4. Document final configuration
-
-## Files Created
-- `fix-cpu-collection-architecture.sql` - New CPU collection procedures
-- `DASHBOARD-ISSUES-AND-FIXES.md` - This document
+1. ⏳ **Wait for next CPU collection cycle** (5 min) to validate fix
+2. 🚀 **Deploy Grafana container** to Azure Container Instances
+3. 🔍 **Run disk I/O diagnostics** using DISK-IO-PANELS-ROOT-CAUSE-ANALYSIS.md
+4. ✅ **Apply fixes** based on diagnostic results
+5. 📝 **Document final resolution** and commit all changes
