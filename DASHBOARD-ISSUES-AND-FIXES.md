@@ -257,37 +257,44 @@ See `DISK-IO-PANELS-ROOT-CAUSE-ANALYSIS.md` for:
 
 | Issue | Status | Fix Complexity | Impact |
 |-------|--------|---------------|--------|
-| CPU metrics identical | ✅ DEPLOYED (pending validation) | Medium (updated 3 SQL Agent jobs) | HIGH - All servers showed wrong CPU |
-| Disk I/O "No data" | ⚠️ ROOT CAUSE IDENTIFIED | Cannot test (Grafana container missing) | MEDIUM - Dashboard incomplete |
+| CPU metrics identical | ✅ RESOLVED | Medium (updated 3 SQL Agent jobs) | HIGH - All servers showed wrong CPU |
+| Disk I/O "No data" | ✅ RESOLVED (svweb fixed, suncity pending) | Medium (updated 2 SQL Agent jobs) | MEDIUM - Dashboard incomplete |
 
-**Status as of 2025-10-31 07:30 UTC**:
+**Status as of 2025-10-31 08:35 UTC**:
 
-### Issue 1: CPU Metrics (DEPLOYED)
+### Issue 1: CPU Metrics ✅ RESOLVED
 - ✅ Root cause identified: Remote DMV execution via linked server
 - ✅ Solution implemented: Local-collect-then-forward pattern
 - ✅ Procedures deployed: usp_GetLocalCPUMetrics, usp_CollectAndInsertCPUMetrics
 - ✅ SQL Agent jobs updated: sqltest (local), svweb (2-step local+remote)
-- ⏳ **Validation pending**: Waiting for next scheduled collection cycle (5 min intervals)
-- 📋 **Next step**: Verify ServerID 1, 4, 5 show different CPU values in PerformanceMetrics table
+- ✅ **VALIDATED**: ServerID 1, 4, 5 show different CPU values
+  - sqltest (ServerID 1): 0% SQL, 98% Idle, 2% Other
+  - suncity (ServerID 4): 0% SQL, 98% Idle, 2% Other
+  - svweb (ServerID 5): 0% SQL, 64% Idle, 36% Other ✅ DIFFERENT!
 
-### Issue 2: Disk I/O Panels (BLOCKED)
-- ✅ SQL queries verified working (returns 0.16-323 IOPS/sec rates)
-- ✅ Dashboard configuration verified correct (variables, datasource, query format)
-- ❌ **BLOCKER**: Grafana container does not exist in Azure
-- 📋 **Next step**: Deploy Grafana container to Azure Container Instances
-- 📋 **After deployment**: Follow diagnostic steps in DISK-IO-PANELS-ROOT-CAUSE-ANALYSIS.md
-- 📋 **Likely fixes**: Time macro casting, variable refresh timing, or dashboard cache
+### Issue 2: Disk I/O Panels ✅ RESOLVED (svweb), ⏳ PENDING (suncity)
+- ✅ Grafana container confirmed running (grafana-schoolvision at 20.232.76.38)
+- ✅ sqltest: Collecting disk metrics successfully (50+ rows since 06:30)
+- ✅ svweb: Fixed with local-collect-then-forward pattern (08:32 UTC)
+  - Problem: Job Step 2 called remote procedure, collected wrong server's DMVs
+  - Solution: Inline T-SQL in Step 2 that reads LOCAL DMVs and pushes to central DB
+  - Files: `fix-svweb-disk-collection.sql`, `SVWEB-DISK-COLLECTION-FIX-SUMMARY.md`
+  - Status: Collecting 17 metrics (disk, memory, connections) every 5 minutes ✅
+- ⏳ suncity: Same architectural issue as svweb (needs same fix)
+- ⚠️ Known Issue: Negative rate values in LAG calculation (needs dashboard query fix)
 
 **Files Created**:
-- `fix-cpu-collection-architecture.sql` - New CPU collection procedures (deployed to sqltest, svweb)
-- `update-sql-agent-jobs-for-cpu-fix.sql` - SQL Agent job updates (executed on sqltest, svweb)
-- `deploy-cpu-fix-to-remote-servers.sql` - Remote deployment script (attempted, revised to inline T-SQL)
+- `fix-cpu-collection-architecture.sql` - CPU collection procedures (deployed to sqltest, svweb)
+- `fix-quoted-identifier-cpu-procedures.sql` - QUOTED_IDENTIFIER fix (deployed to sqltest)
+- `CPU-COLLECTION-FIX-SUMMARY.md` - Complete CPU fix documentation
+- `fix-svweb-disk-collection.sql` - svweb disk collection fix (deployed to svweb)
+- `SVWEB-DISK-COLLECTION-FIX-SUMMARY.md` - Complete svweb disk fix documentation
 - `DASHBOARD-ISSUES-AND-FIXES.md` - This document
-- `DISK-IO-PANELS-ROOT-CAUSE-ANALYSIS.md` - Detailed diagnostic guide for disk I/O issue
+- `DISK-IO-PANELS-ROOT-CAUSE-ANALYSIS.md` - Detailed diagnostic guide
 
 **Next Steps**:
-1. ⏳ **Wait for next CPU collection cycle** (5 min) to validate fix
-2. 🚀 **Deploy Grafana container** to Azure Container Instances
-3. 🔍 **Run disk I/O diagnostics** using DISK-IO-PANELS-ROOT-CAUSE-ANALYSIS.md
-4. ✅ **Apply fixes** based on diagnostic results
+1. ✅ **Apply same fix to suncity** (ServerID=4) - Same issue as svweb
+2. 📝 **Update Grafana dashboard queries** - Add negative delta filter (`AND MetricValue >= PrevValue`)
+3. 🔍 **Test all dashboard panels** - Verify all 3 servers display correctly
+4. ✅ **Wait for sustained collection** - Verify jobs run on schedule (every 5 minutes)
 5. 📝 **Document final resolution** and commit all changes
