@@ -1,0 +1,502 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 5
+              },
+              {
+                "color": "red",
+                "value": 20
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "table",
+          "rawSql": "SELECT COUNT(*) AS [Total Recommendations]\nFROM dbo.QueryPerformanceRecommendations\nWHERE IsImplemented = 0;",
+          "refId": "A"
+        }
+      ],
+      "title": "Open Recommendations",
+      "type": "stat"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "table",
+          "rawSql": "SELECT COUNT(*) AS [Critical Issues]\nFROM dbo.QueryPerformanceRecommendations\nWHERE RecommendationSeverity = 'Critical'\n  AND IsImplemented = 0;",
+          "refId": "A"
+        }
+      ],
+      "title": "Critical Recommendations",
+      "type": "stat"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "table",
+          "rawSql": "SELECT COUNT(*) AS [Plan Regressions]\nFROM dbo.QueryPlanRegressions\nWHERE IsResolved = 0;",
+          "refId": "A"
+        }
+      ],
+      "title": "Active Plan Regressions",
+      "type": "stat"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["mean"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "table",
+          "rawSql": "SELECT AVG(EstimatedImprovementPercent) AS [Avg Potential Improvement]\nFROM dbo.QueryPerformanceRecommendations\nWHERE IsImplemented = 0\n  AND EstimatedImprovementPercent IS NOT NULL;",
+          "refId": "A"
+        }
+      ],
+      "title": "Avg Improvement Potential",
+      "type": "stat"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "left",
+            "displayMode": "auto",
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Severity"
+            },
+            "properties": [
+              {
+                "id": "custom.displayMode",
+                "value": "color-background"
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 1
+                    },
+                    {
+                      "color": "orange",
+                      "value": 2
+                    },
+                    {
+                      "color": "red",
+                      "value": 3
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "Low": {
+                        "index": 0,
+                        "text": "Low"
+                      },
+                      "Medium": {
+                        "index": 1,
+                        "text": "Medium"
+                      },
+                      "High": {
+                        "index": 2,
+                        "text": "High"
+                      },
+                      "Critical": {
+                        "index": 3,
+                        "text": "Critical"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
+      "id": 5,
+      "options": {
+        "footer": {
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": false,
+            "displayName": "Severity"
+          }
+        ]
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "table",
+          "rawSql": "SELECT TOP 20\n  s.ServerName AS Server,\n  r.DatabaseName AS [Database],\n  r.RecommendationType AS Type,\n  r.RecommendationSeverity AS Severity,\n  r.RecommendationText AS Recommendation,\n  CAST(r.EstimatedImprovementPercent AS DECIMAL(5,1)) AS [Est. Improvement %],\n  CAST(r.AvgDurationMs AS INT) AS [Avg Duration (ms)],\n  r.TotalExecutionCount AS Executions,\n  r.DetectionTime AS Detected\nFROM dbo.QueryPerformanceRecommendations r\nINNER JOIN dbo.Servers s ON r.ServerID = s.ServerID\nWHERE r.IsImplemented = 0\nORDER BY\n  CASE r.RecommendationSeverity\n    WHEN 'Critical' THEN 1\n    WHEN 'High' THEN 2\n    WHEN 'Medium' THEN 3\n    WHEN 'Low' THEN 4\n  END,\n  r.EstimatedImprovementPercent DESC;",
+          "refId": "A"
+        }
+      ],
+      "title": "Top 20 Recommendations",
+      "type": "table"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "bars",
+            "fillOpacity": 100,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": ["sum"],
+          "displayMode": "table",
+          "placement": "right"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "time_series",
+          "rawSql": "SELECT\n  DATEADD(DAY, DATEDIFF(DAY, 0, DetectionTime), 0) AS time,\n  COUNT(*) AS value,\n  RecommendationType AS metric\nFROM dbo.QueryPerformanceRecommendations\nWHERE DetectionTime >= $__timeFrom()\n  AND DetectionTime < $__timeTo()\nGROUP BY DATEADD(DAY, DATEDIFF(DAY, 0, DetectionTime), 0), RecommendationType\nORDER BY time;",
+          "refId": "A"
+        }
+      ],
+      "title": "Recommendations by Type (Over Time)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "left",
+            "displayMode": "auto",
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "id": 7,
+      "options": {
+        "footer": {
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "table",
+          "rawSql": "SELECT TOP 10\n  s.ServerName AS Server,\n  r.DatabaseName AS [Database],\n  LEFT(r.QueryText, 100) AS [Query Preview],\n  CAST(r.DurationIncreasePct AS DECIMAL(5,1)) AS [Duration Increase %],\n  CAST(r.OldAvgDurationMs AS INT) AS [Old Avg (ms)],\n  CAST(r.NewAvgDurationMs AS INT) AS [New Avg (ms)],\n  r.DetectionTime AS Detected\nFROM dbo.QueryPlanRegressions r\nINNER JOIN dbo.Servers s ON r.ServerID = s.ServerID\nWHERE r.IsResolved = 0\nORDER BY r.DurationIncreasePct DESC;",
+          "refId": "A"
+        }
+      ],
+      "title": "Active Plan Regressions",
+      "type": "table"
+    }
+  ],
+  "refresh": "5m",
+  "schemaVersion": 27,
+  "style": "dark",
+  "tags": ["query", "performance", "optimization"],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Query Performance Advisor",
+  "uid": "query-advisor",
+  "version": 1
+}
