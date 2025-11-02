@@ -1,0 +1,615 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 3
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "table",
+          "rawSql": "SELECT COUNT(*) AS [Critical Alerts]\nFROM dbo.ActiveAlerts\nWHERE Severity = 'Critical' AND IsResolved = 0;",
+          "refId": "A"
+        }
+      ],
+      "title": "Critical Alerts",
+      "type": "stat"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "orange",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "table",
+          "rawSql": "SELECT COUNT(*) AS [High Alerts]\nFROM dbo.ActiveAlerts\nWHERE Severity = 'High' AND IsResolved = 0;",
+          "refId": "A"
+        }
+      ],
+      "title": "High Alerts",
+      "type": "stat"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "table",
+          "rawSql": "SELECT COUNT(*) AS [Total Active Alerts]\nFROM dbo.ActiveAlerts\nWHERE IsResolved = 0;",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Active Alerts",
+      "type": "stat"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 5
+              },
+              {
+                "color": "orange",
+                "value": 10
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "table",
+          "rawSql": "SELECT COUNT(*) AS [Unacknowledged]\nFROM dbo.ActiveAlerts\nWHERE IsResolved = 0 AND IsAcknowledged = 0;",
+          "refId": "A"
+        }
+      ],
+      "title": "Unacknowledged Alerts",
+      "type": "stat"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "left",
+            "displayMode": "auto",
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Severity"
+            },
+            "properties": [
+              {
+                "id": "custom.displayMode",
+                "value": "color-background"
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 1
+                    },
+                    {
+                      "color": "orange",
+                      "value": 2
+                    },
+                    {
+                      "color": "red",
+                      "value": 3
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "Low": {
+                        "index": 0,
+                        "text": "Low"
+                      },
+                      "Medium": {
+                        "index": 1,
+                        "text": "Medium"
+                      },
+                      "High": {
+                        "index": 2,
+                        "text": "High"
+                      },
+                      "Critical": {
+                        "index": 3,
+                        "text": "Critical"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
+      "id": 5,
+      "options": {
+        "footer": {
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": false,
+            "displayName": "Severity"
+          }
+        ]
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "table",
+          "rawSql": "SELECT TOP 50\n  aa.AlertID,\n  s.ServerName AS Server,\n  ar.RuleName AS [Alert Rule],\n  aa.Severity,\n  aa.CurrentValue AS [Current Value],\n  aa.ThresholdValue AS Threshold,\n  aa.Message,\n  aa.RaisedAt AS [Raised At],\n  DATEDIFF(MINUTE, aa.RaisedAt, GETUTCDATE()) AS [Duration (min)],\n  CASE WHEN aa.IsAcknowledged = 1 THEN 'Yes' ELSE 'No' END AS Acknowledged\nFROM dbo.ActiveAlerts aa\nINNER JOIN dbo.AlertRules ar ON aa.RuleID = ar.RuleID\nINNER JOIN dbo.Servers s ON aa.ServerID = s.ServerID\nWHERE aa.IsResolved = 0\nORDER BY\n  CASE aa.Severity\n    WHEN 'Critical' THEN 1\n    WHEN 'High' THEN 2\n    WHEN 'Medium' THEN 3\n    WHEN 'Low' THEN 4\n  END,\n  aa.RaisedAt DESC;",
+          "refId": "A"
+        }
+      ],
+      "title": "Active Alerts",
+      "type": "table"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "bars",
+            "fillOpacity": 100,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": ["sum"],
+          "displayMode": "table",
+          "placement": "right"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "time_series",
+          "rawSql": "SELECT\n  DATEADD(HOUR, DATEDIFF(HOUR, 0, RaisedAt), 0) AS time,\n  COUNT(*) AS value,\n  Severity AS metric\nFROM dbo.AlertHistory\nWHERE RaisedAt >= $__timeFrom()\n  AND RaisedAt < $__timeTo()\nGROUP BY DATEADD(HOUR, DATEDIFF(HOUR, 0, RaisedAt), 0), Severity\nORDER BY time;",
+          "refId": "A"
+        }
+      ],
+      "title": "Alert History by Severity (Hourly)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": []
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "values": ["value"]
+        },
+        "pieType": "pie",
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "table",
+          "rawSql": "SELECT\n  ar.MetricCategory AS metric,\n  COUNT(*) AS value\nFROM dbo.ActiveAlerts aa\nINNER JOIN dbo.AlertRules ar ON aa.RuleID = ar.RuleID\nWHERE aa.IsResolved = 0\nGROUP BY ar.MetricCategory;",
+          "refId": "A"
+        }
+      ],
+      "title": "Active Alerts by Category",
+      "type": "piechart"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "left",
+            "displayMode": "auto",
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "id": 8,
+      "options": {
+        "footer": {
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Raised At"
+          }
+        ]
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "table",
+          "rawSql": "SELECT TOP 100\n  ah.HistoryID,\n  s.ServerName AS Server,\n  ar.RuleName AS [Alert Rule],\n  ah.Severity,\n  ah.MaxValue AS [Max Value],\n  ah.ThresholdValue AS Threshold,\n  ah.RaisedAt AS [Raised At],\n  ah.ResolvedAt AS [Resolved At],\n  ah.DurationMinutes AS [Duration (min)],\n  ah.Message\nFROM dbo.AlertHistory ah\nINNER JOIN dbo.AlertRules ar ON ah.RuleID = ar.RuleID\nINNER JOIN dbo.Servers s ON ah.ServerID = s.ServerID\nWHERE ah.RaisedAt >= $__timeFrom()\n  AND ah.RaisedAt < $__timeTo()\nORDER BY ah.RaisedAt DESC;",
+          "refId": "A"
+        }
+      ],
+      "title": "Alert History",
+      "type": "table"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "left",
+            "displayMode": "auto",
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 34
+      },
+      "id": 9,
+      "options": {
+        "footer": {
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "table",
+          "rawSql": "SELECT\n  ar.RuleID,\n  ar.RuleName AS [Rule Name],\n  ar.MetricCategory AS Category,\n  ar.MetricName AS [Metric],\n  CASE WHEN ar.IsEnabled = 1 THEN 'Yes' ELSE 'No' END AS Enabled,\n  ar.CriticalThreshold AS [Critical Threshold],\n  ar.HighThreshold AS [High Threshold],\n  ar.MediumThreshold AS [Medium Threshold],\n  ar.LowThreshold AS [Low Threshold],\n  COUNT(DISTINCT CASE WHEN aa.IsResolved = 0 THEN aa.AlertID END) AS [Active Alerts],\n  COUNT(DISTINCT CASE WHEN ah.RaisedAt >= DATEADD(DAY, -7, GETUTCDATE()) THEN ah.HistoryID END) AS [Last 7 Days]\nFROM dbo.AlertRules ar\nLEFT JOIN dbo.ActiveAlerts aa ON ar.RuleID = aa.RuleID\nLEFT JOIN dbo.AlertHistory ah ON ar.RuleID = ah.RuleID\nGROUP BY ar.RuleID, ar.RuleName, ar.MetricCategory, ar.MetricName, ar.IsEnabled,\n         ar.CriticalThreshold, ar.HighThreshold, ar.MediumThreshold, ar.LowThreshold\nORDER BY ar.RuleName;",
+          "refId": "A"
+        }
+      ],
+      "title": "Alert Rules Configuration",
+      "type": "table"
+    }
+  ],
+  "refresh": "5m",
+  "schemaVersion": 27,
+  "style": "dark",
+  "tags": ["alerts", "monitoring", "notifications"],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Alert Monitoring",
+  "uid": "alert-monitoring",
+  "version": 1
+}
