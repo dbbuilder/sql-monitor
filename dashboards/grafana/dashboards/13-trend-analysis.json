@@ -1,0 +1,688 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "table",
+          "rawSql": "SELECT COUNT(DISTINCT ServerID) AS [Servers Monitored]\nFROM dbo.MetricTrends\nWHERE CalculationDate = (SELECT MAX(CalculationDate) FROM dbo.MetricTrends);",
+          "refId": "A"
+        }
+      ],
+      "title": "Servers Monitored",
+      "type": "stat"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "table",
+          "rawSql": "SELECT COUNT(*) AS [Trends Calculated]\nFROM dbo.MetricTrends\nWHERE CalculationDate = (SELECT MAX(CalculationDate) FROM dbo.MetricTrends);",
+          "refId": "A"
+        }
+      ],
+      "title": "Trends Calculated (Latest)",
+      "type": "stat"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "table",
+          "rawSql": "SELECT COUNT(*) AS [Increasing Trends]\nFROM dbo.MetricTrends\nWHERE TrendDirection = 'Increasing'\n  AND CalculationDate = (SELECT MAX(CalculationDate) FROM dbo.MetricTrends)\n  AND TrendPeriod = '30day';",
+          "refId": "A"
+        }
+      ],
+      "title": "Increasing Trends (30-day)",
+      "type": "stat"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "table",
+          "rawSql": "SELECT COUNT(*) AS [Decreasing Trends]\nFROM dbo.MetricTrends\nWHERE TrendDirection = 'Decreasing'\n  AND CalculationDate = (SELECT MAX(CalculationDate) FROM dbo.MetricTrends)\n  AND TrendPeriod = '30day';",
+          "refId": "A"
+        }
+      ],
+      "title": "Decreasing Trends (30-day)",
+      "type": "stat"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": true,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 30,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 3
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": ["last", "mean"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "time_series",
+          "rawSql": "SELECT\n  mt.CalculationDate AS time,\n  mt.GrowthPercentPerDay / 100.0 AS value,\n  s.ServerName + ' - ' + mt.MetricCategory + '.' + mt.MetricName AS metric\nFROM dbo.MetricTrends mt\nINNER JOIN dbo.Servers s ON mt.ServerID = s.ServerID\nWHERE mt.TrendPeriod = '30day'\n  AND mt.MetricCategory IN ('Memory', 'Disk', 'Connections')\n  AND mt.CalculationDate >= DATEADD(DAY, -30, GETUTCDATE())\n  AND ABS(mt.GrowthPercentPerDay) > 0.1\nORDER BY time;",
+          "refId": "A"
+        }
+      ],
+      "title": "Growth Rate Trends (% per day)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 30,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.5
+              },
+              {
+                "color": "green",
+                "value": 0.7
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 3
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": ["last", "mean"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "time_series",
+          "rawSql": "SELECT\n  mt.CalculationDate AS time,\n  mt.RSquared AS value,\n  s.ServerName + ' - ' + mt.MetricCategory + '.' + mt.MetricName AS metric\nFROM dbo.MetricTrends mt\nINNER JOIN dbo.Servers s ON mt.ServerID = s.ServerID\nWHERE mt.TrendPeriod = '30day'\n  AND mt.MetricCategory IN ('Memory', 'Disk', 'CPU')\n  AND mt.CalculationDate >= DATEADD(DAY, -30, GETUTCDATE())\n  AND mt.RSquared IS NOT NULL\nORDER BY time;",
+          "refId": "A"
+        }
+      ],
+      "title": "Trend Confidence (R²) Over Time",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto",
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "TrendDirection"
+            },
+            "properties": [
+              {
+                "id": "custom.displayMode",
+                "value": "color-background"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "Increasing": {
+                        "color": "red",
+                        "index": 0
+                      },
+                      "Decreasing": {
+                        "color": "blue",
+                        "index": 1
+                      },
+                      "Stable": {
+                        "color": "green",
+                        "index": 2
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "GrowthPercentPerDay"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              },
+              {
+                "id": "custom.displayMode",
+                "value": "color-background"
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "blue",
+                      "value": null
+                    },
+                    {
+                      "color": "green",
+                      "value": -1
+                    },
+                    {
+                      "color": "green",
+                      "value": 1
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 5
+                    },
+                    {
+                      "color": "red",
+                      "value": 10
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 11
+      },
+      "id": 7,
+      "options": {
+        "footer": {
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "GrowthPercentPerDay"
+          }
+        ]
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "table",
+          "rawSql": "SELECT\n  s.ServerName,\n  mt.MetricCategory,\n  mt.MetricName,\n  mt.TrendPeriod,\n  mt.TrendDirection,\n  CAST(mt.Slope AS DECIMAL(12,2)) AS Slope,\n  CAST(mt.GrowthPercentPerDay AS DECIMAL(10,4)) AS GrowthPercentPerDay,\n  CAST(mt.RSquared AS DECIMAL(5,4)) AS RSquared,\n  mt.SampleCount,\n  CAST(mt.StartValue AS DECIMAL(10,2)) AS StartValue,\n  CAST(mt.EndValue AS DECIMAL(10,2)) AS EndValue,\n  CAST(mt.AverageValue AS DECIMAL(10,2)) AS AvgValue,\n  CAST(mt.StandardDeviation AS DECIMAL(10,2)) AS StdDev\nFROM dbo.MetricTrends mt\nINNER JOIN dbo.Servers s ON mt.ServerID = s.ServerID\nWHERE mt.CalculationDate = (SELECT MAX(CalculationDate) FROM dbo.MetricTrends)\n  AND mt.TrendPeriod = '30day'\nORDER BY ABS(mt.GrowthPercentPerDay) DESC;",
+          "refId": "A"
+        }
+      ],
+      "title": "All Trends Summary (30-day period)",
+      "type": "table"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto",
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 20
+      },
+      "id": 8,
+      "options": {
+        "footer": {
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "table",
+          "rawSql": "SELECT\n  CalculationType,\n  TrendPeriod,\n  ServersProcessed,\n  MetricsProcessed,\n  TrendsCalculated,\n  DurationSeconds,\n  Status,\n  CalculationTime\nFROM dbo.TrendCalculationHistory\nWHERE CalculationTime >= DATEADD(DAY, -7, GETUTCDATE())\nORDER BY CalculationTime DESC;",
+          "refId": "A"
+        }
+      ],
+      "title": "Trend Calculation History (7 days)",
+      "type": "table"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 20
+      },
+      "id": 9,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "last"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "time_series",
+          "rawSql": "SELECT\n  CalculationTime AS time,\n  DurationSeconds AS value,\n  CalculationType + ' - ' + ISNULL(TrendPeriod, 'All') AS metric\nFROM dbo.TrendCalculationHistory\nWHERE CalculationTime >= DATEADD(DAY, -30, GETUTCDATE())\nORDER BY time;",
+          "refId": "A"
+        }
+      ],
+      "title": "Calculation Performance (30 days)",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "5m",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["predictive", "trends", "analysis"],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-30d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "13 - Trend Analysis & Statistics",
+  "uid": "trend-analysis",
+  "version": 1
+}
