@@ -1,7 +1,17 @@
 # =====================================================
 # SQL Monitor - Multi-Cloud Deployment Configuration
 # =====================================================
-# Copy this file to deployment-config.yaml and customize for your environment
+# TEMPLATE FILE - Copy and customize for your environment
+#
+# This file contains example values. For production use:
+#   1. Copy this file to deployment-config.yaml
+#   2. Replace all example values with your actual configuration
+#   3. DO NOT commit deployment-config.yaml to source control
+#
+# Client-specific deployment scripts available:
+#   - deployment/clients/schoolvision/ - SchoolVision environment
+#   - deployment/clients/arctrade/ - ArcTrade environment
+# =====================================================
 
 # =====================================================
 # Project Information

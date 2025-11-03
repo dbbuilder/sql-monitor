@@ -74,8 +74,11 @@ tmp/
 temp/
 *.tmp
 
-# Client-specific files and analysis
+# Client-specific files and analysis (but allow deployment configs)
 arctrade/
+!deployment/clients/arctrade/
+schoolvision/
+!deployment/clients/schoolvision/
 
 # Archive folder (outdated/temporary files)
 archive/

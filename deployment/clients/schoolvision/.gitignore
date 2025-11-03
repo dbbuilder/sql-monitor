@@ -1,0 +1,7 @@
+# Ignore sensitive files
+.env
+*.log
+logs/
+
+# Keep template
+!.env.template

@@ -1,15 +1,28 @@
 apiVersion: 1
 
+# =============================================================================
+# Grafana SQL Server Datasource Configuration
+# =============================================================================
+# IMPORTANT: This file contains placeholders. For production use:
+#   1. Copy this file to a secure location
+#   2. Replace ${MONITORING_DB_*} variables with actual values OR
+#   3. Set environment variables before starting Grafana
+#
+# Client-specific configurations:
+#   - SchoolVision: See deployment/clients/schoolvision/.env
+#   - ArcTrade: See deployment/clients/arctrade/.env
+# =============================================================================
+
 datasources:
   - name: MonitoringDB
     type: mssql
     uid: monitoringdb
     access: proxy
-    url: sqltest.schoolvision.net:14333
-    database: MonitoringDB
-    user: sv
+    url: ${MONITORING_DB_SERVER:-localhost:1433}
+    database: ${MONITORING_DB_NAME:-MonitoringDB}
+    user: ${MONITORING_DB_USER:-sql_monitor}
     secureJsonData:
-      password: Gv51076!
+      password: ${MONITORING_DB_PASSWORD}
     jsonData:
       maxOpenConns: 10
       maxIdleConns: 2

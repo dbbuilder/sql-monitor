@@ -1,14 +1,22 @@
 # =====================================================
 # Deploy SQL Server Monitor to Test Environment
-# Target: sqltest.schoolvision.net,14333
-# User: sv
-# Password: Gv51076!
+# Generic deployment script - customize parameters for your environment
+# =====================================================
+# For client-specific deployments, use:
+#   deployment/clients/schoolvision/Setup-SchoolVisionMonitoring.ps1
+#   deployment/clients/arctrade/Setup-ArcTradeMonitoring.ps1
 # =====================================================
 
 param(
-    [string]$Server = "sqltest.schoolvision.net,14333",
-    [string]$User = "sv",
-    [string]$Password = "Gv51076!",
+    [Parameter(Mandatory=$true)]
+    [string]$Server,
+
+    [Parameter(Mandatory=$true)]
+    [string]$User,
+
+    [Parameter(Mandatory=$true)]
+    [string]$Password,
+
     [string]$DatabasePath = "$PSScriptRoot\..\database"
 )
 

@@ -11,7 +11,7 @@
     SQL Server hostname or IP address
 
 .PARAMETER Port
-    SQL Server port number (default: 14333)
+    SQL Server port number (default: 1433)
 
 .PARAMETER Username
     SQL Server authentication username
@@ -20,22 +20,22 @@
     SQL Server authentication password
 
 .EXAMPLE
-    pwsh Deploy-MonitoringSystem.ps1 -Server svweb -Port 14333 -Username sv -Password 'Gv51076!'
+    pwsh Deploy-MonitoringSystem.ps1 -Server myserver.example.com -Port 1433 -Username sa -Password 'YourSecurePassword'
 #>
 
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory=$false)]
-    [string]$Server = "svweb",
+    [Parameter(Mandatory=$true)]
+    [string]$Server,
 
     [Parameter(Mandatory=$false)]
-    [int]$Port = 14333,
+    [int]$Port = 1433,
 
-    [Parameter(Mandatory=$false)]
-    [string]$Username = "sv",
+    [Parameter(Mandatory=$true)]
+    [string]$Username,
 
-    [Parameter(Mandatory=$false)]
-    [string]$Password = "Gv51076!"
+    [Parameter(Mandatory=$true)]
+    [string]$Password
 )
 
 # Import SqlClient assembly (use Unix runtime version for WSL)
