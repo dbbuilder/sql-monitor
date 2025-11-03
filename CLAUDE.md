@@ -906,3 +906,4 @@ Cross-platform HTTP-to-sqlcmd bridge that provides a localhost-only HTTP service
 - **JWT Authentication**: https://jwt.io/introduction
 - **TOTP (RFC 6238)**: https://datatracker.ietf.org/doc/html/rfc6238
 - **BCrypt**: https://github.com/BcryptNet/bcrypt.net
+- sqltest.schoolvision.net,14333 is the main target monitoring server , svweb,14333 and suncity.schoolvision.net,14333 are the two remote servers talking to it

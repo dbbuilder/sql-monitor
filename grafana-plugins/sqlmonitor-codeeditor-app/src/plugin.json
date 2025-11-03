@@ -1,0 +1,75 @@
+{
+  "$schema": "https://raw.githubusercontent.com/grafana/grafana/master/docs/sources/developers/plugins/plugin.schema.json",
+  "type": "app",
+  "name": "SQL Monitor Code Editor",
+  "id": "sqlmonitor-codeeditor-app",
+  "info": {
+    "description": "T-SQL code editor with real-time analysis, query execution, and index recommendations. Features auto-save, syntax highlighting, 30+ analysis rules, and integration with SQL Monitor historical data.",
+    "author": {
+      "name": "SQL Monitor",
+      "url": "https://github.com/sql-monitor"
+    },
+    "keywords": [
+      "sql",
+      "tsql",
+      "code editor",
+      "analysis",
+      "monitoring",
+      "performance",
+      "auto-save",
+      "syntax highlighting"
+    ],
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "links": [
+      {
+        "name": "Documentation",
+        "url": "https://github.com/sql-monitor/docs"
+      },
+      {
+        "name": "GitHub",
+        "url": "https://github.com/sql-monitor"
+      },
+      {
+        "name": "License",
+        "url": "https://github.com/sql-monitor/LICENSE"
+      }
+    ],
+    "screenshots": [],
+    "version": "1.0.0",
+    "updated": "2025-11-02"
+  },
+  "includes": [
+    {
+      "type": "page",
+      "name": "Code Editor",
+      "path": "/a/sqlmonitor-codeeditor-app/editor",
+      "role": "Viewer",
+      "addToNav": true,
+      "defaultNav": true,
+      "icon": "file-code-o"
+    },
+    {
+      "type": "page",
+      "name": "Saved Scripts",
+      "path": "/a/sqlmonitor-codeeditor-app/scripts",
+      "role": "Viewer",
+      "addToNav": true,
+      "icon": "file-alt"
+    },
+    {
+      "type": "page",
+      "name": "Configuration",
+      "path": "/a/sqlmonitor-codeeditor-app/config",
+      "role": "Admin",
+      "addToNav": true,
+      "icon": "cog"
+    }
+  ],
+  "dependencies": {
+    "grafanaDependency": ">=10.0.0",
+    "plugins": []
+  }
+}
