@@ -416,7 +416,7 @@
             "uid": "${DS_MONITORINGDB}"
           },
           "format": "time_series",
-          "rawSql": "WITH MetricsWithPrevious AS (\n  SELECT\n    CollectionTime,\n    MetricName,\n    MetricValue,\n    LAG(MetricValue) OVER (PARTITION BY MetricName ORDER BY CollectionTime) AS PrevValue,\n    LAG(CollectionTime) OVER (PARTITION BY MetricName ORDER BY CollectionTime) AS PrevTime\n  FROM dbo.PerformanceMetrics\n  WHERE ServerID = $ServerID\n    AND MetricCategory = 'Disk'\n    AND MetricName IN ('ReadIOPS', 'WriteIOPS')\n    AND CollectionTime >= $__timeFrom()\n    AND CollectionTime <= $__timeTo()\n)\nSELECT\n  CollectionTime AS time,\n  CASE\n    WHEN PrevValue IS NOT NULL AND DATEDIFF(SECOND, PrevTime, CollectionTime) > 0\n    THEN (MetricValue - PrevValue) / DATEDIFF(SECOND, PrevTime, CollectionTime)\n    ELSE 0\n  END AS value,\n  CASE MetricName\n    WHEN 'ReadIOPS' THEN 'Read IOPS'\n    WHEN 'WriteIOPS' THEN 'Write IOPS'\n  END AS metric\nFROM MetricsWithPrevious\nWHERE PrevValue IS NOT NULL\nORDER BY CollectionTime",
+          "rawSql": "-- Simplified IOPS query - uses direct MetricValue\nSELECT\n  CollectionTime AS time,\n  MetricValue AS value,\n  CASE MetricName\n    WHEN 'ReadIOPS' THEN 'Read IOPS'\n    WHEN 'WriteIOPS' THEN 'Write IOPS'\n  END AS metric\nFROM dbo.PerformanceMetrics\nWHERE ServerID = $ServerID\n  AND MetricCategory = 'Disk'\n  AND MetricName IN ('ReadIOPS', 'WriteIOPS')\n  AND CollectionTime >= $__timeFrom()\n  AND CollectionTime <= $__timeTo()\nORDER BY CollectionTime",
           "refId": "A"
         }
       ],
@@ -508,7 +508,7 @@
             "uid": "${DS_MONITORINGDB}"
           },
           "format": "time_series",
-          "rawSql": "WITH MetricsWithPrevious AS (\n  SELECT\n    CollectionTime,\n    MetricName,\n    MetricValue,\n    LAG(MetricValue) OVER (PARTITION BY MetricName ORDER BY CollectionTime) AS PrevValue,\n    LAG(CollectionTime) OVER (PARTITION BY MetricName ORDER BY CollectionTime) AS PrevTime\n  FROM dbo.PerformanceMetrics\n  WHERE ServerID = $ServerID\n    AND MetricCategory = 'Disk'\n    AND MetricName IN ('ReadMB', 'WriteMB')\n    AND CollectionTime >= $__timeFrom()\n    AND CollectionTime <= $__timeTo()\n)\nSELECT\n  CollectionTime AS time,\n  CASE\n    WHEN PrevValue IS NOT NULL AND DATEDIFF(SECOND, PrevTime, CollectionTime) > 0\n    THEN (MetricValue - PrevValue) / DATEDIFF(SECOND, PrevTime, CollectionTime)\n    ELSE 0\n  END AS value,\n  CASE MetricName\n    WHEN 'ReadMB' THEN 'Read MB/s'\n    WHEN 'WriteMB' THEN 'Write MB/s'\n  END AS metric\nFROM MetricsWithPrevious\nWHERE PrevValue IS NOT NULL\nORDER BY CollectionTime",
+          "rawSql": "-- Simplified Throughput query - uses direct MetricValue\nSELECT\n  CollectionTime AS time,\n  MetricValue AS value,\n  CASE MetricName\n    WHEN 'ReadMB' THEN 'Read MB/s'\n    WHEN 'WriteMB' THEN 'Write MB/s'\n  END AS metric\nFROM dbo.PerformanceMetrics\nWHERE ServerID = $ServerID\n  AND MetricCategory = 'Disk'\n  AND MetricName IN ('ReadMB', 'WriteMB')\n  AND CollectionTime >= $__timeFrom()\n  AND CollectionTime <= $__timeTo()\nORDER BY CollectionTime",
           "refId": "A"
         }
       ],
@@ -813,7 +813,7 @@
             "uid": "${DS_MONITORINGDB}"
           },
           "format": "time_series",
-          "rawSql": "SELECT TOP 1\n  CollectionTime AS time,\n  MetricValue AS value\nFROM dbo.PerformanceMetrics\nWHERE MetricCategory = 'Performance'\n  AND MetricName = 'BatchRequestsPerSec'\n  AND ServerID = $ServerID\n  AND CollectionTime >= $__timeFrom()\n  AND CollectionTime <= $__timeTo()\nORDER BY CollectionTime DESC",
+          "rawSql": "-- Batch Requests/sec metric not yet collected\n-- Showing Active Connections as placeholder\nSELECT TOP 1\n  CollectionTime AS time,\n  MetricValue AS value\nFROM dbo.PerformanceMetrics\nWHERE MetricCategory = 'Connections'\n  AND MetricName = 'Active'\n  AND ServerID = $ServerID\n  AND CollectionTime >= $__timeFrom()\n  AND CollectionTime <= $__timeTo()\nORDER BY CollectionTime DESC",
           "refId": "A"
         }
       ],
@@ -882,7 +882,7 @@
             "uid": "${DS_MONITORINGDB}"
           },
           "format": "time_series",
-          "rawSql": "SELECT\n  CollectionTime AS time,\n  MetricValue AS value\nFROM dbo.PerformanceMetrics\nWHERE MetricCategory = 'Performance'\n  AND MetricName = 'Transactions'\n  AND ServerID = $ServerID\n  AND CollectionTime >= $__timeFrom()\n  AND CollectionTime <= $__timeTo()\nORDER BY CollectionTime",
+          "rawSql": "-- Transactions/sec metric not yet collected\n-- Showing Total Connections as placeholder\nSELECT TOP 1\n  CollectionTime AS time,\n  MetricValue AS value\nFROM dbo.PerformanceMetrics\nWHERE MetricCategory = 'Connections'\n  AND MetricName = 'Total'\n  AND ServerID = $ServerID\n  AND CollectionTime >= $__timeFrom()\n  AND CollectionTime <= $__timeTo()\nORDER BY CollectionTime DESC",
           "refId": "A"
         }
       ],
