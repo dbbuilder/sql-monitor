@@ -813,7 +813,7 @@
             "uid": "${DS_MONITORINGDB}"
           },
           "format": "time_series",
-          "rawSql": "-- Batch Requests/sec metric not yet collected\n-- Showing Active Connections as placeholder\nSELECT TOP 1\n  CollectionTime AS time,\n  MetricValue AS value\nFROM dbo.PerformanceMetrics\nWHERE MetricCategory = 'Connections'\n  AND MetricName = 'Active'\n  AND ServerID = $ServerID\n  AND CollectionTime >= $__timeFrom()\n  AND CollectionTime <= $__timeTo()\nORDER BY CollectionTime DESC",
+          "rawSql": "-- Batch Requests per second - SQL Server workload indicator\nSELECT TOP 1\n  CollectionTime AS time,\n  MetricValue AS value\nFROM dbo.PerformanceMetrics\nWHERE MetricCategory = 'Performance'\n  AND MetricName = 'BatchRequestsPerSec'\n  AND ServerID = $ServerID\n  AND CollectionTime >= $__timeFrom()\n  AND CollectionTime <= $__timeTo()\nORDER BY CollectionTime DESC",
           "refId": "A"
         }
       ],
@@ -882,7 +882,7 @@
             "uid": "${DS_MONITORINGDB}"
           },
           "format": "time_series",
-          "rawSql": "-- Transactions/sec metric not yet collected\n-- Showing Total Connections as placeholder\nSELECT TOP 1\n  CollectionTime AS time,\n  MetricValue AS value\nFROM dbo.PerformanceMetrics\nWHERE MetricCategory = 'Connections'\n  AND MetricName = 'Total'\n  AND ServerID = $ServerID\n  AND CollectionTime >= $__timeFrom()\n  AND CollectionTime <= $__timeTo()\nORDER BY CollectionTime DESC",
+          "rawSql": "-- Transactions per second - Transaction activity across all databases\nSELECT TOP 1\n  CollectionTime AS time,\n  MetricValue AS value\nFROM dbo.PerformanceMetrics\nWHERE MetricCategory = 'Performance'\n  AND MetricName = 'Transactions'\n  AND ServerID = $ServerID\n  AND CollectionTime >= $__timeFrom()\n  AND CollectionTime <= $__timeTo()\nORDER BY CollectionTime DESC",
           "refId": "A"
         }
       ],
