@@ -29,11 +29,13 @@ services:
       - GF_AUTH_ANONYMOUS_ENABLED=false
       - GF_INSTALL_PLUGINS=
       - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/00-dashboard-browser.json
+      - GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=sqlmonitor-codeeditor-app
     volumes:
       - grafana-data:/var/lib/grafana
       - ./dashboards/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
       - ./dashboards/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
       - ./dashboards/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - ./grafana-plugins/sqlmonitor-codeeditor-app/dist:/var/lib/grafana/plugins/sqlmonitor-codeeditor-app:ro
     restart: unless-stopped
     networks:
       - sql-monitor-network

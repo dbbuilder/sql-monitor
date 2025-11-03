@@ -11,9 +11,10 @@
  *
  * Example of optimized rule with cached regex:
  *
+ * @example
  * export class OptimizedRule extends BaseRule {
  *   // Cache compiled regex as static property
- *   private static readonly PATTERN = /SELECT\s+\*/gi;
+ *   private static readonly PATTERN = /SELECT star/gi;
  *
  *   public async detect(code: string): Promise<AnalysisResult[]> {
  *     const results: AnalysisResult[] = [];
