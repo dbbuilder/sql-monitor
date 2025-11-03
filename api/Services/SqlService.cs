@@ -482,6 +482,28 @@ public class SqlService : ISqlService
 
         return result.FirstOrDefault();
     }
+
+    public async Task<IEnumerable<T>> ExecuteStoredProcedureAsync<T>(string procedureName, Dictionary<string, object?>? parameters = null)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        // Convert dictionary to DynamicParameters
+        var dynamicParams = new DynamicParameters();
+        if (parameters != null)
+        {
+            foreach (var param in parameters)
+            {
+                dynamicParams.Add(param.Key, param.Value);
+            }
+        }
+
+        var result = await connection.QueryAsync<T>(
+            procedureName,
+            dynamicParams,
+            commandType: CommandType.StoredProcedure);
+
+        return result;
+    }
 }
 
 /// <summary>

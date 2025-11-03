@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using SqlMonitor.Api.Models;
 using SqlMonitor.Api.Services;
 using System.Text;
+using System.Data;
+using Microsoft.Data.SqlClient;
+using System.Diagnostics;
 
 namespace SqlMonitor.Api.Controllers;
 
@@ -259,6 +262,293 @@ public class CodeController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving connection info");
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Execute SQL query and return results
+    /// </summary>
+    /// <param name="request">Query execution request</param>
+    /// <returns>Query results with execution time and row counts</returns>
+    [HttpPost("execute")]
+    [ProducesResponseType(typeof(ExecuteQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ExecuteQueryResponse>> ExecuteQuery([FromBody] ExecuteQueryRequest request)
+    {
+        var response = new ExecuteQueryResponse();
+        var stopwatch = Stopwatch.StartNew();
+
+        try
+        {
+            // Validate request
+            if (request.ServerId <= 0)
+            {
+                return BadRequest(new { error = "Invalid server ID" });
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Database))
+            {
+                return BadRequest(new { error = "Database name is required" });
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Query))
+            {
+                return BadRequest(new { error = "Query is required" });
+            }
+
+            if (request.TimeoutSeconds < 1 || request.TimeoutSeconds > 600)
+            {
+                return BadRequest(new { error = "Timeout must be between 1 and 600 seconds" });
+            }
+
+            _logger.LogInformation(
+                "Executing query on server {ServerId}, database {Database}",
+                request.ServerId, request.Database);
+
+            // Get server connection string
+            var server = await _sqlService.GetServerByIdAsync(request.ServerId);
+            if (server == null)
+            {
+                return BadRequest(new { error = $"Server {request.ServerId} not found" });
+            }
+
+            // Build connection string
+            var connectionString = $"Server={server.ServerName};Database={request.Database};Integrated Security=true;Connection Timeout={request.TimeoutSeconds};TrustServerCertificate=True;";
+
+            using var connection = new SqlConnection(connectionString);
+            await connection.OpenAsync();
+
+            using var command = new SqlCommand(request.Query, connection);
+            command.CommandTimeout = request.TimeoutSeconds;
+            command.CommandType = CommandType.Text;
+
+            // Track messages (PRINT statements, etc.)
+            var messages = new List<string>();
+            connection.InfoMessage += (sender, args) =>
+            {
+                messages.Add(args.Message);
+            };
+
+            using var reader = await command.ExecuteReaderAsync();
+
+            do
+            {
+                var resultSet = new QueryResultSet();
+
+                // Get column metadata
+                var schemaTable = reader.GetSchemaTable();
+                if (schemaTable != null)
+                {
+                    foreach (DataRow schemaRow in schemaTable.Rows)
+                    {
+                        var column = new QueryColumn
+                        {
+                            Name = schemaRow["ColumnName"].ToString() ?? "",
+                            DataType = schemaRow["DataTypeName"].ToString() ?? "",
+                            IsNullable = (bool)(schemaRow["AllowDBNull"] ?? false),
+                            MaxLength = schemaRow["ColumnSize"] != DBNull.Value
+                                ? Convert.ToInt32(schemaRow["ColumnSize"])
+                                : null
+                        };
+                        resultSet.Columns.Add(column);
+                    }
+                }
+
+                // Read rows (limit to MaxRows)
+                int rowCount = 0;
+                while (await reader.ReadAsync() && rowCount < request.MaxRows)
+                {
+                    var row = new Dictionary<string, object?>();
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        var value = reader.IsDBNull(i) ? null : reader.GetValue(i);
+                        row[reader.GetName(i)] = value;
+                    }
+                    resultSet.Rows.Add(row);
+                    rowCount++;
+                }
+
+                response.ResultSets.Add(resultSet);
+
+            } while (await reader.NextResultAsync());
+
+            response.RowsAffected = reader.RecordsAffected;
+            response.Messages = messages;
+            response.Success = true;
+
+            stopwatch.Stop();
+            response.ExecutionTimeMs = stopwatch.ElapsedMilliseconds;
+
+            _logger.LogInformation(
+                "Query executed successfully in {ElapsedMs}ms, {ResultSetCount} result sets, {RowsAffected} rows affected",
+                response.ExecutionTimeMs, response.ResultSets.Count, response.RowsAffected);
+
+            return Ok(response);
+        }
+        catch (SqlException ex)
+        {
+            stopwatch.Stop();
+            response.ExecutionTimeMs = stopwatch.ElapsedMilliseconds;
+            response.Success = false;
+            response.Error = $"SQL Error: {ex.Message} (Line {ex.LineNumber})";
+
+            _logger.LogError(ex, "SQL error executing query");
+            return Ok(response); // Return 200 with error in response body
+        }
+        catch (Exception ex)
+        {
+            stopwatch.Stop();
+            response.ExecutionTimeMs = stopwatch.ElapsedMilliseconds;
+            response.Success = false;
+            response.Error = ex.Message;
+
+            _logger.LogError(ex, "Error executing query");
+            return Ok(response); // Return 200 with error in response body
+        }
+    }
+
+    /// <summary>
+    /// Analyze query for rewrite suggestions
+    /// </summary>
+    /// <param name="request">Query analysis request</param>
+    /// <returns>List of rewrite suggestions</returns>
+    [HttpPost("analyze-rewrites")]
+    [ProducesResponseType(typeof(AnalyzeQueryRewriteResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<AnalyzeQueryRewriteResponse>> AnalyzeQueryRewrites([FromBody] AnalyzeQueryRewriteRequest request)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(request.QueryText))
+            {
+                return BadRequest(new { error = "Query text is required" });
+            }
+
+            _logger.LogInformation("Analyzing query for rewrites");
+
+            // Call stored procedure to analyze query
+            var suggestions = await _sqlService.ExecuteStoredProcedureAsync<QueryRewriteSuggestion>(
+                "dbo.usp_AnalyzeQueryForRewrites",
+                new Dictionary<string, object?>
+                {
+                    { "@QueryText", request.QueryText },
+                    { "@ServerID", request.ServerId },
+                    { "@DatabaseName", request.DatabaseName }
+                });
+
+            var response = new AnalyzeQueryRewriteResponse
+            {
+                Suggestions = suggestions.ToList()
+            };
+
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error analyzing query for rewrites");
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Get query percentiles for a server
+    /// </summary>
+    /// <param name="serverId">Server ID</param>
+    /// <param name="timeWindowMinutes">Time window in minutes (default: 60)</param>
+    /// <returns>Query percentile data</returns>
+    [HttpGet("percentiles/{serverId}")]
+    [ProducesResponseType(typeof(QueryPercentilesResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<QueryPercentilesResponse>> GetQueryPercentiles(
+        int serverId,
+        [FromQuery] int timeWindowMinutes = 60)
+    {
+        try
+        {
+            _logger.LogInformation(
+                "Getting query percentiles for server {ServerId}, time window {TimeWindow} minutes",
+                serverId, timeWindowMinutes);
+
+            // First calculate percentiles
+            await _sqlService.ExecuteStoredProcedureAsync<object>(
+                "dbo.usp_CalculateQueryPercentiles",
+                new Dictionary<string, object?>
+                {
+                    { "@ServerID", serverId },
+                    { "@TimeWindowMinutes", timeWindowMinutes }
+                });
+
+            // Then get performance insights
+            var queries = await _sqlService.ExecuteStoredProcedureAsync<QueryPercentileData>(
+                "dbo.usp_GetQueryPerformanceInsights",
+                new Dictionary<string, object?>
+                {
+                    { "@ServerID", serverId },
+                    { "@TopN", 50 }
+                });
+
+            var response = new QueryPercentilesResponse
+            {
+                Queries = queries.ToList(),
+                TimeWindowMinutes = timeWindowMinutes
+            };
+
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting query percentiles");
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Get wait statistics by category for a server
+    /// </summary>
+    /// <param name="serverId">Server ID</param>
+    /// <param name="timeWindowMinutes">Time window in minutes (default: 60)</param>
+    /// <returns>Wait statistics by category</returns>
+    [HttpGet("wait-categories/{serverId}")]
+    [ProducesResponseType(typeof(WaitStatsByCategoryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<WaitStatsByCategoryResponse>> GetWaitStatsByCategory(
+        int serverId,
+        [FromQuery] int timeWindowMinutes = 60)
+    {
+        try
+        {
+            _logger.LogInformation(
+                "Getting wait statistics by category for server {ServerId}, time window {TimeWindow} minutes",
+                serverId, timeWindowMinutes);
+
+            var categories = await _sqlService.ExecuteStoredProcedureAsync<WaitCategoryData>(
+                "dbo.usp_GetWaitStatsByCategory",
+                new Dictionary<string, object?>
+                {
+                    { "@ServerID", serverId },
+                    { "@TimeWindowMinutes", timeWindowMinutes }
+                });
+
+            var categoriesList = categories.ToList();
+            var totalWaitTime = categoriesList.Sum(c => c.TotalWaitTimeMs);
+
+            var response = new WaitStatsByCategoryResponse
+            {
+                Categories = categoriesList,
+                TimeWindowMinutes = timeWindowMinutes,
+                TotalWaitTimeMs = totalWaitTime
+            };
+
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting wait statistics by category");
             return StatusCode(500, new { error = ex.Message });
         }
     }

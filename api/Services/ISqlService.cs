@@ -172,4 +172,13 @@ public interface ISqlService
     /// Gets session statistics (Phase 2.0 Week 3 Days 13-14 - Session Management)
     /// </summary>
     Task<SessionStatistics?> GetSessionStatisticsAsync(int timeRangeHours = 24);
+
+    /// <summary>
+    /// Executes a stored procedure and returns results mapped to type T
+    /// </summary>
+    /// <typeparam name="T">Type to map results to</typeparam>
+    /// <param name="procedureName">Stored procedure name</param>
+    /// <param name="parameters">Stored procedure parameters</param>
+    /// <returns>Collection of mapped results</returns>
+    Task<IEnumerable<T>> ExecuteStoredProcedureAsync<T>(string procedureName, Dictionary<string, object?>? parameters = null);
 }
