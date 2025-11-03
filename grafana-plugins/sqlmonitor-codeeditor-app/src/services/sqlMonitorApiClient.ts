@@ -17,8 +17,9 @@ import type { QueryExecutionResult, QueryExecutionRequest } from '../types/query
 
 /**
  * API configuration
+ * Points to the ASP.NET Core API (port 9000) running alongside Grafana
  */
-const API_BASE_URL = '/api/datasources/proxy/uid'; // Grafana datasource proxy
+const API_BASE_URL = '/api'; // Will be proxied through Grafana to http://sql-monitor-api:9000/api
 const DEFAULT_TIMEOUT_MS = 60000; // 60 seconds
 
 /**
@@ -80,7 +81,7 @@ export class SqlMonitorApiClient {
 
   /**
    * Execute SQL query
-   * Week 3 Day 9-10 implementation
+   * Updated to use real backend API (Feature #7 integration)
    */
   public async executeQuery(request: QueryExecutionRequest): Promise<QueryExecutionResult> {
     console.log('[SqlMonitorApiClient] Executing query:', {
@@ -92,114 +93,60 @@ export class SqlMonitorApiClient {
     const startTime = Date.now();
 
     try {
-      // TODO: Replace with actual API endpoint
-      // const response = await getBackendSrv().post('/api/sqlmonitor/execute', request, {
-      //   timeout: request.timeoutSeconds ? request.timeoutSeconds * 1000 : DEFAULT_TIMEOUT_MS,
-      // });
+      // Call real backend API endpoint
+      const apiRequest = {
+        serverId: request.serverId,
+        database: request.databaseName,
+        query: request.query,
+        timeoutSeconds: request.timeoutSeconds || 60,
+        maxRows: request.maxRows || 5000,
+      };
 
-      // MOCK IMPLEMENTATION (Week 3 - will be replaced with real API)
-      await this.mockDelay(1000); // Simulate 1 second query execution
+      const response = await getBackendSrv().post(`${API_BASE_URL}/code/execute`, apiRequest, {
+        timeout: request.timeoutSeconds ? request.timeoutSeconds * 1000 : DEFAULT_TIMEOUT_MS,
+      });
 
-      // Parse query type to determine response
-      const queryUpper = request.query.trim().toUpperCase();
-      const isSelect = queryUpper.startsWith('SELECT');
-      const isInsert = queryUpper.startsWith('INSERT');
-      const isUpdate = queryUpper.startsWith('UPDATE');
-      const isDelete = queryUpper.startsWith('DELETE');
-      const isExec = queryUpper.startsWith('EXEC');
+      // Map backend response to frontend format
+      const result: QueryExecutionResult = {
+        success: response.success,
+        executionId: this.generateExecutionId(),
+        rowsAffected: response.rowsAffected || 0,
+        resultSets: response.resultSets.map((rs: any, index: number) => ({
+          columns: rs.columns.map((col: any, ordinal: number) => ({
+            name: col.name,
+            dataType: col.dataType,
+            ordinal,
+          })),
+          rows: rs.rows,
+          rowCount: rs.rowCount || rs.rows.length,
+        })),
+        messages: response.messages || [],
+        errors: response.error
+          ? [
+              {
+                message: response.error,
+                lineNumber: 0,
+                severity: 'Error',
+              },
+            ]
+          : [],
+        executionTimeMs: response.executionTimeMs || Date.now() - startTime,
+        serverName: `Server${request.serverId}`,
+        databaseName: request.databaseName,
+        executedAt: new Date().toISOString(),
+      };
 
-      if (isSelect) {
-        // Return mock result set
-        const mockResult: QueryExecutionResult = {
-          success: true,
-          executionId: this.generateExecutionId(),
-          rowsAffected: 0,
-          resultSets: [
-            {
-              columns: [
-                { name: 'CustomerID', dataType: 'int', ordinal: 0 },
-                { name: 'CustomerName', dataType: 'nvarchar', ordinal: 1 },
-                { name: 'Email', dataType: 'nvarchar', ordinal: 2 },
-                { name: 'OrderCount', dataType: 'int', ordinal: 3 },
-              ],
-              rows: [
-                { CustomerID: 1, CustomerName: 'Acme Corp', Email: 'contact@acme.com', OrderCount: 15 },
-                { CustomerID: 2, CustomerName: 'TechStart Inc', Email: 'info@techstart.com', OrderCount: 8 },
-                { CustomerID: 3, CustomerName: 'Global Solutions', Email: 'hello@global.com', OrderCount: 23 },
-                { CustomerID: 4, CustomerName: 'Innovation Labs', Email: 'team@innovation.com', OrderCount: 12 },
-                { CustomerID: 5, CustomerName: 'Smart Systems', Email: 'contact@smart.com', OrderCount: 19 },
-              ],
-              rowCount: 5,
-            },
-          ],
-          messages: ['(5 rows affected)'],
-          executionTimeMs: Date.now() - startTime,
-          serverName: `Server${request.serverId}`,
-          databaseName: request.databaseName,
-          executedAt: new Date().toISOString(),
-        };
+      console.log('[SqlMonitorApiClient] Query execution completed:', {
+        success: result.success,
+        resultSets: result.resultSets.length,
+        executionTimeMs: result.executionTimeMs,
+      });
 
-        return mockResult;
-      } else if (isInsert || isUpdate || isDelete) {
-        // Return mock modification result
-        const mockRowsAffected = Math.floor(Math.random() * 10) + 1;
-        const mockResult: QueryExecutionResult = {
-          success: true,
-          executionId: this.generateExecutionId(),
-          rowsAffected: mockRowsAffected,
-          resultSets: [],
-          messages: [`(${mockRowsAffected} rows affected)`],
-          executionTimeMs: Date.now() - startTime,
-          serverName: `Server${request.serverId}`,
-          databaseName: request.databaseName,
-          executedAt: new Date().toISOString(),
-        };
-
-        return mockResult;
-      } else if (isExec) {
-        // Return mock stored procedure result
-        const mockResult: QueryExecutionResult = {
-          success: true,
-          executionId: this.generateExecutionId(),
-          rowsAffected: 0,
-          resultSets: [
-            {
-              columns: [
-                { name: 'StatusCode', dataType: 'int', ordinal: 0 },
-                { name: 'Message', dataType: 'nvarchar', ordinal: 1 },
-              ],
-              rows: [{ StatusCode: 0, Message: 'Stored procedure executed successfully' }],
-              rowCount: 1,
-            },
-          ],
-          messages: ['Stored procedure completed successfully'],
-          executionTimeMs: Date.now() - startTime,
-          serverName: `Server${request.serverId}`,
-          databaseName: request.databaseName,
-          executedAt: new Date().toISOString(),
-        };
-
-        return mockResult;
-      } else {
-        // Return mock success for DDL/other statements
-        const mockResult: QueryExecutionResult = {
-          success: true,
-          executionId: this.generateExecutionId(),
-          rowsAffected: 0,
-          resultSets: [],
-          messages: ['Command completed successfully'],
-          executionTimeMs: Date.now() - startTime,
-          serverName: `Server${request.serverId}`,
-          databaseName: request.databaseName,
-          executedAt: new Date().toISOString(),
-        };
-
-        return mockResult;
-      }
+      return result;
     } catch (error) {
       console.error('[SqlMonitorApiClient] Query execution failed:', error);
 
-      const mockErrorResult: QueryExecutionResult = {
+      const errorResult: QueryExecutionResult = {
         success: false,
         executionId: this.generateExecutionId(),
         rowsAffected: 0,
@@ -208,7 +155,7 @@ export class SqlMonitorApiClient {
         errors: [
           {
             message: error instanceof Error ? error.message : 'Unknown error occurred',
-            lineNumber: 1,
+            lineNumber: 0,
             severity: 'Error',
           },
         ],
@@ -218,7 +165,7 @@ export class SqlMonitorApiClient {
         executedAt: new Date().toISOString(),
       };
 
-      return mockErrorResult;
+      return errorResult;
     }
   }
 
