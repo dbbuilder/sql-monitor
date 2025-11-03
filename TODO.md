@@ -112,9 +112,16 @@ Build a **self-hosted, enterprise-grade SQL Server monitoring solution** that:
 
 ## 🔥 Phase 3: Killer Features - IN PROGRESS (6 of 7 Complete)
 
-**Status**: 86% Complete (120h actual / 140h estimated)
-**Current Feature**: Feature #7 - T-SQL Code Editor (Week 1 of 5)
-**Target Completion**: 2025-12-06
+**Status**: 77% Complete (123h actual / 160h estimated)
+**Current Feature**: Feature #7 - T-SQL Code Editor + UX (Week 1 Day 2 of 6 weeks)
+**Target Completion**: 2025-12-13 (75h remaining)
+
+**Phase 3 Breakdown**:
+- Features #1-6: 120h complete ✅
+- Feature #7 (Core): 55h planned
+- Feature #7 (UX Enhancements): 20h planned
+- Feature #7 (Day 1 Complete): 3h done
+- **Total Phase 3**: 160h (120h + 55h + 20h - 3h + 3h = 160h)
 
 ### ✅ Completed Features (6 of 7)
 
@@ -126,54 +133,73 @@ Build a **self-hosted, enterprise-grade SQL Server monitoring solution** that:
 | 4 | Historical Baseline Comparison | ✅ Complete | 16h | 2025-10-31 | `PHASE-03-KILLER-FEATURES-PLAN.md` |
 | 5 | Predictive Analytics | ✅ Complete | 24h | 2025-11-01 | `PREDICTIVE-ANALYTICS-GUIDE.md` |
 | 6 | Automated Index Maintenance | ✅ Complete | 20h | 2025-11-02 | `INDEX-MAINTENANCE-GUIDE.md` |
-| 7 | T-SQL Code Editor | 🔄 **IN PROGRESS** | 0h / 55h | Target: 2025-12-06 | `PHASE-3-FEATURE-7-IMPLEMENTATION-PLAN.md` |
+| 7 | T-SQL Code Editor + UX | 🔄 **IN PROGRESS** | 3h / 75h | Target: 2025-12-13 | `PHASE-3-FEATURE-7-IMPLEMENTATION-PLAN.md` |
 
-### 🔄 Feature #7: T-SQL Code Editor & Analyzer (55 hours)
+### 🔄 Feature #7: T-SQL Code Editor & Analyzer (75 hours with UX enhancements)
 
-**Document**: `docs/PHASE-3-FEATURE-7-IMPLEMENTATION-PLAN.md`
-**Architecture**: `docs/PHASE-3-FEATURE-7-PLUGIN-ARCHITECTURE.md`
-**Competitive Analysis**: `docs/COMPETITIVE-FEATURE-ANALYSIS.md`
-**Future Rules**: `docs/FUTURE-ANALYSIS-RULES-REFERENCE.md`
+**Documents**:
+- Implementation Plan: `docs/PHASE-3-FEATURE-7-IMPLEMENTATION-PLAN.md`
+- Architecture: `docs/PHASE-3-FEATURE-7-PLUGIN-ARCHITECTURE.md`
+- Nice-to-Haves: `docs/PHASE-3-FEATURE-7-NICE-TO-HAVES.md` ⭐ NEW
+- Competitive Analysis: `docs/COMPETITIVE-FEATURE-ANALYSIS.md`
+- Future Rules: `docs/FUTURE-ANALYSIS-RULES-REFERENCE.md`
 
-**Status**: Week 1 - Plugin scaffolding and foundation
-**Progress**: 0% (0 of 55 hours)
+**Status**: Week 1 Day 1 Complete - Day 2 In Progress
+**Progress**: 4% (3 of 75 hours)
+**Target Completion**: 2025-12-13 (6 weeks)
 
-#### Implementation Phases (5 weeks)
+#### Updated Estimate Breakdown
+- **Core Functionality**: 55 hours (original plan)
+- **UX Enhancements**: 20 hours (auto-save, IntelliSense, keyboard shortcuts, etc.)
+- **Total**: 75 hours
 
-**Week 1: Core Editor Foundation (10 hours)** 🔄
-- [ ] Day 1: Plugin scaffolding with @grafana/create-plugin (3h)
-  - Create plugin structure
-  - Configure plugin.json metadata
-  - Install dependencies (Monaco, ag-Grid)
-- [ ] Day 2: Basic layout & routing (4h)
-  - Create type definitions (analysis.ts, query.ts)
-  - Create CodeEditorPage layout
-  - Configure routing in App.tsx
-- [ ] Day 3: Monaco Editor integration (3h)
+**Justification**: Small investment (20h) for professional-grade UX that matches SSMS/VSCode standards
+
+#### Implementation Phases (6 weeks - Updated with UX enhancements)
+
+**Week 1: Core Editor + Auto-Save + Keyboard Shortcuts (15 hours)** 🔄
+- [x] Day 1: Plugin scaffolding (3h) ✅ COMPLETE
+  - Created plugin structure (package.json, tsconfig, webpack, plugin.json)
+  - Configured metadata with 3 pages (Editor, Saved Scripts, Config)
+  - Set up dependencies (Monaco, ag-Grid, React, TypeScript, lodash)
+- [ ] Day 2: Type definitions + AutoSaveService (6h) 🔄 IN PROGRESS
+  - Create type definitions (analysis.ts, query.ts, savedScript.ts)
+  - Implement AutoSaveService (localStorage, 2-second debounce)
+  - Create CodeEditorPage basic layout
+  - Add unsaved changes indicator
+- [ ] Day 3: Monaco Editor + Keyboard Shortcuts + Dark Mode (6h)
   - Create EditorPanel component
-  - Integrate Grafana CodeEditor
-  - Configure SQL syntax highlighting
+  - Integrate Grafana CodeEditor with SQL syntax
+  - Implement 20+ keyboard shortcuts (Ctrl+S, Ctrl+Enter, F5, etc.)
+  - Add dark mode support (respect Grafana theme)
+  - Add code formatting (sql-formatter library)
 
-**Week 2: Code Analysis Engine (20 hours)** 📋
+**Week 2: Code Analysis + IntelliSense + Snippets (26 hours)** 📋
 - [ ] Day 4-5: Analysis engine foundation (8h)
   - Create RuleBase interface and BaseRule class
   - Create AnalysisEngine with analyze() method
   - Implement rule management (enable/disable)
-- [ ] Day 6-8: Implement 30 analysis rules (12h)
+- [ ] Day 6-7: Implement 30 analysis rules (12h)
   - Performance Rules (P001-P010): 4 hours
   - Deprecated Rules (DP001-DP008): 2 hours
   - Security Rules (S001-S005): 2 hours
   - Code Smell Rules (C001-C008): 2 hours
   - Design Rules (D001-D005): 1 hour
   - Naming Rules (N001-N005): 1 hour
+- [ ] Day 8: IntelliSense + Code Formatting + Snippets (6h) ⭐ UX ENHANCEMENT
+  - Schema-aware IntelliSense (table/column autocomplete): 4h
+  - SQL code formatter integration: 1h
+  - T-SQL code snippets (SELECT, INSERT, etc.): 1h
 
-**Week 3: Query Execution & Results (10 hours)** 📋
+**Week 3: Query Execution + Export + History (15 hours)** 📋
 - [ ] Day 9-10: API client & query execution (6h)
   - Create SqlMonitorApiClient service
   - Create ASP.NET Core QueryController endpoint
-  - Implement query execution with timeout
-- [ ] Day 11: Results grid (4h)
-  - Create ResultsPanel with ag-Grid
+  - Implement query execution with timeout (60 seconds)
+- [ ] Day 11: Results grid + Export + History (9h) ⭐ UX ENHANCEMENT
+  - Create ResultsPanel with ag-Grid (sortable, filterable): 4h
+  - Add Export Results (CSV, JSON, Excel): 2h
+  - Implement Execution History (last 50 queries): 3h
   - Create ToolbarActions component
   - Add server/database selection dropdowns
 
@@ -189,15 +215,47 @@ Build a **self-hosted, enterprise-grade SQL Server monitoring solution** that:
   - Create fn_CategorizeWaitType function
   - Deploy to MonitoringDB
 
-**Week 4: Polish & Documentation (5 hours)** 📋
-- [ ] Day 16: AnalysisPanel component (2h)
-  - Create results sidebar with badges
+**Week 4: Polish + Script Management + Documentation (9 hours)** 📋
+- [ ] Day 16: AnalysisPanel + Script Management (6h) ⭐ UX ENHANCEMENT
+  - Create results sidebar with badges: 2h
   - Add clickable results (jump to line)
   - Display fix suggestions
+  - Implement Script Management (Save/Load/Delete): 4h
+  - Create SavedScriptsPage
 - [ ] Day 17: Documentation (3h)
   - User guide (USER-GUIDE.md)
   - Developer guide (DEVELOPER-GUIDE.md)
   - Update project README.md
+
+**TOTAL HOURS**: 75 hours (15 + 26 + 15 + 10 + 9 = 75)
+
+#### UX Enhancements Included (20 additional hours)
+
+**⭐ CRITICAL**:
+1. **Auto-Save** (3h) - localStorage with 2-second debounce, prevents data loss
+2. **Keyboard Shortcuts** (2h) - 20+ shortcuts (Ctrl+S, Ctrl+Enter, F5, etc.)
+
+**⭐ HIGH PRIORITY**:
+3. **Script Management** (4h) - Save, load, delete, organize SQL scripts
+4. **IntelliSense** (4h) - Schema-aware autocomplete for tables/columns
+
+**⭐ MEDIUM PRIORITY**:
+5. **Export Results** (2h) - CSV, JSON, Excel export
+6. **Execution History** (3h) - Track last 50 queries
+7. **Code Formatting** (1h) - sql-formatter integration
+
+**⭐ LOW PRIORITY (included)**:
+8. **Dark Mode** (0.5h) - Respect Grafana theme
+9. **Snippets** (1h) - T-SQL code templates
+
+**Unique Value Proposition**:
+> "The only web-based T-SQL editor with real-time analysis, auto-save, IntelliSense, and integration with your monitoring data."
+
+**Competitive Advantages Enabled**:
+- ✅ Auto-save (SQLenlight: ❌ no editor, Redgate: ❌ desktop only)
+- ✅ IntelliSense (SSMS: desktop, We: web-based)
+- ✅ Script library (Most tools: ❌ none, We: built-in management)
+- ✅ Execution history (Most tools: ❌ none, We: last 50 queries)
 
 #### Key Deliverables
 
