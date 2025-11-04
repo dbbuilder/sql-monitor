@@ -226,7 +226,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
   }, []);
 
   return (
-    <div className={css(getStyles(theme))}>
+    <div className={getStyles(theme)}>
       <Editor
         height={height}
         defaultLanguage={language}
