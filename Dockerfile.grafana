@@ -15,11 +15,20 @@ COPY public/grafana-entrypoint.sh /grafana-entrypoint.sh
 COPY public/dashboard-refresh.sh /dashboard-refresh.sh
 COPY public/dashboard-refresh-webhook.sh /dashboard-refresh-webhook.sh
 
-# Make executable
+# Copy Grafana plugin (T-SQL Code Editor)
+COPY grafana-plugins/sqlmonitor-codeeditor-app/dist /var/lib/grafana/plugins/sqlmonitor-codeeditor-app
+
+# Make scripts executable
 RUN chmod +x /grafana-entrypoint.sh /dashboard-refresh.sh /dashboard-refresh-webhook.sh
+
+# Set proper ownership for plugin directory
+RUN chown -R grafana:grafana /var/lib/grafana/plugins/sqlmonitor-codeeditor-app
 
 # Note: Script runs as root so it can chown files to grafana user (472)
 # The script calls 'exec /run.sh' which handles switching to grafana user
+
+# Allow loading unsigned plugins (for custom T-SQL Code Editor plugin)
+ENV GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=sqlmonitor-codeeditor-app
 
 # Set custom entrypoint
 ENTRYPOINT ["/bin/bash", "/grafana-entrypoint.sh"]
