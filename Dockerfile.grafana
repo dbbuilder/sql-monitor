@@ -21,8 +21,8 @@ COPY grafana-plugins/sqlmonitor-codeeditor-app/dist /var/lib/grafana/plugins/sql
 # Make scripts executable
 RUN chmod +x /grafana-entrypoint.sh /dashboard-refresh.sh /dashboard-refresh-webhook.sh
 
-# Set proper ownership for plugin directory
-RUN chown -R grafana:grafana /var/lib/grafana/plugins/sqlmonitor-codeeditor-app
+# Set proper ownership for plugin directory (UID 472 = grafana user in base image)
+RUN chown -R 472:0 /var/lib/grafana/plugins/sqlmonitor-codeeditor-app
 
 # Note: Script runs as root so it can chown files to grafana user (472)
 # The script calls 'exec /run.sh' which handles switching to grafana user
