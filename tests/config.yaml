@@ -1,0 +1,61 @@
+# Dashboard Validation Test Configuration
+
+# Database connection
+database:
+  server: "sqltest.schoolvision.net"
+  port: 14333
+  database: "MonitoringDB"
+  user: "sv"
+  password: "Gv51076!"
+  timeout: 30
+
+# Test configuration
+tests:
+  dashboards_dir: "/mnt/d/Dev2/sql-monitor/dashboards/grafana/dashboards"
+  output_dir: "/mnt/d/Dev2/sql-monitor/tests/reports"
+  skip_patterns:
+    - "-backup.json"
+    - ".backup"
+
+  # Query timeout in seconds
+  query_timeout: 30
+
+  # Retry configuration
+  retry:
+    enabled: true
+    max_attempts: 3
+    delay_seconds: 2
+
+# Reporting
+reports:
+  formats:
+    - markdown
+    - json
+    - html
+  include_query_text: true
+  truncate_queries_at: 200
+
+# Expected objects (for validation)
+expected_tables:
+  - "dbo.Servers"
+  - "dbo.PerformanceMetrics"
+  - "dbo.ProcedureMetrics"
+  - "dbo.QueryStoreData"
+  - "dbo.WaitStatsSnapshot"
+  - "dbo.BlockingEvents"
+  - "dbo.DeadlockEvents"
+  - "dbo.AlertRules"
+  - "dbo.AlertHistory"
+  - "dbo.Users"
+  - "dbo.Roles"
+  - "dbo.Permissions"
+  - "dbo.UserSessions"
+  - "dbo.AuditLog"
+
+expected_procedures:
+  - "dbo.usp_GetServers"
+  - "dbo.usp_GetMetricHistory"
+  - "dbo.usp_GetDatabaseSummary"
+  - "dbo.usp_EvaluateAlertRules"
+  - "dbo.usp_GetUserSessions"
+  - "dbo.usp_GetAuditTrail"

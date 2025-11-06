@@ -219,7 +219,7 @@
             "uid": "MonitoringDB"
           },
           "format": "time_series",
-          "rawSql": "SELECT COUNT(*) AS OutdatedStats\nFROM dbo.StatisticsInfo si\nINNER JOIN (\n  SELECT ServerID, DatabaseName, SchemaName, TableName, StatisticsName, MAX(CollectionTime) AS LastCollection\n  FROM dbo.StatisticsInfo\n  WHERE CollectionTime > DATEADD(HOUR, -12, GETUTCDATE())\n  GROUP BY ServerID, DatabaseName, SchemaName, TableName, StatisticsName\n) latest ON si.ServerID = latest.ServerID\n  AND si.DatabaseName = latest.DatabaseName\n  AND si.SchemaName = latest.SchemaName\n  AND si.TableName = latest.TableName\n  AND si.StatisticsName = latest.StatisticsName\n  AND si.CollectionTime = latest.LastCollection\nWHERE si.RowCount > 0\n  AND (DATEDIFF(DAY, si.LastUpdated, GETUTCDATE()) >= 7\n    OR (si.ModificationCounter * 100.0 / NULLIF(si.RowCount, 0)) >= 20.0);",
+          "rawSql": "SELECT COUNT(*) AS OutdatedStats\nFROM dbo.StatisticsInfo si\nINNER JOIN (\n  SELECT ServerID, DatabaseName, SchemaName, TableName, StatisticsName, MAX(CollectionTime) AS LastCollection\n  FROM dbo.StatisticsInfo\n  WHERE CollectionTime > DATEADD(HOUR, -12, GETUTCDATE())\n  GROUP BY ServerID, DatabaseName, SchemaName, TableName, StatisticsName\n) latest ON si.ServerID = latest.ServerID\n  AND si.DatabaseName = latest.DatabaseName\n  AND si.SchemaName = latest.SchemaName\n  AND si.TableName = latest.TableName\n  AND si.StatisticsName = latest.StatisticsName\n  AND si.CollectionTime = latest.LastCollection\nWHERE si.[RowCount] > 0\n  AND (DATEDIFF(DAY, si.LastUpdated, GETUTCDATE()) >= 7\n    OR (si.ModificationCounter * 100.0 / NULLIF(si.[RowCount], 0)) >= 20.0);",
           "refId": "A"
         }
       ],
