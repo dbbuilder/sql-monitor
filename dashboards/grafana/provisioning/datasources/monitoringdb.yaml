@@ -18,11 +18,11 @@ datasources:
     type: mssql
     uid: monitoringdb
     access: proxy
-    url: ${MONITORING_DB_SERVER:-localhost:1433}
-    database: ${MONITORING_DB_NAME:-MonitoringDB}
-    user: ${MONITORING_DB_USER:-sql_monitor}
+    url: ${MONITORINGDB_SERVER:-localhost}:${MONITORINGDB_PORT:-1433}
+    database: ${MONITORINGDB_DATABASE:-MonitoringDB}
+    user: ${MONITORINGDB_USER:-sql_monitor}
     secureJsonData:
-      password: ${MONITORING_DB_PASSWORD}
+      password: ${MONITORINGDB_PASSWORD}
     jsonData:
       maxOpenConns: 10
       maxIdleConns: 2
