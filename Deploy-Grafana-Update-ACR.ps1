@@ -44,6 +44,21 @@ Write-Host "  Subscription: $($account.subscription)" -ForegroundColor Green
 Write-Host "  User: $($account.user)" -ForegroundColor Green
 Write-Host ""
 
+# Step 1.4: Sync dashboards from source to public folder
+Write-Host "Step 1.4: Syncing dashboards..." -ForegroundColor Yellow
+$syncScript = Join-Path $ProjectRoot "sync-dashboards.sh"
+if (Test-Path $syncScript) {
+    bash $syncScript
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "ERROR: Dashboard sync failed" -ForegroundColor Red
+        exit 1
+    }
+    Write-Host "  Dashboards synced successfully!" -ForegroundColor Green
+} else {
+    Write-Host "  WARNING: sync-dashboards.sh not found, skipping sync" -ForegroundColor Yellow
+}
+Write-Host ""
+
 # Step 1.5: Verify plugin build exists
 Write-Host "Step 1.5: Verifying plugin build..." -ForegroundColor Yellow
 $pluginDistPath = Join-Path $ProjectRoot "grafana-plugins\sqlmonitor-codeeditor-app\dist"
