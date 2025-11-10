@@ -33,7 +33,11 @@
   "refresh": "",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["landing", "home", "navigation"],
+  "tags": [
+    "landing",
+    "home",
+    "navigation"
+  ],
   "templating": {
     "list": []
   },
@@ -43,7 +47,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "SQL Monitor - Home",
+  "title": "SQL Monitor - Home (Build: 2025-11-10 08:34:54 UTC)",
   "uid": "sql-monitor-home",
   "version": 1,
   "weekStart": ""

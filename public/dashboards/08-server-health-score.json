@@ -1,0 +1,570 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 60
+              },
+              {
+                "color": "green",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true,
+        "text": {}
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "time_series",
+          "rawSql": "SELECT\n  CalculationTime AS time,\n  OverallHealthScore AS value,\n  ServerName AS metric\nFROM dbo.ServerHealthScore hs\nINNER JOIN dbo.Servers s ON hs.ServerID = s.ServerID\nWHERE s.ServerName = '$server'\n  AND hs.CalculationTime >= DATEADD(HOUR, -1, GETUTCDATE())\nORDER BY hs.CalculationTime DESC;",
+          "refId": "A"
+        }
+      ],
+      "title": "Overall Health Score - $server",
+      "type": "gauge"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": [
+            "last",
+            "min",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "time_series",
+          "rawSql": "SELECT\n  hs.CalculationTime AS time,\n  hs.OverallHealthScore AS [Overall Score]\nFROM dbo.ServerHealthScore hs\nINNER JOIN dbo.Servers s ON hs.ServerID = s.ServerID\nWHERE s.ServerName = '$server'\n  AND hs.CalculationTime >= DATEADD(HOUR, -$__range_h, GETUTCDATE())\nORDER BY hs.CalculationTime ASC;",
+          "refId": "A"
+        }
+      ],
+      "title": "Health Score Trend - $server",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 60
+              },
+              {
+                "color": "green",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "id": 3,
+      "options": {
+        "displayMode": "gradient",
+        "minVizHeight": 10,
+        "minVizWidth": 0,
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "table",
+          "rawSql": "WITH LatestScores AS (\n  SELECT\n    hs.*,\n    ROW_NUMBER() OVER (PARTITION BY hs.ServerID ORDER BY hs.CalculationTime DESC) AS rn\n  FROM dbo.ServerHealthScore hs\n  INNER JOIN dbo.Servers s ON hs.ServerID = s.ServerID\n  WHERE s.ServerName = '$server'\n)\nSELECT\n  'CPU' AS Component,\n  CPUHealthScore AS Score\nFROM LatestScores WHERE rn = 1\nUNION ALL\nSELECT 'Memory', MemoryHealthScore FROM LatestScores WHERE rn = 1\nUNION ALL\nSELECT 'Disk I/O', DiskIOHealthScore FROM LatestScores WHERE rn = 1\nUNION ALL\nSELECT 'Wait Stats', WaitStatsHealthScore FROM LatestScores WHERE rn = 1\nUNION ALL\nSELECT 'Blocking', BlockingHealthScore FROM LatestScores WHERE rn = 1\nUNION ALL\nSELECT 'Index Health', IndexHealthScore FROM LatestScores WHERE rn = 1\nUNION ALL\nSELECT 'Query Performance', QueryPerformanceHealthScore FROM LatestScores WHERE rn = 1;",
+          "refId": "A"
+        }
+      ],
+      "title": "Component Scores - $server",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "indexByName": {
+              "Component": 0,
+              "Score": 1
+            },
+            "renameByName": {}
+          }
+        }
+      ],
+      "type": "bargauge"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "left",
+            "displayMode": "auto",
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "IssueSeverity"
+            },
+            "properties": [
+              {
+                "id": "custom.displayMode",
+                "value": "color-background"
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "orange",
+                      "value": 1
+                    },
+                    {
+                      "color": "red",
+                      "value": 2
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "Info": {
+                        "index": 0,
+                        "text": "Info"
+                      },
+                      "Warning": {
+                        "index": 1,
+                        "text": "Warning"
+                      },
+                      "Critical": {
+                        "index": 2,
+                        "text": "Critical"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
+      "id": 4,
+      "options": {
+        "footer": {
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "ImpactOnScore"
+          }
+        ]
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "table",
+          "rawSql": "WITH LatestScore AS (\n  SELECT TOP 1 hs.HealthScoreID\n  FROM dbo.ServerHealthScore hs\n  INNER JOIN dbo.Servers s ON hs.ServerID = s.ServerID\n  WHERE s.ServerName = '$server'\n  ORDER BY hs.CalculationTime DESC\n)\nSELECT\n  i.IssueCategory AS Category,\n  i.IssueSeverity AS Severity,\n  i.IssueDescription AS Description,\n  CAST(i.ImpactOnScore AS DECIMAL(5,2)) AS [Impact on Score],\n  i.RecommendedAction AS [Recommended Action]\nFROM dbo.HealthScoreIssues i\nINNER JOIN LatestScore ls ON i.HealthScoreID = ls.HealthScoreID\nORDER BY i.ImpactOnScore DESC;",
+          "refId": "A"
+        }
+      ],
+      "title": "Current Issues - $server",
+      "type": "table"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 22
+      },
+      "id": 5,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "table",
+          "rawSql": "SELECT TOP 1\n  CriticalIssueCount AS [Critical Issues]\nFROM dbo.ServerHealthScore hs\nINNER JOIN dbo.Servers s ON hs.ServerID = s.ServerID\nWHERE s.ServerName = '$server'\nORDER BY hs.CalculationTime DESC;",
+          "refId": "A"
+        }
+      ],
+      "title": "Critical Issues",
+      "type": "stat"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 22
+      },
+      "id": 6,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "table",
+          "rawSql": "SELECT TOP 1\n  WarningIssueCount AS [Warning Issues]\nFROM dbo.ServerHealthScore hs\nINNER JOIN dbo.Servers s ON hs.ServerID = s.ServerID\nWHERE s.ServerName = '$server'\nORDER BY hs.CalculationTime DESC;",
+          "refId": "A"
+        }
+      ],
+      "title": "Warning Issues",
+      "type": "stat"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "left",
+            "displayMode": "auto",
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 12,
+        "y": 22
+      },
+      "id": 7,
+      "options": {
+        "footer": {
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "table",
+          "rawSql": "SELECT TOP 1\n  TopIssueDescription AS [Top Issue],\n  TopIssueSeverity AS Severity\nFROM dbo.ServerHealthScore hs\nINNER JOIN dbo.Servers s ON hs.ServerID = s.ServerID\nWHERE s.ServerName = '$server'\nORDER BY hs.CalculationTime DESC;",
+          "refId": "A"
+        }
+      ],
+      "title": "Top Issue",
+      "type": "table"
+    }
+  ],
+  "refresh": "1m",
+  "schemaVersion": 27,
+  "style": "dark",
+  "tags": [
+    "health",
+    "monitoring",
+    "overview"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "sqltest.schoolvision.net,14333",
+          "value": "sqltest.schoolvision.net,14333"
+        },
+        "datasource": "MonitoringDB",
+        "definition": "SELECT ServerName FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Server",
+        "multi": false,
+        "name": "server",
+        "options": [],
+        "query": "SELECT ServerName FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "SQL Server Health Score (Build: 2025-11-10 08:34:54 UTC)",
+  "uid": "health-score",
+  "version": 1
+}

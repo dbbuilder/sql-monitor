@@ -130,7 +130,7 @@
             "uid": "${DS_MONITORINGDB}"
           },
           "format": "time_series",
-          "rawSql": "SELECT\n  CollectionTime AS time,\n  MetricValue AS value,\n  s.ServerName + ' - ' + MetricName AS metric\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.MetricCategory = 'Performance'\n  AND pm.MetricName LIKE '%CPU%'\n  AND pm.ServerID = $ServerID\n  AND pm.CollectionTime >= $__timeFrom()\n  AND pm.CollectionTime <= $__timeTo()\nORDER BY pm.CollectionTime",
+          "rawSql": "SELECT\n  pm.CollectionTime AS time,\n  pm.MetricValue AS value,\n  s.ServerName + ' - ' + pm.MetricName AS metric\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.MetricCategory = 'CPU'\n  AND pm.ServerID = $ServerID\n  AND pm.CollectionTime >= $__timeFrom()\n  AND pm.CollectionTime <= $__timeTo()\nORDER BY pm.CollectionTime",
           "refId": "A"
         }
       ],
@@ -1403,7 +1403,7 @@
     ]
   },
   "timezone": "browser",
-  "title": "AWS RDS Performance Insights (SQL Server) (Build: 2025-11-10 08:21:26 UTC)",
+  "title": "AWS RDS Performance Insights (SQL Server) (Build: 2025-11-10 08:34:54 UTC)",
   "uid": "aws-rds-performance-insights",
   "version": 1,
   "weekStart": ""

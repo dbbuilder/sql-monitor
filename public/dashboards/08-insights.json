@@ -11,6 +11,32 @@
   "panels": [
     {
       "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 999,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "## 💡 Insights - 24 Hour Priorities\n\n### Purpose\nThis dashboard provides actionable intelligence by analyzing your SQL Server environment and prioritizing issues that need attention. Think of it as your daily health check and to-do list.\n\n### What You'll Find Here\n\n**🔴 Critical Issues**\n- Severely fragmented indexes (>80% fragmentation)\n- Tables with excessive row count but no indexes\n- Blocking chains lasting > 5 minutes\n- Memory pressure indicators\n- Deadlock patterns\n\n**🟠 High Priority**\n- Moderately fragmented indexes (30-80%)\n- Missing indexes with high impact\n- Long-running queries (> 1 minute)\n- High CPU procedures\n- Page life expectancy concerns\n\n**🟡 Medium Priority**\n- Statistics that need updates\n- Unused indexes consuming space\n- Maintenance job failures\n- Query plan cache bloat\n\n### How to Use This Dashboard\n\n1. **Start Your Day Here**: Open this dashboard each morning to see overnight issues\n2. **Click Server Names**: Navigate directly to that server's detailed metrics\n3. **Click Issue Descriptions**: View recommendations and remediation steps\n4. **Priority Order**: Address CRITICAL first, then HIGH, then MEDIUM\n5. **Time-Based View**: Toggle between 24h, 7d, and 30d views\n\n### Common Actions\n\n**Index Fragmentation**\n```sql\n-- See recommendation\nEXEC dbo.usp_GetRecommendations @ServerID = 1, @RecommendationType = 'INDEX';\n\n-- Apply fix\nALTER INDEX [IndexName] ON [Schema].[Table] REBUILD;\n```\n\n**Missing Indexes**\n```sql\n-- View missing index details\nSELECT * FROM dbo.IndexAnalysis\nWHERE RecommendedAction = 'CREATE'\nORDER BY EstimatedImpact DESC;\n```\n\n**Blocking Chains**\n```sql\n-- Identify blocking sessions\nSELECT * FROM dbo.BlockingEvents\nWHERE EndTime IS NULL\nORDER BY StartTime;\n```\n\n### Best Practices\n\n✅ **Do**:\n- Review this dashboard daily\n- Address critical issues within 24 hours\n- Schedule maintenance during low-usage windows\n- Document actions taken\n\n❌ **Don't**:\n- Ignore critical alerts\n- Rebuild all indexes without checking fragmentation\n- Run maintenance during business hours\n- Apply changes to production without testing\n\n### Refresh Rate\n- Dashboard: 30 seconds\n- Data collection: 5 minutes\n- Recommendation engine: 15 minutes\n\n---\n**Pro Tip**: Export high-priority items to a ticket system for team collaboration.\n",
+        "mode": "markdown"
+      },
+      "pluginVersion": "10.2.0",
+      "title": "About Insights Dashboard",
+      "type": "text",
+      "transparent": false
+    },
+    {
+      "datasource": {
         "type": "mssql",
         "uid": "${DS_MONITORINGDB}"
       },
@@ -181,7 +207,7 @@
         "h": 20,
         "w": 24,
         "x": 0,
-        "y": 0
+        "y": 12
       },
       "id": 1,
       "options": {
@@ -189,7 +215,9 @@
         "footer": {
           "countRows": false,
           "fields": "",
-          "reducer": ["sum"],
+          "reducer": [
+            "sum"
+          ],
           "show": false
         },
         "showHeader": true,
@@ -208,7 +236,7 @@
             "uid": "${DS_MONITORINGDB}"
           },
           "format": "table",
-          "rawSql": "-- SQL Monitor: 24-Hour Prioritized Insights by Server\n-- Aggregates key issues and opportunities from the last 24 hours\n\nWITH SlowQueries AS (\n    SELECT\n        s.ServerName,\n        'CRITICAL' AS Priority,\n        'Performance' AS Category,\n        'Top Slow Query: ' + LEFT(qm.QueryText, 100) + '...' AS Insight,\n        'Query averaging ' + CAST(CAST(qm.AvgDurationMs AS DECIMAL(10,2)) AS VARCHAR) + 'ms - investigate execution plan' AS Recommendation,\n        qm.ExecutionCount AS Occurrences,\n        qm.CollectionTime AS LastSeen\n    FROM dbo.QueryMetrics qm\n    INNER JOIN dbo.Servers s ON qm.ServerID = s.ServerID\n    WHERE qm.CollectionTime >= DATEADD(HOUR, -24, GETUTCDATE())\n        AND qm.AvgDurationMs > 1000  -- Queries over 1 second\n        AND qm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n        AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n),\nSlowProcedures AS (\n    SELECT TOP 5\n        s.ServerName,\n        'HIGH' AS Priority,\n        'Performance' AS Category,\n        'Slow Procedure: ' + pm.DatabaseName + '.' + pm.ProcedureName AS Insight,\n        'Avg ' + CAST(CAST(pm.AvgDurationMs AS DECIMAL(10,2)) AS VARCHAR) + 'ms (' + CAST(pm.ExecutionCount AS VARCHAR) + ' calls) - consider optimization' AS Recommendation,\n        pm.ExecutionCount AS Occurrences,\n        pm.CollectionTime AS LastSeen\n    FROM dbo.ProcedureMetrics pm\n    INNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\n    WHERE pm.CollectionTime >= DATEADD(HOUR, -24, GETUTCDATE())\n        AND pm.AvgDurationMs > 500\n        AND pm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n        AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n    ORDER BY pm.AvgDurationMs DESC\n),\nBlockingEvents AS (\n    SELECT\n        s.ServerName,\n        'CRITICAL' AS Priority,\n        'Blocking' AS Category,\n        'Blocking Detected: ' + CAST(COUNT(*) AS VARCHAR) + ' blocking chains' AS Insight,\n        'Review blocking sessions - avg wait time ' + CAST(CAST(AVG(be.WaitDurationMs) AS DECIMAL(10,2)) AS VARCHAR) + 'ms' AS Recommendation,\n        COUNT(*) AS Occurrences,\n        MAX(be.EventTime) AS LastSeen\n    FROM dbo.BlockingEvents be\n    INNER JOIN dbo.Servers s ON be.ServerID = s.ServerID\n    WHERE be.EventTime >= DATEADD(HOUR, -24, GETUTCDATE())\n        AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n    GROUP BY s.ServerName\n    HAVING COUNT(*) > 0\n),\nDeadlocks AS (\n    SELECT\n        s.ServerName,\n        'CRITICAL' AS Priority,\n        'Deadlock' AS Category,\n        'Deadlocks: ' + CAST(COUNT(*) AS VARCHAR) + ' deadlock(s) detected' AS Insight,\n        'Review deadlock graphs and adjust transaction isolation or query order' AS Recommendation,\n        COUNT(*) AS Occurrences,\n        MAX(de.EventTime) AS LastSeen\n    FROM dbo.DeadlockEvents de\n    INNER JOIN dbo.Servers s ON de.ServerID = s.ServerID\n    WHERE de.EventTime >= DATEADD(HOUR, -24, GETUTCDATE())\n        AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n    GROUP BY s.ServerName\n    HAVING COUNT(*) > 0\n),\nHighCPU AS (\n    SELECT\n        s.ServerName,\n        'HIGH' AS Priority,\n        'Resource' AS Category,\n        'High CPU Usage Detected' AS Insight,\n        'Average CPU: ' + CAST(CAST(AVG(pm.MetricValue) AS DECIMAL(5,2)) AS VARCHAR) + '% - investigate top queries' AS Recommendation,\n        COUNT(*) AS Occurrences,\n        MAX(pm.CollectionTime) AS LastSeen\n    FROM dbo.PerformanceMetrics pm\n    INNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\n    WHERE pm.CollectionTime >= DATEADD(HOUR, -24, GETUTCDATE())\n        AND pm.MetricCategory = 'CPU'\n        AND pm.MetricName LIKE '%Processor Time%'\n        AND pm.MetricValue > 80\n        AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n    GROUP BY s.ServerName\n    HAVING COUNT(*) > 5  -- More than 5 samples over 80%\n),\nHighMemory AS (\n    SELECT\n        s.ServerName,\n        'HIGH' AS Priority,\n        'Resource' AS Category,\n        'High Memory Pressure' AS Insight,\n        'Average Memory: ' + CAST(CAST(AVG(pm.MetricValue) AS DECIMAL(5,2)) AS VARCHAR) + '% - consider adding RAM or optimize queries' AS Recommendation,\n        COUNT(*) AS Occurrences,\n        MAX(pm.CollectionTime) AS LastSeen\n    FROM dbo.PerformanceMetrics pm\n    INNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\n    WHERE pm.CollectionTime >= DATEADD(HOUR, -24, GETUTCDATE())\n        AND pm.MetricCategory = 'Memory'\n        AND pm.MetricName LIKE '%Available%'\n        AND pm.MetricValue < 20  -- Less than 20% available\n        AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n    GROUP BY s.ServerName\n    HAVING COUNT(*) > 5\n),\nFragmentedIndexes AS (\n    SELECT\n        s.ServerName,\n        'MEDIUM' AS Priority,\n        'Maintenance' AS Category,\n        'Fragmented Indexes: ' + CAST(COUNT(*) AS VARCHAR) + ' indexes need attention' AS Insight,\n        'Run index maintenance - avg fragmentation ' + CAST(CAST(AVG(ia.AvgFragmentationPercent) AS DECIMAL(5,2)) AS VARCHAR) + '%' AS Recommendation,\n        COUNT(*) AS Occurrences,\n        MAX(ia.AnalysisTime) AS LastSeen\n    FROM dbo.IndexAnalysis ia\n    INNER JOIN dbo.Servers s ON ia.ServerID = s.ServerID\n    WHERE ia.AnalysisTime >= DATEADD(HOUR, -24, GETUTCDATE())\n        AND ia.AvgFragmentationPercent > 30\n        AND ia.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n        AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n    GROUP BY s.ServerName\n    HAVING COUNT(*) > 10\n),\nCombinedInsights AS (\n    SELECT * FROM SlowQueries\n    UNION ALL\n    SELECT * FROM SlowProcedures\n    UNION ALL\n    SELECT * FROM BlockingEvents\n    UNION ALL\n    SELECT * FROM Deadlocks\n    UNION ALL\n    SELECT * FROM HighCPU\n    UNION ALL\n    SELECT * FROM HighMemory\n    UNION ALL\n    SELECT * FROM FragmentedIndexes\n)\nSELECT\n    ServerName,\n    Priority,\n    Category,\n    Insight,\n    Recommendation,\n    Occurrences,\n    FORMAT(LastSeen, 'yyyy-MM-dd HH:mm:ss') AS LastSeen\nFROM CombinedInsights\nORDER BY \n    CASE Priority\n        WHEN 'CRITICAL' THEN 1\n        WHEN 'HIGH' THEN 2\n        WHEN 'MEDIUM' THEN 3\n        ELSE 4\n    END,\n    LastSeen DESC;",
+          "rawSql": "-- SQL Monitor: 24-Hour Prioritized Insights by Server\n-- Aggregates key issues and opportunities from the last 24 hours\n\nWITH SlowQueries AS (\n    SELECT\n        s.ServerName,\n        'CRITICAL' AS Priority,\n        'Performance' AS Category,\n        'Top Slow Query: ' + LEFT(qm.QueryText, 100) + '...' AS Insight,\n        'Query averaging ' + CAST(CAST(qm.AvgDurationMs AS DECIMAL(10,2)) AS VARCHAR) + 'ms - investigate execution plan' AS Recommendation,\n        qm.ExecutionCount AS Occurrences,\n        qm.CollectionTime AS LastSeen\n    FROM dbo.QueryMetrics qm\n    INNER JOIN dbo.Servers s ON qm.ServerID = s.ServerID\n    WHERE qm.CollectionTime >= DATEADD(HOUR, -24, GETUTCDATE())\n        AND qm.AvgDurationMs > 1000  -- Queries over 1 second\n        AND qm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n        AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n),\nSlowProcedures AS (\n    SELECT TOP 5\n        s.ServerName,\n        'HIGH' AS Priority,\n        'Performance' AS Category,\n        'Slow Procedure: ' + pm.DatabaseName + '.' + pm.ProcedureName AS Insight,\n        'Avg ' + CAST(CAST(pm.AvgDurationMs AS DECIMAL(10,2)) AS VARCHAR) + 'ms (' + CAST(pm.ExecutionCount AS VARCHAR) + ' calls) - consider optimization' AS Recommendation,\n        pm.ExecutionCount AS Occurrences,\n        pm.CollectionTime AS LastSeen\n    FROM dbo.ProcedureMetrics pm\n    INNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\n    WHERE pm.CollectionTime >= DATEADD(HOUR, -24, GETUTCDATE())\n        AND pm.AvgDurationMs > 500\n        AND pm.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n        AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n    ORDER BY pm.AvgDurationMs DESC\n),\nBlockingEvents AS (\n    SELECT\n        s.ServerName,\n        'CRITICAL' AS Priority,\n        'Blocking' AS Category,\n        'Blocking Detected: ' + CAST(COUNT(*) AS VARCHAR) + ' blocking chains' AS Insight,\n        'Review blocking sessions - avg wait time ' + CAST(CAST(AVG(be.WaitDurationMs) AS DECIMAL(10,2)) AS VARCHAR) + 'ms' AS Recommendation,\n        COUNT(*) AS Occurrences,\n        MAX(be.EventTime) AS LastSeen\n    FROM dbo.BlockingEvents be\n    INNER JOIN dbo.Servers s ON be.ServerID = s.ServerID\n    WHERE be.EventTime >= DATEADD(HOUR, -24, GETUTCDATE())\n        AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n    GROUP BY s.ServerName\n    HAVING COUNT(*) > 0\n),\nDeadlocks AS (\n    SELECT\n        s.ServerName,\n        'CRITICAL' AS Priority,\n        'Deadlock' AS Category,\n        'Deadlocks: ' + CAST(COUNT(*) AS VARCHAR) + ' deadlock(s) detected' AS Insight,\n        'Review deadlock graphs and adjust transaction isolation or query order' AS Recommendation,\n        COUNT(*) AS Occurrences,\n        MAX(de.EventTime) AS LastSeen\n    FROM dbo.DeadlockEvents de\n    INNER JOIN dbo.Servers s ON de.ServerID = s.ServerID\n    WHERE de.EventTime >= DATEADD(HOUR, -24, GETUTCDATE())\n        AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n    GROUP BY s.ServerName\n    HAVING COUNT(*) > 0\n),\nHighCPU AS (\n    SELECT\n        s.ServerName,\n        'HIGH' AS Priority,\n        'Resource' AS Category,\n        'High CPU Usage Detected' AS Insight,\n        'Average CPU: ' + CAST(CAST(AVG(pm.MetricValue) AS DECIMAL(5,2)) AS VARCHAR) + '% - investigate top queries' AS Recommendation,\n        COUNT(*) AS Occurrences,\n        MAX(pm.CollectionTime) AS LastSeen\n    FROM dbo.PerformanceMetrics pm\n    INNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\n    WHERE pm.CollectionTime >= DATEADD(HOUR, -24, GETUTCDATE())\n        AND pm.MetricCategory = 'CPU'\n        AND pm.MetricName LIKE '%Processor Time%'\n        AND pm.MetricValue > 80\n        AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n    GROUP BY s.ServerName\n    HAVING COUNT(*) > 5  -- More than 5 samples over 80%\n),\nHighMemory AS (\n    SELECT\n        s.ServerName,\n        'HIGH' AS Priority,\n        'Resource' AS Category,\n        'High Memory Pressure' AS Insight,\n        'Average Memory: ' + CAST(CAST(AVG(pm.MetricValue) AS DECIMAL(5,2)) AS VARCHAR) + '% - consider adding RAM or optimize queries' AS Recommendation,\n        COUNT(*) AS Occurrences,\n        MAX(pm.CollectionTime) AS LastSeen\n    FROM dbo.PerformanceMetrics pm\n    INNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\n    WHERE pm.CollectionTime >= DATEADD(HOUR, -24, GETUTCDATE())\n        AND pm.MetricCategory = 'Memory'\n        AND pm.MetricName LIKE '%Available%'\n        AND pm.MetricValue < 20  -- Less than 20% available\n        AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n    GROUP BY s.ServerName\n    HAVING COUNT(*) > 5\n),\nFragmentedIndexes AS (\n    SELECT\n        s.ServerName,\n        'MEDIUM' AS Priority,\n        'Maintenance' AS Category,\n        'Fragmented Indexes: ' + CAST(COUNT(*) AS VARCHAR) + ' indexes need attention' AS Insight,\n        'Run index maintenance - avg fragmentation ' + CAST(CAST(AVG(ia.AvgFragmentationPercent) AS DECIMAL(5,2)) AS VARCHAR) + '%' AS Recommendation,\n        COUNT(*) AS Occurrences,\n        MAX(ia.CollectionTime) AS LastSeen\n    FROM dbo.IndexAnalysis ia\n    INNER JOIN dbo.Servers s ON ia.ServerID = s.ServerID\n    WHERE ia.CollectionTime >= DATEADD(HOUR, -24, GETUTCDATE())\n        AND ia.AvgFragmentationPercent > 30\n        AND ia.DatabaseName NOT IN ('MonitoringDB', 'DBATools', 'master', 'model', 'msdb', 'tempdb')\n        AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\n    GROUP BY s.ServerName\n    HAVING COUNT(*) > 10\n),\nCombinedInsights AS (\n    SELECT * FROM SlowQueries\n    UNION ALL\n    SELECT * FROM SlowProcedures\n    UNION ALL\n    SELECT * FROM BlockingEvents\n    UNION ALL\n    SELECT * FROM Deadlocks\n    UNION ALL\n    SELECT * FROM HighCPU\n    UNION ALL\n    SELECT * FROM HighMemory\n    UNION ALL\n    SELECT * FROM FragmentedIndexes\n)\nSELECT\n    ServerName,\n    Priority,\n    Category,\n    Insight,\n    Recommendation,\n    Occurrences,\n    FORMAT(LastSeen, 'yyyy-MM-dd HH:mm:ss') AS LastSeen\nFROM CombinedInsights\nORDER BY \n    CASE Priority\n        WHEN 'CRITICAL' THEN 1\n        WHEN 'HIGH' THEN 2\n        WHEN 'MEDIUM' THEN 3\n        ELSE 4\n    END,\n    LastSeen DESC;",
           "refId": "A"
         }
       ],
@@ -224,7 +252,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 32
       },
       "id": 2,
       "options": {
@@ -244,9 +272,32 @@
   "refresh": "5m",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["insights", "priorities", "daily-review"],
+  "tags": [
+    "insights",
+    "priorities",
+    "daily-review"
+  ],
   "templating": {
     "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "MonitoringDB",
+          "value": "MonitoringDB"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Datasource",
+        "multi": false,
+        "name": "DS_MONITORINGDB",
+        "options": [],
+        "query": "mssql",
+        "queryValue": "",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
+      },
       {
         "current": {
           "selected": false,
@@ -279,7 +330,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Insights - 24h Priorities",
+  "title": "Insights - 24h Priorities (Build: 2025-11-10 08:34:54 UTC)",
   "uid": "insights-24h",
   "version": 1,
   "weekStart": ""

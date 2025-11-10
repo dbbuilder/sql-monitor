@@ -10,12 +10,38 @@
   "liveNow": false,
   "panels": [
     {
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 999,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "## ⚡ Performance Analysis Dashboard\n\n### Purpose\nDeep-dive into SQL Server performance metrics with historical trending, correlation analysis, and bottleneck identification.\n\n### Key Metrics\n\n**CPU Analysis**\n- SQL Server CPU vs System CPU\n- Top CPU-consuming procedures\n- CPU pressure indicators\n- Signal wait percentage\n\n**Memory Analysis**\n- Buffer pool utilization\n- Page life expectancy (PLE)\n- Memory grants pending\n- Buffer cache hit ratio\n\n**Disk I/O**\n- Read/write IOPS\n- Latency (avg/max)\n- Top I/O consuming queries\n- Tempdb pressure\n\n**Wait Statistics**\n- Top wait types by duration\n- Wait time trends\n- Resource contention patterns\n- Lock waits vs latch waits\n\n### Time Interval Selection\n\nUse the time picker to analyze different periods:\n\n- **Last 1 hour**: Real-time troubleshooting\n- **Last 6 hours**: Identify patterns during business hours\n- **Last 24 hours**: Daily performance review\n- **Last 7 days**: Weekly trending and capacity planning\n- **Custom range**: Incident investigation\n\n### Correlation Analysis\n\nLook for patterns across metrics:\n\n1. **High CPU + High Signal Waits** = CPU bottleneck\n2. **High Memory + Low PLE** = Memory pressure\n3. **High Disk Latency + PAGEIOLATCH waits** = Storage bottleneck\n4. **High Lock waits + Blocking** = Concurrency issues\n\n### Common Scenarios\n\n**Scenario 1: Sudden CPU Spike**\n```sql\n-- Find CPU-intensive procedures during spike\nSELECT TOP 10\n    DatabaseName, ProcedureName,\n    AvgCPUMs, ExecutionCount,\n    CollectionTime\nFROM dbo.ProcedureMetrics\nWHERE CollectionTime BETWEEN '2025-10-30 09:00' AND '2025-10-30 09:30'\nORDER BY AvgCPUMs * ExecutionCount DESC;\n```\n\n**Scenario 2: Memory Pressure**\n```sql\n-- Check PLE trend\nSELECT\n    CollectionTime,\n    MetricValue AS PageLifeExpectancy\nFROM dbo.PerformanceMetrics\nWHERE MetricCategory = 'Memory'\n  AND MetricName = 'PageLifeExpectancy'\n  AND CollectionTime >= DATEADD(day, -1, GETUTCDATE())\nORDER BY CollectionTime;\n\n-- Target: PLE > 300 (5 minutes)\n```\n\n**Scenario 3: Disk I/O Investigation**\n```sql\n-- Find queries causing high physical reads\nSELECT TOP 10\n    QueryHash, DatabaseName,\n    TotalLogicalReads, TotalPhysicalReads,\n    PhysicalReadPct = CAST(TotalPhysicalReads * 100.0 / NULLIF(TotalLogicalReads, 0) AS DECIMAL(5,2))\nFROM dbo.QueryMetrics\nWHERE CollectionTime >= DATEADD(hour, -1, GETUTCDATE())\nORDER BY TotalPhysicalReads DESC;\n```\n\n### Thresholds\n\n| Metric | Good | Warning | Critical |\n|--------|------|---------|----------|\n| CPU % | < 60 | 60-80 | > 80 |\n| Memory % | < 80 | 80-90 | > 90 |\n| Disk Latency | < 10ms | 10-20ms | > 20ms |\n| PLE | > 300s | 100-300s | < 100s |\n| Buffer Cache Hit | > 95% | 90-95% | < 90% |\n\n### Dashboard Variables\n\n- **$ServerName**: Filter by specific SQL Server instance\n- **$TimeRange**: Adjust time window for analysis\n- **$Interval**: Data aggregation interval (1m, 5m, 15m, 1h)\n\n---\n**Pro Tip**: Compare weekday vs weekend performance to identify workload patterns.\n",
+        "mode": "markdown"
+      },
+      "pluginVersion": "10.2.0",
+      "title": "About Performance Analysis",
+      "type": "text",
+      "transparent": false
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 0
+        "y": 12
       },
       "id": 10,
       "panels": [],
@@ -188,7 +214,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 1
+        "y": 13
       },
       "id": 1,
       "options": {
@@ -233,7 +259,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 11
+        "y": 23
       },
       "id": 11,
       "panels": [],
@@ -432,7 +458,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 12
+        "y": 24
       },
       "id": 2,
       "options": {
@@ -477,7 +503,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 34
       },
       "id": 12,
       "panels": [],
@@ -542,7 +568,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 23
+        "y": 35
       },
       "id": 3,
       "options": {
@@ -635,7 +661,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 23
+        "y": 35
       },
       "id": 4,
       "options": {
@@ -679,15 +705,15 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 31
+        "y": 43
       },
       "id": 13,
       "options": {
-        "content": "# \u26a1 Performance Analysis - Query Tuning Guide\n\n## What This Dashboard Shows\n\nDeep performance analysis of queries, stored procedures, and indexes. Identify slow queries, missing indexes, and optimization opportunities.\n\n### Why Performance Matters\n\n| Impact | Slow Queries | Optimized Queries |\n|--------|--------------|-------------------|\n| **User Experience** | Timeout errors, frustrated users | Instant responses, happy users |\n| **Server Load** | High CPU, memory pressure | Efficient resource usage |\n| **Scalability** | Can't handle growth | Scales to millions of rows |\n| **Cost** | Need bigger servers | Run on smaller hardware |\n\n## \ud83d\udcca Key Metrics Explained\n\n### Procedure Performance\n- **Avg Duration**: How long procedure typically runs (milliseconds)\n- **Max Duration**: Longest execution seen (potential timeout)\n- **Execution Count**: How often procedure is called\n- **Avg CPU**: CPU time consumed per execution\n- **Avg Reads**: Disk/memory reads per execution (I/O cost)\n- **Avg Writes**: Disk writes per execution\n\n### What's Good vs Bad?\n| Metric | Good | Warning | Critical |\n|--------|------|---------|----------|\n| Avg Duration | <100ms | 100-1000ms (1 sec) | >5000ms (5 sec) |\n| Avg CPU | <50ms | 50-500ms | >1000ms (1 sec) |\n| Avg Reads (MB) | <10 MB | 10-100 MB | >500 MB |\n| Execution Count | Varies | N/A | >1000/min (hot path) |\n\n## \ud83c\udfaf Common Scenarios\n\n### \"Why is this API call slow?\"\n1. Note the API method name\n2. Find corresponding stored procedure\n3. Check **Avg Duration** and **Max Duration**\n4. If high, check **Avg Reads** (I/O problem?)\n5. Look for missing index recommendations below\n\n### \"Which queries use the most resources?\"\nSort by:\n- **Avg Duration \u00d7 Execution Count** = Total time spent\n- **Avg CPU \u00d7 Execution Count** = Total CPU consumed\n- **Avg Reads \u00d7 Execution Count** = Total I/O impact\n\nOptimize the top 5 queries for biggest impact.\n\n### \"Find missing indexes\"\nLook at **Missing Index Recommendations** panel:\n- **Improvement %**: Estimated query speedup\n- **Equality Columns**: Add to index (WHERE X = Y)\n- **Inequality Columns**: Add to index (WHERE X > Y)\n- **Included Columns**: Add for covered query (SELECT columns)\n\n\u26a0\ufe0f **Don't blindly add all indexes!** Too many = slow INSERTs/UPDATEs.\n\n### \"Compare before/after optimization\"\n1. Note current **Avg Duration** and **Avg Reads**\n2. Make changes (add index, rewrite query, update stats)\n3. Wait 5-10 minutes for metrics to update\n4. Compare new values to baseline\n5. Calculate improvement %\n\n## \ud83d\udd0d Performance Analysis Workflow\n\n### Step 1: Identify Slow Queries\nFilter by **Avg Duration > 1000ms** (1 second):\n```sql\n-- Example filter in dashboard\nWHERE AvgDurationMs > 1000\nORDER BY AvgDurationMs DESC\n```\n\n### Step 2: Analyze Root Cause\nFor each slow query, check:\n\n**High Reads + Low Duration** = Memory cache hit (good!)\n**High Reads + High Duration** = Disk I/O bottleneck (bad!)\n**Low Reads + High Duration** = CPU-bound (complex calculations)\n**High Writes** = Transaction log pressure\n\n### Step 3: Review Execution Plan\n1. Click procedure name to view code\n2. Copy procedure to SSMS/Azure Data Studio\n3. Run with `SET STATISTICS IO, TIME ON`\n4. Click \"Display Estimated Execution Plan\"\n5. Look for:\n   - **Table Scans** (reads entire table) \u2192 Add index\n   - **Key Lookups** (extra I/O to fetch columns) \u2192 Add covering index\n   - **High cost operators** (>50% of query) \u2192 Optimize that part\n   - **Parallelism** (many threads) \u2192 Consider simpler query\n   - **Missing indexes** (green hint) \u2192 Evaluate recommendation\n\n### Step 4: Implement Fix\nCommon fixes:\n- **Add index**: On WHERE/JOIN columns\n- **Rewrite query**: Avoid functions on indexed columns\n- **Update statistics**: `UPDATE STATISTICS TableName WITH FULLSCAN`\n- **Reduce result set**: Add TOP, pagination\n- **Denormalize**: Duplicate data to avoid JOINs\n\n### Step 5: Verify Improvement\n- Compare metrics before/after\n- Test under load (not just single execution)\n- Monitor for 24 hours (different usage patterns)\n\n## \ud83d\udca1 Optimization Techniques\n\n### 1. Indexing Strategies\n**Covering Index**: Includes all SELECT columns\n```sql\nCREATE INDEX IX_Orders_CustomerDate\nON Orders (CustomerID, OrderDate)\nINCLUDE (TotalAmount, Status);\n-- Now query doesn't need to lookup row (key lookup eliminated)\n```\n\n**Filtered Index**: Only index subset of rows\n```sql\nCREATE INDEX IX_Orders_Pending\nON Orders (OrderDate, CustomerID)\nWHERE Status = 'Pending';\n-- Smaller index, faster queries for active orders\n```\n\n### 2. Query Rewriting\n**Avoid functions on indexed columns**:\n```sql\n-- BAD: Can't use index\nWHERE YEAR(OrderDate) = 2025\n\n-- GOOD: Uses index\nWHERE OrderDate >= '2025-01-01' AND OrderDate < '2026-01-01'\n```\n\n**Use EXISTS instead of COUNT**:\n```sql\n-- BAD: Counts all rows\nIF (SELECT COUNT(*) FROM Orders WHERE CustomerID = @ID) > 0\n\n-- GOOD: Stops at first match\nIF EXISTS (SELECT 1 FROM Orders WHERE CustomerID = @ID)\n```\n\n### 3. Avoid SELECT *\nSpecify only needed columns:\n```sql\n-- BAD: Fetches 50 columns\nSELECT * FROM Orders\n\n-- GOOD: Fetches 3 columns (faster, less memory)\nSELECT OrderID, OrderDate, TotalAmount FROM Orders\n```\n\n### 4. Pagination\nFor large result sets:\n```sql\n-- BAD: Fetches all 1 million rows\nSELECT * FROM Orders ORDER BY OrderDate DESC\n\n-- GOOD: Fetches page of 100 rows\nSELECT * FROM Orders\nORDER BY OrderDate DESC\nOFFSET @PageSize * (@PageNumber - 1) ROWS\nFETCH NEXT @PageSize ROWS ONLY\n```\n\n## \ud83d\udcc8 Monitoring Best Practices\n\n### Daily Checks\n- [ ] Top 10 slowest procedures (Avg Duration)\n- [ ] High execution count (>1000/min) + high duration\n- [ ] Missing index recommendations with >50% improvement\n- [ ] Procedures with Max Duration >30 seconds (timeout risk)\n\n### Weekly Reviews\n- [ ] Compare current week vs last week (trending)\n- [ ] Identify new slow queries (recent code changes)\n- [ ] Review index usage (unused indexes = remove)\n- [ ] Check procedure complexity (LineCount from Code Browser)\n\n### After Deployments\n- [ ] Compare metrics before/after deployment\n- [ ] Watch for new slow queries (regressions)\n- [ ] Validate performance improvements from optimizations\n\n## \u26a0\ufe0f Common Mistakes\n\n### 1. Over-Indexing\n**Problem**: 20 indexes on a table\n**Impact**: INSERTs/UPDATEs become 10x slower\n**Solution**: Remove unused indexes, consolidate similar indexes\n\n### 2. Premature Optimization\n**Problem**: Optimizing query that runs once per day\n**Impact**: Wasted development time\n**Solution**: Focus on high-frequency, high-duration queries first\n\n### 3. Ignoring Plan Cache\n**Problem**: Different execution plan each time (parameter sniffing)\n**Impact**: Sometimes fast, sometimes slow\n**Solution**: Use `OPTION (RECOMPILE)` or `OPTION (OPTIMIZE FOR UNKNOWN)`\n\n### 4. Testing Without Load\n**Problem**: Query fast with 1 user, slow with 100 users\n**Impact**: Production slowness not reproduced in dev\n**Solution**: Load test with realistic concurrency\n\n## \ud83d\udd17 Related Dashboards\n\n- **Detailed Metrics**: See real-time performance over time\n- **Code Browser**: View procedure source code\n- **Table Details**: Check index definitions\n- **Wait Statistics**: Understand what queries wait for\n\n## \ud83c\udd98 When to Escalate to DBA\n\n- Procedure >30 seconds consistently (timeout risk)\n- Missing index recommendation >80% improvement\n- High I/O (>1 GB reads per execution)\n- Plan cache issues (parameter sniffing)\n- Need to partition large table (>100 GB)\n- Locking/blocking issues\n\n---\n*Metrics updated every 5 minutes | Focus on high-frequency queries first | Test optimizations before production*\n",
+        "content": "# ⚡ Performance Analysis - Query Tuning Guide\n\n## What This Dashboard Shows\n\nDeep performance analysis of queries, stored procedures, and indexes. Identify slow queries, missing indexes, and optimization opportunities.\n\n### Why Performance Matters\n\n| Impact | Slow Queries | Optimized Queries |\n|--------|--------------|-------------------|\n| **User Experience** | Timeout errors, frustrated users | Instant responses, happy users |\n| **Server Load** | High CPU, memory pressure | Efficient resource usage |\n| **Scalability** | Can't handle growth | Scales to millions of rows |\n| **Cost** | Need bigger servers | Run on smaller hardware |\n\n## 📊 Key Metrics Explained\n\n### Procedure Performance\n- **Avg Duration**: How long procedure typically runs (milliseconds)\n- **Max Duration**: Longest execution seen (potential timeout)\n- **Execution Count**: How often procedure is called\n- **Avg CPU**: CPU time consumed per execution\n- **Avg Reads**: Disk/memory reads per execution (I/O cost)\n- **Avg Writes**: Disk writes per execution\n\n### What's Good vs Bad?\n| Metric | Good | Warning | Critical |\n|--------|------|---------|----------|\n| Avg Duration | <100ms | 100-1000ms (1 sec) | >5000ms (5 sec) |\n| Avg CPU | <50ms | 50-500ms | >1000ms (1 sec) |\n| Avg Reads (MB) | <10 MB | 10-100 MB | >500 MB |\n| Execution Count | Varies | N/A | >1000/min (hot path) |\n\n## 🎯 Common Scenarios\n\n### \"Why is this API call slow?\"\n1. Note the API method name\n2. Find corresponding stored procedure\n3. Check **Avg Duration** and **Max Duration**\n4. If high, check **Avg Reads** (I/O problem?)\n5. Look for missing index recommendations below\n\n### \"Which queries use the most resources?\"\nSort by:\n- **Avg Duration × Execution Count** = Total time spent\n- **Avg CPU × Execution Count** = Total CPU consumed\n- **Avg Reads × Execution Count** = Total I/O impact\n\nOptimize the top 5 queries for biggest impact.\n\n### \"Find missing indexes\"\nLook at **Missing Index Recommendations** panel:\n- **Improvement %**: Estimated query speedup\n- **Equality Columns**: Add to index (WHERE X = Y)\n- **Inequality Columns**: Add to index (WHERE X > Y)\n- **Included Columns**: Add for covered query (SELECT columns)\n\n⚠️ **Don't blindly add all indexes!** Too many = slow INSERTs/UPDATEs.\n\n### \"Compare before/after optimization\"\n1. Note current **Avg Duration** and **Avg Reads**\n2. Make changes (add index, rewrite query, update stats)\n3. Wait 5-10 minutes for metrics to update\n4. Compare new values to baseline\n5. Calculate improvement %\n\n## 🔍 Performance Analysis Workflow\n\n### Step 1: Identify Slow Queries\nFilter by **Avg Duration > 1000ms** (1 second):\n```sql\n-- Example filter in dashboard\nWHERE AvgDurationMs > 1000\nORDER BY AvgDurationMs DESC\n```\n\n### Step 2: Analyze Root Cause\nFor each slow query, check:\n\n**High Reads + Low Duration** = Memory cache hit (good!)\n**High Reads + High Duration** = Disk I/O bottleneck (bad!)\n**Low Reads + High Duration** = CPU-bound (complex calculations)\n**High Writes** = Transaction log pressure\n\n### Step 3: Review Execution Plan\n1. Click procedure name to view code\n2. Copy procedure to SSMS/Azure Data Studio\n3. Run with `SET STATISTICS IO, TIME ON`\n4. Click \"Display Estimated Execution Plan\"\n5. Look for:\n   - **Table Scans** (reads entire table) → Add index\n   - **Key Lookups** (extra I/O to fetch columns) → Add covering index\n   - **High cost operators** (>50% of query) → Optimize that part\n   - **Parallelism** (many threads) → Consider simpler query\n   - **Missing indexes** (green hint) → Evaluate recommendation\n\n### Step 4: Implement Fix\nCommon fixes:\n- **Add index**: On WHERE/JOIN columns\n- **Rewrite query**: Avoid functions on indexed columns\n- **Update statistics**: `UPDATE STATISTICS TableName WITH FULLSCAN`\n- **Reduce result set**: Add TOP, pagination\n- **Denormalize**: Duplicate data to avoid JOINs\n\n### Step 5: Verify Improvement\n- Compare metrics before/after\n- Test under load (not just single execution)\n- Monitor for 24 hours (different usage patterns)\n\n## 💡 Optimization Techniques\n\n### 1. Indexing Strategies\n**Covering Index**: Includes all SELECT columns\n```sql\nCREATE INDEX IX_Orders_CustomerDate\nON Orders (CustomerID, OrderDate)\nINCLUDE (TotalAmount, Status);\n-- Now query doesn't need to lookup row (key lookup eliminated)\n```\n\n**Filtered Index**: Only index subset of rows\n```sql\nCREATE INDEX IX_Orders_Pending\nON Orders (OrderDate, CustomerID)\nWHERE Status = 'Pending';\n-- Smaller index, faster queries for active orders\n```\n\n### 2. Query Rewriting\n**Avoid functions on indexed columns**:\n```sql\n-- BAD: Can't use index\nWHERE YEAR(OrderDate) = 2025\n\n-- GOOD: Uses index\nWHERE OrderDate >= '2025-01-01' AND OrderDate < '2026-01-01'\n```\n\n**Use EXISTS instead of COUNT**:\n```sql\n-- BAD: Counts all rows\nIF (SELECT COUNT(*) FROM Orders WHERE CustomerID = @ID) > 0\n\n-- GOOD: Stops at first match\nIF EXISTS (SELECT 1 FROM Orders WHERE CustomerID = @ID)\n```\n\n### 3. Avoid SELECT *\nSpecify only needed columns:\n```sql\n-- BAD: Fetches 50 columns\nSELECT * FROM Orders\n\n-- GOOD: Fetches 3 columns (faster, less memory)\nSELECT OrderID, OrderDate, TotalAmount FROM Orders\n```\n\n### 4. Pagination\nFor large result sets:\n```sql\n-- BAD: Fetches all 1 million rows\nSELECT * FROM Orders ORDER BY OrderDate DESC\n\n-- GOOD: Fetches page of 100 rows\nSELECT * FROM Orders\nORDER BY OrderDate DESC\nOFFSET @PageSize * (@PageNumber - 1) ROWS\nFETCH NEXT @PageSize ROWS ONLY\n```\n\n## 📈 Monitoring Best Practices\n\n### Daily Checks\n- [ ] Top 10 slowest procedures (Avg Duration)\n- [ ] High execution count (>1000/min) + high duration\n- [ ] Missing index recommendations with >50% improvement\n- [ ] Procedures with Max Duration >30 seconds (timeout risk)\n\n### Weekly Reviews\n- [ ] Compare current week vs last week (trending)\n- [ ] Identify new slow queries (recent code changes)\n- [ ] Review index usage (unused indexes = remove)\n- [ ] Check procedure complexity (LineCount from Code Browser)\n\n### After Deployments\n- [ ] Compare metrics before/after deployment\n- [ ] Watch for new slow queries (regressions)\n- [ ] Validate performance improvements from optimizations\n\n## ⚠️ Common Mistakes\n\n### 1. Over-Indexing\n**Problem**: 20 indexes on a table\n**Impact**: INSERTs/UPDATEs become 10x slower\n**Solution**: Remove unused indexes, consolidate similar indexes\n\n### 2. Premature Optimization\n**Problem**: Optimizing query that runs once per day\n**Impact**: Wasted development time\n**Solution**: Focus on high-frequency, high-duration queries first\n\n### 3. Ignoring Plan Cache\n**Problem**: Different execution plan each time (parameter sniffing)\n**Impact**: Sometimes fast, sometimes slow\n**Solution**: Use `OPTION (RECOMPILE)` or `OPTION (OPTIMIZE FOR UNKNOWN)`\n\n### 4. Testing Without Load\n**Problem**: Query fast with 1 user, slow with 100 users\n**Impact**: Production slowness not reproduced in dev\n**Solution**: Load test with realistic concurrency\n\n## 🔗 Related Dashboards\n\n- **Detailed Metrics**: See real-time performance over time\n- **Code Browser**: View procedure source code\n- **Table Details**: Check index definitions\n- **Wait Statistics**: Understand what queries wait for\n\n## 🆘 When to Escalate to DBA\n\n- Procedure >30 seconds consistently (timeout risk)\n- Missing index recommendation >80% improvement\n- High I/O (>1 GB reads per execution)\n- Plan cache issues (parameter sniffing)\n- Need to partition large table (>100 GB)\n- Locking/blocking issues\n\n---\n*Metrics updated every 5 minutes | Focus on high-frequency queries first | Test optimizations before production*\n",
         "mode": "markdown"
       },
       "pluginVersion": "10.2.0",
-      "title": "\ud83d\udcd6 Developer Guide",
+      "title": "📖 Developer Guide",
       "type": "text"
     }
   ],
@@ -776,7 +802,7 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "Performance Analysis",
+  "title": "Performance Analysis (Build: 2025-11-10 08:34:54 UTC)",
   "uid": "performance-analysis",
   "version": 1,
   "weekStart": ""

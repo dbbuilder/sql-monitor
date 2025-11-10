@@ -101,7 +101,7 @@
           "refId": "A"
         }
       ],
-      "title": "\ud83d\udcca Server Overview",
+      "title": "📊 Server Overview",
       "transformations": [
         {
           "id": "calculateField",
@@ -179,11 +179,11 @@
             "uid": "PACBEEDECF159CDCA"
           },
           "format": "table",
-          "rawSql": "SELECT COUNT(*) AS \"Recommendations\"\nFROM dbo.IndexAnalysis\nWHERE RecommendedAction IN ('REBUILD', 'REORGANIZE')\n  AND CollectionTime >= DATEADD(day, -7, GETUTCDATE())",
+          "rawSql": "SELECT COUNT(*) AS \"Recommendations\"\nFROM dbo.IndexAnalysis\nWHERE AnalysisType = 'Fragmented'\n  AND CollectionTime >= DATEADD(day, -7, GETUTCDATE())",
           "refId": "A"
         }
       ],
-      "title": "\ud83d\udca1 Insights",
+      "title": "💡 Insights",
       "type": "stat"
     },
     {
@@ -261,7 +261,7 @@
           "refId": "A"
         }
       ],
-      "title": "\u26a1 Performance",
+      "title": "⚡ Performance",
       "type": "stat"
     },
     {
@@ -331,7 +331,7 @@
           "refId": "A"
         }
       ],
-      "title": "\ud83d\udd0d Query Store",
+      "title": "🔍 Query Store",
       "type": "stat"
     },
     {
@@ -401,7 +401,7 @@
           "refId": "A"
         }
       ],
-      "title": "\ud83d\udccb Table Browser",
+      "title": "📋 Table Browser",
       "type": "stat"
     },
     {
@@ -471,7 +471,7 @@
           "refId": "A"
         }
       ],
-      "title": "\ud83d\udcbb Code Browser",
+      "title": "💻 Code Browser",
       "type": "stat"
     },
     {
@@ -541,7 +541,7 @@
           "refId": "A"
         }
       ],
-      "title": "\ud83d\udcc8 Detailed Metrics",
+      "title": "📈 Detailed Metrics",
       "type": "stat"
     },
     {
@@ -611,7 +611,7 @@
           "refId": "A"
         }
       ],
-      "title": "\ud83d\udd12 Audit Logging",
+      "title": "🔒 Audit Logging",
       "type": "stat"
     },
     {
@@ -632,7 +632,7 @@
           "showLineNumbers": false,
           "showMiniMap": false
         },
-        "content": "## \ud83c\udfaf Quick Start Guide\n\n### For Developers\n1. **Performance Issues?** \u2192 Start with **Insights** dashboard to see 24h priorities\n2. **Slow Query?** \u2192 Use **Performance Analysis** or **Query Store** dashboards\n3. **Need Code?** \u2192 Browse with **Code Browser** to search procedures/functions\n\n### For DBAs\n1. **Daily Health Check** \u2192 **Server Overview** shows real-time metrics across all servers\n2. **Capacity Planning** \u2192 **Detailed Metrics** with time intervals (1min to 24hr)\n3. **Maintenance** \u2192 **Insights** shows fragmented indexes and optimization opportunities\n\n### For DevOps\n1. **Multi-Server View** \u2192 All dashboards support server filtering\n2. **Alerts & Anomalies** \u2192 **Insights** prioritizes CRITICAL, HIGH, MEDIUM issues\n3. **Compliance** \u2192 **Audit Logging** tracks all access with SOC 2 compliance mappings\n\n---\n\n## \ud83d\udca1 Dashboard Features\n\n- **Click Any Card** to open that dashboard\n- **Server Filters** on all dashboards for multi-server environments\n- **Time Intervals** (1min-24hr) on metrics dashboards\n- **Search & Filter** on performance and code browsers\n- **Hyperlinked Objects** - click database/table/procedure names to navigate\n- **System Databases Hidden** - MonitoringDB, DBATools automatically excluded\n\n---\n\n<div style='text-align: center; color: #666; margin-top: 20px;'>\n  <p><strong>Powered by SQL Monitor</strong> | SQL Server Monitoring Platform</p>\n</div>",
+        "content": "## 🎯 Quick Start Guide\n\n### For Developers\n1. **Performance Issues?** → Start with **Insights** dashboard to see 24h priorities\n2. **Slow Query?** → Use **Performance Analysis** or **Query Store** dashboards\n3. **Need Code?** → Browse with **Code Browser** to search procedures/functions\n\n### For DBAs\n1. **Daily Health Check** → **Server Overview** shows real-time metrics across all servers\n2. **Capacity Planning** → **Detailed Metrics** with time intervals (1min to 24hr)\n3. **Maintenance** → **Insights** shows fragmented indexes and optimization opportunities\n\n### For DevOps\n1. **Multi-Server View** → All dashboards support server filtering\n2. **Alerts & Anomalies** → **Insights** prioritizes CRITICAL, HIGH, MEDIUM issues\n3. **Compliance** → **Audit Logging** tracks all access with SOC 2 compliance mappings\n\n---\n\n## 💡 Dashboard Features\n\n- **Click Any Card** to open that dashboard\n- **Server Filters** on all dashboards for multi-server environments\n- **Time Intervals** (1min-24hr) on metrics dashboards\n- **Search & Filter** on performance and code browsers\n- **Hyperlinked Objects** - click database/table/procedure names to navigate\n- **System Databases Hidden** - MonitoringDB, DBATools automatically excluded\n\n---\n\n<div style='text-align: center; color: #666; margin-top: 20px;'>\n  <p><strong>Powered by SQL Monitor</strong> | SQL Server Monitoring Platform</p>\n</div>",
         "mode": "markdown"
       },
       "pluginVersion": "10.2.0",
@@ -657,7 +657,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Dashboard Browser",
+  "title": "Dashboard Browser (Build: 2025-11-10 08:34:54 UTC)",
   "uid": "dashboard-browser",
   "version": 1,
   "weekStart": ""

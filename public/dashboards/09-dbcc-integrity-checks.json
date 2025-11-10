@@ -70,7 +70,9 @@
         "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": "",
           "values": false
         },
@@ -85,7 +87,7 @@
             "uid": "${DS_MONITORINGDB}"
           },
           "format": "time_series",
-          "rawSql": "SELECT\n  $__timeGroup(CheckStartTime, '1d') AS time,\n  COUNT(*) AS value,\n  'Critical Errors' AS metric\nFROM dbo.DBCCCheckResults\nWHERE Severity = 'CRITICAL'\n  AND CheckStartTime >= $__timeFrom()\n  AND CheckStartTime <= $__timeTo()\n  AND ('$__all' IN (${ServerName:singlequote}) OR ServerName IN (${ServerName:singlequote}))\nGROUP BY $__timeGroup(CheckStartTime, '1d')\nORDER BY time ASC",
+          "rawSql": "SELECT\n  $__timeGroup(dcr.CheckStartTime, '1d') AS time,\n  COUNT(*) AS value,\n  'Critical Errors' AS metric\nFROM dbo.DBCCCheckResults dcr\nINNER JOIN dbo.Servers s ON dcr.ServerID = s.ServerID\nWHERE dcr.Severity = 'CRITICAL'\n  AND dcr.CheckStartTime >= $__timeFrom()\n  AND dcr.CheckStartTime <= $__timeTo()\n  AND ('$__all' IN (${ServerName:singlequote}) OR s.ServerName IN (${ServerName:singlequote}))\nGROUP BY $__timeGroup(dcr.CheckStartTime, '1d')\nORDER BY time ASC",
           "refId": "A"
         }
       ],
@@ -128,7 +130,9 @@
         "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": "",
           "values": false
         },
@@ -186,7 +190,9 @@
         "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": "",
           "values": false
         },
@@ -244,7 +250,9 @@
         "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": "",
           "values": false
         },
@@ -314,19 +322,48 @@
                 "value": {
                   "mode": "absolute",
                   "steps": [
-                    {"color": "green", "value": null},
-                    {"color": "orange", "value": 1},
-                    {"color": "red", "value": 2}
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "orange",
+                      "value": 1
+                    },
+                    {
+                      "color": "red",
+                      "value": 2
+                    }
                   ]
                 }
               },
               {
                 "id": "mappings",
                 "value": [
-                  {"type": "value", "value": "CRITICAL", "text": "CRITICAL", "color": "red"},
-                  {"type": "value", "value": "WARNING", "text": "WARNING", "color": "orange"},
-                  {"type": "value", "value": "INFO", "text": "INFO", "color": "blue"},
-                  {"type": "value", "value": "SUCCESS", "text": "SUCCESS", "color": "green"}
+                  {
+                    "type": "value",
+                    "value": "CRITICAL",
+                    "text": "CRITICAL",
+                    "color": "red"
+                  },
+                  {
+                    "type": "value",
+                    "value": "WARNING",
+                    "text": "WARNING",
+                    "color": "orange"
+                  },
+                  {
+                    "type": "value",
+                    "value": "INFO",
+                    "text": "INFO",
+                    "color": "blue"
+                  },
+                  {
+                    "type": "value",
+                    "value": "SUCCESS",
+                    "text": "SUCCESS",
+                    "color": "green"
+                  }
                 ]
               }
             ]
@@ -348,7 +385,10 @@
               },
               {
                 "id": "color",
-                "value": {"mode": "fixed", "fixedColor": "blue"}
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
               }
             ]
           },
@@ -382,9 +422,24 @@
               {
                 "id": "mappings",
                 "value": [
-                  {"type": "value", "value": "REPAIR_ALLOW_DATA_LOSS", "text": "⚠️ DATA LOSS", "color": "dark-red"},
-                  {"type": "value", "value": "REPAIR_REBUILD", "text": "🔧 REBUILD", "color": "orange"},
-                  {"type": "value", "value": "REPAIR_FAST", "text": "⚡ FAST", "color": "yellow"}
+                  {
+                    "type": "value",
+                    "value": "REPAIR_ALLOW_DATA_LOSS",
+                    "text": "⚠️ DATA LOSS",
+                    "color": "dark-red"
+                  },
+                  {
+                    "type": "value",
+                    "value": "REPAIR_REBUILD",
+                    "text": "🔧 REBUILD",
+                    "color": "orange"
+                  },
+                  {
+                    "type": "value",
+                    "value": "REPAIR_FAST",
+                    "text": "⚡ FAST",
+                    "color": "yellow"
+                  }
                 ]
               }
             ]
@@ -401,7 +456,9 @@
       "options": {
         "footer": {
           "fields": "",
-          "reducer": ["sum"],
+          "reducer": [
+            "sum"
+          ],
           "show": false
         },
         "showHeader": true,
@@ -571,7 +628,10 @@
       "id": 8,
       "options": {
         "legend": {
-          "calcs": ["mean", "max"],
+          "calcs": [
+            "mean",
+            "max"
+          ],
           "displayMode": "table",
           "placement": "bottom"
         },
@@ -623,7 +683,13 @@
   "refresh": "5m",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["dbcc", "integrity", "errors", "warnings", "repair"],
+  "tags": [
+    "dbcc",
+    "integrity",
+    "errors",
+    "warnings",
+    "repair"
+  ],
   "templating": {
     "list": [
       {
@@ -700,7 +766,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "DBCC Integrity Checks",
+  "title": "DBCC Integrity Checks (Build: 2025-11-10 08:34:54 UTC)",
   "uid": "dbcc-integrity",
   "version": 1,
   "weekStart": ""

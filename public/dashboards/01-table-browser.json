@@ -134,6 +134,37 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "TableName"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View Table Details (sp_help style)",
+                    "url": "/d/sql-monitor-table-details/table-details?var-ServerName=${__data.fields.ServerName}&var-DatabaseName=${__data.fields.DatabaseName}&var-SchemaName=${__data.fields.SchemaName}&var-TableName=${__data.fields.TableName}",
+                    "targetBlank": true
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
           }
         ]
       },
@@ -209,11 +240,11 @@
       },
       "id": 2,
       "options": {
-        "content": "# \ud83d\udccb Table Browser - Developer Guide\n\n## What This Dashboard Shows\n\nBrowse all tables across all databases on your monitored SQL Servers. View sizes, row counts, and schema details without writing SQL queries.\n\n### Table Metrics Explained\n\n| Column | What It Means | Why It Matters |\n|--------|---------------|----------------|\n| **TableName** | Name of the table | Identifying specific tables |\n| **RowCount** | Number of rows in table | Performance and data volume |\n| **DataSizeMB** | Space used by actual data | Storage capacity planning |\n| **IndexSizeMB** | Space used by indexes | Index overhead analysis |\n| **TotalSizeMB** | Data + Indexes combined | Total storage consumption |\n| **LastUpdated** | When stats were collected | Data freshness indicator |\n\n## \ud83d\udd0d How to Use\n\n### Filter by Database\n1. Select database from dropdown (top)\n2. Shows all tables in that database\n3. System databases (master, model, msdb, tempdb) are excluded\n\n### Find Specific Tables\n1. Use the **Table Name** filter box\n2. Enter partial name (e.g., \"Customer\")\n3. Matches any table containing that text\n4. Case-insensitive search\n\n### Sort by Size\n- Click any column header to sort\n- Default: Sorted by TotalSizeMB descending (largest first)\n- Useful for finding storage hogs\n\n## \ud83c\udfaf Common Use Cases\n\n### \"How big is my table?\"\n- Type table name in filter\n- Check **TotalSizeMB** column\n- Row count shows record volume\n\n### \"Which tables are huge?\"\n- Leave filters at default\n- Tables sorted by size automatically\n- Top 10 = your largest tables\n\n### \"Find all customer-related tables\"\n- Type \"customer\" in Table Name filter\n- Shows: Customers, CustomerOrders, CustomerAddresses, etc.\n- Useful for understanding data relationships\n\n### \"How much index overhead?\"\n- Compare **DataSizeMB** vs **IndexSizeMB**\n- IndexSizeMB > DataSizeMB = potential over-indexing\n- Indexes speed up reads but slow down writes\n\n## \ud83d\udca1 Understanding Table Sizes\n\n### What's Normal?\n- **Small tables**: <100 MB, <1 million rows (lookup tables, configs)\n- **Medium tables**: 100MB-10GB, 1-100 million rows (transactional data)\n- **Large tables**: >10GB, >100 million rows (historical data, logs)\n\n### When to Worry\n- Table growing >10% per day unexpectedly\n- Index size >5x data size (too many indexes)\n- Row count doesn't match business expectations\n- Tables never updated (stale statistics)\n\n## \ud83d\udd27 Developer Actions\n\n### If Table is Too Large\n1. **Archive old data**: Move historical records to archive database\n2. **Partition table**: Split by date range (requires DBA)\n3. **Check for logs**: Application logs should be truncated/rotated\n4. **Delete unused data**: Identify obsolete records\n\n### If Index Size is High\n1. **Review indexes**: Talk to DBA about removing unused indexes\n2. **Check for duplicates**: Same column(s) indexed multiple times\n3. **Consider filtered indexes**: Index subset of rows only\n4. **Measure impact**: Compare query performance vs write overhead\n\n## \ud83d\udd17 Related Dashboards\n\n- **Table Details** - Click table name to see detailed schema, indexes, and constraints\n- **Code Browser** - View stored procedures that query these tables\n- **Performance Analysis** - See which queries are slowest\n\n## \ud83d\udcca Pro Tips\n\n1. **Bookmark large tables**: Monitor growth over time\n2. **Compare dev vs prod**: Ensure data volumes match\n3. **Check after deployments**: Verify migrations completed\n4. **Identify temp table bloat**: Look for tables with \"temp\" or \"#\" in name\n5. **Share links**: URL includes filters (copy/paste to team)\n\n## \u26a0\ufe0f What This Dashboard Doesn't Show\n\n- **Real-time data**: Stats updated every 5 minutes (not live)\n- **Table relationships**: Foreign keys (see Table Details dashboard)\n- **Query performance**: How fast queries run (see Performance Analysis)\n- **Data inside tables**: Actual row contents (use SQL query tool)\n\n## \ud83c\udd98 When to Contact DBA\n\n- Tables growing faster than expected\n- Production vs development size mismatch >50%\n- Need to partition or archive large tables\n- Index recommendations needed\n\n---\n*Data updated every 5 minutes | System databases excluded | Click table name for details*\n",
+        "content": "# 📋 Table Browser - Developer Guide\n\n## What This Dashboard Shows\n\nBrowse all tables across all databases on your monitored SQL Servers. View sizes, row counts, and schema details without writing SQL queries.\n\n### Table Metrics Explained\n\n| Column | What It Means | Why It Matters |\n|--------|---------------|----------------|\n| **TableName** | Name of the table | Identifying specific tables |\n| **RowCount** | Number of rows in table | Performance and data volume |\n| **DataSizeMB** | Space used by actual data | Storage capacity planning |\n| **IndexSizeMB** | Space used by indexes | Index overhead analysis |\n| **TotalSizeMB** | Data + Indexes combined | Total storage consumption |\n| **LastUpdated** | When stats were collected | Data freshness indicator |\n\n## 🔍 How to Use\n\n### Filter by Database\n1. Select database from dropdown (top)\n2. Shows all tables in that database\n3. System databases (master, model, msdb, tempdb) are excluded\n\n### Find Specific Tables\n1. Use the **Table Name** filter box\n2. Enter partial name (e.g., \"Customer\")\n3. Matches any table containing that text\n4. Case-insensitive search\n\n### Sort by Size\n- Click any column header to sort\n- Default: Sorted by TotalSizeMB descending (largest first)\n- Useful for finding storage hogs\n\n## 🎯 Common Use Cases\n\n### \"How big is my table?\"\n- Type table name in filter\n- Check **TotalSizeMB** column\n- Row count shows record volume\n\n### \"Which tables are huge?\"\n- Leave filters at default\n- Tables sorted by size automatically\n- Top 10 = your largest tables\n\n### \"Find all customer-related tables\"\n- Type \"customer\" in Table Name filter\n- Shows: Customers, CustomerOrders, CustomerAddresses, etc.\n- Useful for understanding data relationships\n\n### \"How much index overhead?\"\n- Compare **DataSizeMB** vs **IndexSizeMB**\n- IndexSizeMB > DataSizeMB = potential over-indexing\n- Indexes speed up reads but slow down writes\n\n## 💡 Understanding Table Sizes\n\n### What's Normal?\n- **Small tables**: <100 MB, <1 million rows (lookup tables, configs)\n- **Medium tables**: 100MB-10GB, 1-100 million rows (transactional data)\n- **Large tables**: >10GB, >100 million rows (historical data, logs)\n\n### When to Worry\n- Table growing >10% per day unexpectedly\n- Index size >5x data size (too many indexes)\n- Row count doesn't match business expectations\n- Tables never updated (stale statistics)\n\n## 🔧 Developer Actions\n\n### If Table is Too Large\n1. **Archive old data**: Move historical records to archive database\n2. **Partition table**: Split by date range (requires DBA)\n3. **Check for logs**: Application logs should be truncated/rotated\n4. **Delete unused data**: Identify obsolete records\n\n### If Index Size is High\n1. **Review indexes**: Talk to DBA about removing unused indexes\n2. **Check for duplicates**: Same column(s) indexed multiple times\n3. **Consider filtered indexes**: Index subset of rows only\n4. **Measure impact**: Compare query performance vs write overhead\n\n## 🔗 Related Dashboards\n\n- **Table Details** - Click table name to see detailed schema, indexes, and constraints\n- **Code Browser** - View stored procedures that query these tables\n- **Performance Analysis** - See which queries are slowest\n\n## 📊 Pro Tips\n\n1. **Bookmark large tables**: Monitor growth over time\n2. **Compare dev vs prod**: Ensure data volumes match\n3. **Check after deployments**: Verify migrations completed\n4. **Identify temp table bloat**: Look for tables with \"temp\" or \"#\" in name\n5. **Share links**: URL includes filters (copy/paste to team)\n\n## ⚠️ What This Dashboard Doesn't Show\n\n- **Real-time data**: Stats updated every 5 minutes (not live)\n- **Table relationships**: Foreign keys (see Table Details dashboard)\n- **Query performance**: How fast queries run (see Performance Analysis)\n- **Data inside tables**: Actual row contents (use SQL query tool)\n\n## 🆘 When to Contact DBA\n\n- Tables growing faster than expected\n- Production vs development size mismatch >50%\n- Need to partition or archive large tables\n- Index recommendations needed\n\n---\n*Data updated every 5 minutes | System databases excluded | Click table name for details*\n",
         "mode": "markdown"
       },
       "pluginVersion": "10.2.0",
-      "title": "\ud83d\udcd6 Developer Guide",
+      "title": "📖 Developer Guide",
       "type": "text"
     }
   ],
@@ -303,7 +334,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "SQL Monitor - Table Browser",
+  "title": "SQL Monitor - Table Browser (Build: 2025-11-10 08:34:54 UTC)",
   "uid": "sql-monitor-table-browser",
   "version": 0,
   "weekStart": ""

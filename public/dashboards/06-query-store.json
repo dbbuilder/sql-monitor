@@ -11,6 +11,32 @@
   "panels": [
     {
       "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 999,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "## 🔍 Query Store Dashboard\n\n### Purpose\nAnalyze query performance using SQL Server Query Store data to identify plan regressions, performance degradations, and optimization opportunities.\n\n### What is Query Store?\n\nQuery Store is SQL Server's built-in query performance tracking feature that captures:\n- Query execution plans\n- Runtime execution statistics\n- Plan forcing capabilities\n- Query wait statistics\n\n### Key Panels\n\n**Plan Regressions**\n- Queries with performance degradation\n- Plan changes causing slowdowns\n- Comparison: before vs after\n- Automatic detection of regressions\n\n**Top Queries by Duration**\n- Highest total duration\n- Resource-intensive queries\n- Execution frequency\n- Average vs max duration\n\n**Top Queries by CPU**\n- CPU time consumption\n- CPU-bound operations\n- Worker thread usage\n\n**Top Queries by Logical Reads**\n- I/O intensive queries\n- Buffer pool pressure\n- Missing index indicators\n\n### Query Store States\n\n- **READ_WRITE**: Actively collecting data ✅\n- **READ_ONLY**: Disk space limit reached ⚠️\n- **OFF**: Not enabled ❌\n\n**Enable Query Store**:\n```sql\nALTER DATABASE [YourDatabase]\nSET QUERY_STORE = ON (\n    OPERATION_MODE = READ_WRITE,\n    CLEANUP_POLICY = (STALE_QUERY_THRESHOLD_DAYS = 90),\n    DATA_FLUSH_INTERVAL_SECONDS = 900,\n    INTERVAL_LENGTH_MINUTES = 5,\n    MAX_STORAGE_SIZE_MB = 1000,\n    QUERY_CAPTURE_MODE = AUTO,\n    SIZE_BASED_CLEANUP_MODE = AUTO\n);\n```\n\n### Investigating Plan Regressions\n\n**Step 1: Identify Regression**\n- Look for sudden duration increases\n- Check \"Plan Changes\" column\n- Note QueryHash and PlanHash\n\n**Step 2: Compare Plans**\n```sql\n-- Get plan details\nSELECT\n    qrs.plan_id,\n    qrs.avg_duration/1000.0 AS avg_duration_ms,\n    qrs.avg_cpu_time/1000.0 AS avg_cpu_ms,\n    qrs.avg_logical_io_reads,\n    qrs.execution_type_desc,\n    qsp.query_plan\nFROM sys.query_store_runtime_stats qrs\nINNER JOIN sys.query_store_plan qsp ON qrs.plan_id = qsp.plan_id\nWHERE qsp.query_id = [QueryID]\nORDER BY qrs.last_execution_time DESC;\n```\n\n**Step 3: Force Good Plan**\n```sql\n-- Force a known-good plan\nEXEC sp_query_store_force_plan\n    @query_id = [QueryID],\n    @plan_id = [GoodPlanID];\n```\n\n**Step 4: Monitor Results**\n- Compare performance before/after\n- Verify plan stability\n- Document in change log\n\n### Common Issues\n\n**Issue 1: Query Store Full**\n```sql\n-- Check space usage\nSELECT\n    actual_state_desc,\n    current_storage_size_mb,\n    max_storage_size_mb,\n    CAST(current_storage_size_mb * 100.0 / max_storage_size_mb AS DECIMAL(5,2)) AS pct_used\nFROM sys.database_query_store_options;\n\n-- Solution: Increase size or reduce retention\nALTER DATABASE [YourDatabase]\nSET QUERY_STORE (MAX_STORAGE_SIZE_MB = 2000);\n```\n\n**Issue 2: Parameter Sniffing**\n```sql\n-- Identify parameter-sensitive queries\nSELECT\n    q.query_id,\n    qt.query_sql_text,\n    COUNT(DISTINCT p.plan_id) AS plan_count,\n    MAX(rs.avg_duration) / MIN(rs.avg_duration) AS duration_variance\nFROM sys.query_store_query q\nINNER JOIN sys.query_store_query_text qt ON q.query_text_id = qt.query_text_id\nINNER JOIN sys.query_store_plan p ON q.query_id = p.query_id\nINNER JOIN sys.query_store_runtime_stats rs ON p.plan_id = rs.plan_id\nGROUP BY q.query_id, qt.query_sql_text\nHAVING COUNT(DISTINCT p.plan_id) > 5\n   AND MAX(rs.avg_duration) / MIN(rs.avg_duration) > 10\nORDER BY duration_variance DESC;\n\n-- Solution: RECOMPILE hint or OPTIMIZE FOR UNKNOWN\n```\n\n### Best Practices\n\n✅ **Do**:\n- Enable Query Store on all user databases\n- Review plan regressions weekly\n- Force plans only after testing\n- Monitor Query Store space usage\n- Clear stale data regularly\n\n❌ **Don't**:\n- Disable Query Store in production\n- Force plans without understanding why\n- Ignore \"Query Store Full\" warnings\n- Keep Query Store in READ_ONLY mode long-term\n\n### Performance Impact\n\nQuery Store overhead: **1-5% CPU** (typical)\n- Minimal in most workloads\n- Async writes to disk\n- Built-in throttling\n\n### Dashboard Refresh\n- Real-time: 30 seconds\n- Query Store flush: 15 minutes\n- Aggregated stats: 5 minutes\n\n---\n**Pro Tip**: Use Query Store to validate performance improvements after applying indexes or code changes.\n",
+        "mode": "markdown"
+      },
+      "pluginVersion": "10.2.0",
+      "title": "About Query Store",
+      "type": "text",
+      "transparent": false
+    },
+    {
+      "datasource": {
         "type": "mssql",
         "uid": "${DS_MONITORINGDB}"
       },
@@ -44,7 +70,7 @@
         "h": 4,
         "w": 6,
         "x": 0,
-        "y": 0
+        "y": 12
       },
       "id": 1,
       "options": {
@@ -103,7 +129,7 @@
         "h": 4,
         "w": 6,
         "x": 6,
-        "y": 0
+        "y": 12
       },
       "id": 2,
       "options": {
@@ -170,7 +196,7 @@
         "h": 4,
         "w": 6,
         "x": 12,
-        "y": 0
+        "y": 12
       },
       "id": 3,
       "options": {
@@ -237,7 +263,7 @@
         "h": 4,
         "w": 6,
         "x": 18,
-        "y": 0
+        "y": 12
       },
       "id": 4,
       "options": {
@@ -375,7 +401,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 4
+        "y": 16
       },
       "id": 5,
       "options": {
@@ -469,7 +495,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 14
+        "y": 26
       },
       "id": 6,
       "options": {
@@ -559,7 +585,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 14
+        "y": 26
       },
       "id": 7,
       "options": {
@@ -731,7 +757,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 34
       },
       "id": 8,
       "options": {
@@ -776,7 +802,7 @@
         "h": 12,
         "w": 24,
         "x": 0,
-        "y": 32
+        "y": 44
       },
       "id": 100,
       "options": {
@@ -791,7 +817,11 @@
   "refresh": "1m",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["query-store", "performance", "optimization"],
+  "tags": [
+    "query-store",
+    "performance",
+    "optimization"
+  ],
   "templating": {
     "list": [
       {
@@ -848,7 +878,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Query Store Performance Analysis",
+  "title": "Query Store Performance Analysis (Build: 2025-11-10 08:34:54 UTC)",
   "uid": "query-store-analysis",
   "version": 1,
   "weekStart": ""

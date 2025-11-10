@@ -1,0 +1,637 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "orange",
+                "value": 5
+              },
+              {
+                "color": "red",
+                "value": 10
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "table",
+          "rawSql": "SELECT COUNT(*) AS [Active Anomalies]\nFROM dbo.AnomalyDetections\nWHERE IsResolved = 0;",
+          "refId": "A"
+        }
+      ],
+      "title": "Active Anomalies",
+      "type": "stat"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "table",
+          "rawSql": "SELECT COUNT(*) AS [Critical Anomalies]\nFROM dbo.AnomalyDetections\nWHERE IsResolved = 0 AND Severity = 'Critical';",
+          "refId": "A"
+        }
+      ],
+      "title": "Critical Anomalies",
+      "type": "stat"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 3,
+      "options": {
+        "legend": {
+          "calcs": [
+            "last",
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "time_series",
+          "rawSql": "SELECT\n    CollectionTime AS time,\n    MetricValue AS [Current Value],\n    ServerID\nFROM dbo.PerformanceMetrics\nWHERE ServerID = ${ServerID}\n  AND MetricCategory = 'CPU'\n  AND MetricName = 'Percent'\n  AND $__timeFilter(CollectionTime)\nORDER BY CollectionTime;",
+          "refId": "A"
+        },
+        {
+          "datasource": "MonitoringDB",
+          "format": "time_series",
+          "rawSql": "SELECT\n    DATEADD(DAY, DATEDIFF(DAY, 0, BaselineDate), 0) AS time,\n    AvgValue AS [7-Day Baseline],\n    ServerID\nFROM dbo.MetricBaselines\nWHERE ServerID = ${ServerID}\n  AND MetricCategory = 'CPU'\n  AND MetricName = 'Percent'\n  AND BaselinePeriod = '7day'\n  AND BaselineDate >= DATEADD(DAY, -30, GETUTCDATE())\nORDER BY BaselineDate;",
+          "refId": "B"
+        },
+        {
+          "datasource": "MonitoringDB",
+          "format": "time_series",
+          "rawSql": "SELECT\n    DATEADD(DAY, DATEDIFF(DAY, 0, BaselineDate), 0) AS time,\n    AvgValue AS [30-Day Baseline],\n    ServerID\nFROM dbo.MetricBaselines\nWHERE ServerID = ${ServerID}\n  AND MetricCategory = 'CPU'\n  AND MetricName = 'Percent'\n  AND BaselinePeriod = '30day'\n  AND BaselineDate >= DATEADD(DAY, -30, GETUTCDATE())\nORDER BY BaselineDate;",
+          "refId": "C"
+        }
+      ],
+      "title": "CPU % - Current vs Baselines",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "left",
+            "displayMode": "auto",
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Severity"
+            },
+            "properties": [
+              {
+                "id": "custom.displayMode",
+                "value": "color-background"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "Critical": {
+                        "color": "red",
+                        "index": 0
+                      },
+                      "High": {
+                        "color": "orange",
+                        "index": 1
+                      },
+                      "Medium": {
+                        "color": "yellow",
+                        "index": 2
+                      },
+                      "Low": {
+                        "color": "green",
+                        "index": 3
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "DeviationScore"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              },
+              {
+                "id": "custom.displayMode",
+                "value": "color-background-solid"
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 2
+                    },
+                    {
+                      "color": "orange",
+                      "value": 3
+                    },
+                    {
+                      "color": "red",
+                      "value": 4
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 4
+      },
+      "id": 4,
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "DeviationScore"
+          }
+        ]
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "table",
+          "rawSql": "SELECT TOP 50\n    s.ServerName,\n    a.MetricCategory,\n    a.MetricName,\n    a.DetectionTime,\n    a.CurrentValue,\n    a.BaselineValue,\n    a.DeviationScore,\n    a.Severity,\n    a.AnomalyType\nFROM dbo.AnomalyDetections a\nINNER JOIN dbo.Servers s ON a.ServerID = s.ServerID\nWHERE a.IsResolved = 0\nORDER BY a.DeviationScore DESC;",
+          "refId": "A"
+        }
+      ],
+      "title": "Active Anomalies",
+      "type": "table"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 12
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": [
+            "last",
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "time_series",
+          "rawSql": "SELECT\n    CollectionTime AS time,\n    MetricValue AS [Current Value],\n    ServerID\nFROM dbo.PerformanceMetrics\nWHERE ServerID = ${ServerID}\n  AND MetricCategory = 'Memory'\n  AND MetricName = 'Percent'\n  AND $__timeFilter(CollectionTime)\nORDER BY CollectionTime;",
+          "refId": "A"
+        },
+        {
+          "datasource": "MonitoringDB",
+          "format": "time_series",
+          "rawSql": "SELECT\n    DATEADD(DAY, DATEDIFF(DAY, 0, BaselineDate), 0) AS time,\n    AvgValue AS [7-Day Baseline],\n    ServerID\nFROM dbo.MetricBaselines\nWHERE ServerID = ${ServerID}\n  AND MetricCategory = 'Memory'\n  AND MetricName = 'Percent'\n  AND BaselinePeriod = '7day'\n  AND BaselineDate >= DATEADD(DAY, -30, GETUTCDATE())\nORDER BY BaselineDate;",
+          "refId": "B"
+        },
+        {
+          "datasource": "MonitoringDB",
+          "format": "time_series",
+          "rawSql": "SELECT\n    DATEADD(DAY, DATEDIFF(DAY, 0, BaselineDate), 0) AS time,\n    AvgValue AS [30-Day Baseline],\n    ServerID\nFROM dbo.MetricBaselines\nWHERE ServerID = ${ServerID}\n  AND MetricCategory = 'Memory'\n  AND MetricName = 'Percent'\n  AND BaselinePeriod = '30day'\n  AND BaselineDate >= DATEADD(DAY, -30, GETUTCDATE())\nORDER BY BaselineDate;",
+          "refId": "C"
+        }
+      ],
+      "title": "Memory % - Current vs Baselines",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 12
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": [
+            "last",
+            "mean"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "time_series",
+          "rawSql": "SELECT\n    DetectionTime AS time,\n    DeviationScore AS [Deviation (Sigma)],\n    ServerID\nFROM dbo.AnomalyDetections\nWHERE ServerID = ${ServerID}\n  AND $__timeFilter(DetectionTime)\nORDER BY DetectionTime;",
+          "refId": "A"
+        }
+      ],
+      "title": "Anomaly Deviation Trend",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "MonitoringDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "left",
+            "displayMode": "auto",
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 20
+      },
+      "id": 7,
+      "options": {
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": "MonitoringDB",
+          "format": "table",
+          "rawSql": "SELECT TOP 100\n    s.ServerName,\n    mb.MetricCategory,\n    mb.MetricName,\n    mb.BaselinePeriod,\n    mb.BaselineDate,\n    mb.AvgValue,\n    mb.MinValue,\n    mb.MaxValue,\n    mb.StdDevValue,\n    mb.MedianValue,\n    mb.P95Value,\n    mb.P99Value,\n    mb.SampleCount\nFROM dbo.MetricBaselines mb\nINNER JOIN dbo.Servers s ON mb.ServerID = s.ServerID\nWHERE mb.BaselineDate >= DATEADD(DAY, -7, GETUTCDATE())\nORDER BY mb.BaselineDate DESC, s.ServerName, mb.MetricCategory, mb.MetricName;",
+          "refId": "A"
+        }
+      ],
+      "title": "Recent Baseline Calculations",
+      "type": "table"
+    }
+  ],
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [
+    "sql-server",
+    "monitoring",
+    "baselines",
+    "anomaly-detection"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "1",
+          "value": "1"
+        },
+        "datasource": "MonitoringDB",
+        "definition": "SELECT ServerID AS __value, ServerName AS __text FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "ServerID",
+        "options": [],
+        "query": "SELECT ServerID AS __value, ServerName AS __text FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "11 - Baseline Comparison & Anomaly Detection (Build: 2025-11-10 08:34:54 UTC)",
+  "uid": "baseline-comparison",
+  "version": 1
+}
