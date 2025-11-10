@@ -53,6 +53,7 @@ apiVersion: 1
 datasources:
   - name: MonitoringDB
     type: mssql
+    uid: monitoringdb
     access: proxy
     url: ${MONITORINGDB_SERVER}:${MONITORINGDB_PORT}
     database: ${MONITORINGDB_DATABASE}
