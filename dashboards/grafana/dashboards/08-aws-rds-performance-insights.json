@@ -416,7 +416,7 @@
             "uid": "${DS_MONITORINGDB}"
           },
           "format": "time_series",
-          "rawSql": "-- Simplified IOPS query - uses direct MetricValue\nSELECT\n  CollectionTime AS time,\n  MetricValue AS value,\n  CASE MetricName\n    WHEN 'ReadIOPS' THEN 'Read IOPS'\n    WHEN 'WriteIOPS' THEN 'Write IOPS'\n  END AS metric\nFROM dbo.PerformanceMetrics\nWHERE ServerID = $ServerID\n  AND MetricCategory = 'Disk'\n  AND MetricName IN ('ReadIOPS', 'WriteIOPS')\n  AND CollectionTime >= $__timeFrom()\n  AND CollectionTime <= $__timeTo()\nORDER BY CollectionTime",
+          "rawSql": "SELECT\n  pm.CollectionTime AS time,\n  pm.MetricValue AS value,\n  pm.MetricName AS metric\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.MetricCategory = 'Disk'\n  AND pm.MetricName IN ('ReadIOPS', 'WriteIOPS')\n  AND pm.ServerID = $ServerID\n  AND pm.CollectionTime >= $__timeFrom()\n  AND pm.CollectionTime <= $__timeTo()\nORDER BY pm.CollectionTime",
           "refId": "A"
         }
       ],
@@ -508,7 +508,7 @@
             "uid": "${DS_MONITORINGDB}"
           },
           "format": "time_series",
-          "rawSql": "-- Simplified Throughput query - uses direct MetricValue\nSELECT\n  CollectionTime AS time,\n  MetricValue AS value,\n  CASE MetricName\n    WHEN 'ReadMB' THEN 'Read MB/s'\n    WHEN 'WriteMB' THEN 'Write MB/s'\n  END AS metric\nFROM dbo.PerformanceMetrics\nWHERE ServerID = $ServerID\n  AND MetricCategory = 'Disk'\n  AND MetricName IN ('ReadMB', 'WriteMB')\n  AND CollectionTime >= $__timeFrom()\n  AND CollectionTime <= $__timeTo()\nORDER BY CollectionTime",
+          "rawSql": "SELECT\n  pm.CollectionTime AS time,\n  pm.MetricValue AS value,\n  pm.MetricName AS metric\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.MetricCategory = 'Disk'\n  AND pm.MetricName IN ('ReadMB', 'WriteMB')\n  AND pm.ServerID = $ServerID\n  AND pm.CollectionTime >= $__timeFrom()\n  AND pm.CollectionTime <= $__timeTo()\nORDER BY pm.CollectionTime",
           "refId": "A"
         }
       ],
@@ -608,7 +608,7 @@
             "uid": "${DS_MONITORINGDB}"
           },
           "format": "time_series",
-          "rawSql": "SELECT\n  CollectionTime AS time,\n  MetricValue AS value,\n  CASE MetricName\n    WHEN 'AvgReadLatencyMs' THEN 'Read Latency'\n    WHEN 'AvgWriteLatencyMs' THEN 'Write Latency'\n  END AS metric\nFROM dbo.PerformanceMetrics pm\nWHERE pm.MetricCategory = 'Disk'\n  AND pm.MetricName IN ('AvgReadLatencyMs', 'AvgWriteLatencyMs')\n  AND pm.ServerID = $ServerID\n  AND pm.CollectionTime >= $__timeFrom()\n  AND pm.CollectionTime <= $__timeTo()\nORDER BY pm.CollectionTime",
+          "rawSql": "SELECT\n  pm.CollectionTime AS time,\n  pm.MetricValue AS value,\n  pm.MetricName AS metric\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.MetricCategory = 'Disk'\n  AND pm.MetricName IN ('AvgReadLatencyMs', 'AvgWriteLatencyMs')\n  AND pm.ServerID = $ServerID\n  AND pm.CollectionTime >= $__timeFrom()\n  AND pm.CollectionTime <= $__timeTo()\nORDER BY pm.CollectionTime",
           "refId": "A"
         }
       ],
