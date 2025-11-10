@@ -130,7 +130,7 @@
             "uid": "${DS_MONITORINGDB}"
           },
           "format": "time_series",
-          "rawSql": "SELECT\n  CollectionTime AS time,\n  MetricValue AS value,\n  s.ServerName + ' - ' + MetricName AS metric\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.MetricCategory = 'Performance'\n  AND pm.MetricName LIKE '%CPU%'\n  AND pm.ServerID = $ServerID\n  AND pm.CollectionTime >= $__timeFrom()\n  AND pm.CollectionTime <= $__timeTo()\nORDER BY pm.CollectionTime",
+          "rawSql": "SELECT\n  pm.CollectionTime AS time,\n  pm.MetricValue AS value,\n  s.ServerName + ' - ' + pm.MetricName AS metric\nFROM dbo.PerformanceMetrics pm\nINNER JOIN dbo.Servers s ON pm.ServerID = s.ServerID\nWHERE pm.MetricCategory = 'CPU'\n  AND pm.ServerID = $ServerID\n  AND pm.CollectionTime >= $__timeFrom()\n  AND pm.CollectionTime <= $__timeTo()\nORDER BY pm.CollectionTime",
           "refId": "A"
         }
       ],
@@ -1030,7 +1030,7 @@
             "uid": "${DS_MONITORINGDB}"
           },
           "format": "time_series",
-          "rawSql": "-- Database Load by Wait Type (Active Sessions)\nSELECT\n  CollectionTime AS time,\n  MetricValue AS value,\n  MetricName AS metric\nFROM dbo.PerformanceMetrics\nWHERE MetricCategory = 'WaitStats'\n  AND ServerID = $ServerID\n  AND MetricName IN (\n    'PAGEIOLATCH_SH', 'PAGEIOLATCH_EX',\n    'LCK_M_S', 'LCK_M_X', 'LCK_M_U',\n    'WRITELOG', 'LOGBUFFER',\n    'CXPACKET', 'CXCONSUMER',\n    'SOS_SCHEDULER_YIELD',\n    'ASYNC_NETWORK_IO',\n    'BROKER_RECEIVE_WAITFOR'\n  )\n  AND CollectionTime >= $__timeFrom()\n  AND CollectionTime <= $__timeTo()\n\nUNION ALL\n\n-- Add Max vCPU line (logical CPU count)\nSELECT\n  CollectionTime AS time,\n  MetricValue AS value,\n  'Max vCPU' AS metric\nFROM dbo.PerformanceMetrics\nWHERE MetricCategory = 'CPU'\n  AND MetricName = 'LogicalProcessors'\n  AND ServerID = $ServerID\n  AND CollectionTime >= $__timeFrom()\n  AND CollectionTime <= $__timeTo()\n\nORDER BY time, metric",
+          "rawSql": "-- Database Load by Wait Type (Active Sessions)\nSELECT\n  ws.SnapshotTime AS time,\n  ws.WaitingTasksCount AS value,\n  ws.WaitType AS metric\nFROM dbo.WaitStatsSnapshot ws\nWHERE ws.ServerID = $ServerID\n  AND ws.WaitType IN (\n    'PAGEIOLATCH_SH', 'PAGEIOLATCH_EX',\n    'LCK_M_S', 'LCK_M_X', 'LCK_M_U',\n    'WRITELOG', 'LOGBUFFER',\n    'CXPACKET', 'CXCONSUMER',\n    'SOS_SCHEDULER_YIELD',\n    'ASYNC_NETWORK_IO',\n    'BROKER_RECEIVE_WAITFOR'\n  )\n  AND ws.SnapshotTime >= $__timeFrom()\n  AND ws.SnapshotTime <= $__timeTo()\nORDER BY time, metric",
           "refId": "A"
         }
       ],
