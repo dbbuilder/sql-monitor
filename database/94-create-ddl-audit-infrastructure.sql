@@ -13,6 +13,13 @@
 USE MonitoringDB;
 GO
 
+SET ANSI_NULLS ON;
+GO
+SET QUOTED_IDENTIFIER ON;
+GO
+SET ANSI_PADDING ON;
+GO
+
 -- =====================================================
 -- SECTION 1: DDL Audit Events Table
 -- =====================================================
@@ -963,7 +970,7 @@ BEGIN
         @enabled = 1,
         @description = N'Analyzes DDL events and correlates them with performance metrics to detect impact',
         @category_name = N'Database Maintenance',
-        @owner_login_name = N'sa';
+        @owner_login_name = N'sv';
 
     EXEC msdb.dbo.sp_add_jobstep
         @job_name = N'SQL Monitor - DDL Impact Analysis',

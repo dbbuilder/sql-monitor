@@ -163,8 +163,8 @@ BEGIN
                                 ips.partition_number AS PartitionNumber,
                                 CAST(ips.avg_fragmentation_in_percent AS DECIMAL(5,2)) AS FragmentationPercent,
                                 ips.page_count AS PageCount,
-                                ips.record_count AS RecordCount,
-                                CAST(ips.avg_page_space_used_in_percent AS DECIMAL(5,2)) AS AvgPageSpaceUsedPercent
+                                ISNULL(ips.record_count, 0) AS RecordCount,
+                                CAST(ISNULL(ips.avg_page_space_used_in_percent, 0) AS DECIMAL(5,2)) AS AvgPageSpaceUsedPercent
                             FROM sys.dm_db_index_physical_stats(' + CAST(@DbID AS NVARCHAR(10)) + ', NULL, NULL, NULL, ''LIMITED'') ips
                             INNER JOIN [' + @DbName + '].sys.tables t WITH (NOLOCK) ON ips.object_id = t.object_id
                             INNER JOIN [' + @DbName + '].sys.indexes i WITH (NOLOCK) ON ips.object_id = i.object_id AND ips.index_id = i.index_id
@@ -544,13 +544,13 @@ BEGIN
             BEGIN
                 INSERT INTO dbo.IndexMaintenanceHistory (
                     ServerID, DatabaseName, SchemaName, TableName, IndexName,
-                    MaintenanceType, FragmentationBefore, PageCountBefore,
-                    DurationSeconds, StartTime, EndTime
+                    MaintenanceType, FragmentationBefore, PageCount,
+                    DurationSeconds, StartTime, EndTime, Status
                 )
                 VALUES (
                     @ServerID, @MaintDbName, @SchemaName, @TableName, @IndexName,
                     @Action, @Fragmentation, @PageCount,
-                    @DurationSeconds, @StartTime, @EndTime
+                    @DurationSeconds, @StartTime, @EndTime, 'Success'
                 );
             END;
 
@@ -566,13 +566,13 @@ BEGIN
             BEGIN
                 INSERT INTO dbo.IndexMaintenanceHistory (
                     ServerID, DatabaseName, SchemaName, TableName, IndexName,
-                    MaintenanceType, FragmentationBefore, PageCountBefore,
-                    DurationSeconds, StartTime, EndTime
+                    MaintenanceType, FragmentationBefore, PageCount,
+                    DurationSeconds, StartTime, EndTime, Status, ErrorMessage
                 )
                 VALUES (
                     @ServerID, @MaintDbName, @SchemaName, @TableName, @IndexName,
                     'FAILED', @Fragmentation, @PageCount,
-                    0, @StartTime, GETUTCDATE()
+                    0, @StartTime, GETUTCDATE(), 'Failed', ERROR_MESSAGE()
                 );
             END;
         END CATCH;
