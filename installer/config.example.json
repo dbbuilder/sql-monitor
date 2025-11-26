@@ -1,0 +1,20 @@
+{
+  "InstallPath": "/opt/sql-monitor",
+  "DeploymentType": "docker",
+  "SqlServer": "your-sql-server.database.windows.net",
+  "SqlPort": "1433",
+  "SqlUser": "sa",
+  "SqlPassword": "YOUR_SQL_PASSWORD",
+  "ApiUser": "monitor_api",
+  "ApiPassword": "GENERATE_SECURE_PASSWORD",
+  "GrafanaPassword": "GENERATE_SECURE_PASSWORD",
+  "JwtSecret": "GENERATE_48_CHAR_SECRET",
+  "ApiPort": "9000",
+  "GrafanaPort": "9001",
+  "EnableSsl": false,
+  "RetentionDays": 90,
+  "MonitoredServers": [
+    "server1.example.com:1433",
+    "server2.example.com:1433"
+  ]
+}
