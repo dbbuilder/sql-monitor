@@ -1,0 +1,1161 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "grafana",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 100,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "# DDL Audit & Change Tracking Dashboard\n\nThis dashboard provides comprehensive tracking of **DDL (Data Definition Language) changes** across all monitored SQL Servers, including:\n\n- **Who** made schema changes (login, host, application)\n- **What** was changed (tables, indexes, procedures, views, permissions)\n- **When** changes occurred with timeline visualization\n- **Impact Analysis** - correlation between DDL changes and performance metrics\n- **Anomaly Detection** - unusual DDL patterns (volume spikes, after-hours changes, rapid-fire modifications)\n\n**SOC 2 Compliance**: CC6.1 (Logical Access), CC7.2 (Security Monitoring), CC8.1 (Change Management)",
+        "mode": "markdown"
+      },
+      "pluginVersion": "10.2.0",
+      "title": "",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "PACBEEDECF159CDCA"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 50 },
+              { "color": "red", "value": 100 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 4 },
+      "id": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "PACBEEDECF159CDCA" },
+          "format": "table",
+          "rawSql": "SELECT COUNT(*) AS DDLEvents\nFROM dbo.DDLAuditEvents\nWHERE EventTime >= DATEADD(HOUR, -24, SYSUTCDATETIME())\n  AND ($ServerName = 'All' OR ServerID IN (SELECT ServerID FROM dbo.Servers WHERE ServerName = '$ServerName'));",
+          "refId": "A"
+        }
+      ],
+      "title": "DDL Events (24h)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "PACBEEDECF159CDCA"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 1 },
+              { "color": "red", "value": 5 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 4 },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "PACBEEDECF159CDCA" },
+          "format": "table",
+          "rawSql": "SELECT COUNT(*) AS HighImpact\nFROM dbo.DDLAuditEvents\nWHERE EventTime >= DATEADD(HOUR, -24, SYSUTCDATETIME())\n  AND ImpactSeverity IN ('High', 'Critical')\n  AND ($ServerName = 'All' OR ServerID IN (SELECT ServerID FROM dbo.Servers WHERE ServerName = '$ServerName'));",
+          "refId": "A"
+        }
+      ],
+      "title": "High Impact (24h)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "PACBEEDECF159CDCA"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "blue", "value": null }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 4 },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "PACBEEDECF159CDCA" },
+          "format": "table",
+          "rawSql": "SELECT COUNT(DISTINCT LoginName) AS UniqueUsers\nFROM dbo.DDLAuditEvents\nWHERE EventTime >= DATEADD(HOUR, -24, SYSUTCDATETIME())\n  AND ($ServerName = 'All' OR ServerID IN (SELECT ServerID FROM dbo.Servers WHERE ServerName = '$ServerName'));",
+          "refId": "A"
+        }
+      ],
+      "title": "Unique Users (24h)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "PACBEEDECF159CDCA"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "red", "value": 3 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 4 },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "PACBEEDECF159CDCA" },
+          "format": "table",
+          "rawSql": "SELECT COUNT(*) AS Anomalies\nFROM (\n    SELECT LoginName\n    FROM dbo.DDLAuditEvents\n    WHERE EventTime >= DATEADD(DAY, -7, SYSUTCDATETIME())\n      AND ($ServerName = 'All' OR ServerID IN (SELECT ServerID FROM dbo.Servers WHERE ServerName = '$ServerName'))\n    GROUP BY LoginName\n    HAVING COUNT(*) > (\n        SELECT AVG(cnt) * 3\n        FROM (\n            SELECT COUNT(*) as cnt\n            FROM dbo.DDLAuditEvents\n            WHERE EventTime >= DATEADD(DAY, -37, SYSUTCDATETIME())\n              AND EventTime < DATEADD(DAY, -7, SYSUTCDATETIME())\n            GROUP BY LoginName\n        ) baseline\n    )\n) anomalies;",
+          "refId": "A"
+        }
+      ],
+      "title": "Anomalies (7d)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "PACBEEDECF159CDCA"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "purple", "value": null }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 4 },
+      "id": 5,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "PACBEEDECF159CDCA" },
+          "format": "table",
+          "rawSql": "SELECT COUNT(DISTINCT DatabaseName) AS Databases\nFROM dbo.DDLAuditEvents\nWHERE EventTime >= DATEADD(HOUR, -24, SYSUTCDATETIME())\n  AND ($ServerName = 'All' OR ServerID IN (SELECT ServerID FROM dbo.Servers WHERE ServerName = '$ServerName'));",
+          "refId": "A"
+        }
+      ],
+      "title": "Databases Affected (24h)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "PACBEEDECF159CDCA"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "orange", "value": null }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 4 },
+      "id": 6,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "PACBEEDECF159CDCA" },
+          "format": "table",
+          "rawSql": "SELECT COUNT(*) AS PendingReview\nFROM dbo.DDLAuditEvents d\nINNER JOIN dbo.DDLEventCategories c ON d.EventType = c.EventType\nWHERE d.EventTime >= DATEADD(DAY, -7, SYSUTCDATETIME())\n  AND c.RequiresReview = 1\n  AND d.ReviewedBy IS NULL\n  AND ($ServerName = 'All' OR d.ServerID IN (SELECT ServerID FROM dbo.Servers WHERE ServerName = '$ServerName'));",
+          "refId": "A"
+        }
+      ],
+      "title": "Pending Review",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "PACBEEDECF159CDCA"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "id": 10,
+      "options": {
+        "legend": {
+          "calcs": ["sum"],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "PACBEEDECF159CDCA" },
+          "format": "time_series",
+          "rawSql": "SELECT\n    DATEADD(HOUR, DATEDIFF(HOUR, 0, EventTime), 0) AS time,\n    EventCategory,\n    COUNT(*) AS events\nFROM dbo.DDLAuditEvents\nWHERE EventTime >= DATEADD(DAY, -7, SYSUTCDATETIME())\n  AND ($ServerName = 'All' OR ServerID IN (SELECT ServerID FROM dbo.Servers WHERE ServerName = '$ServerName'))\nGROUP BY DATEADD(HOUR, DATEDIFF(HOUR, 0, EventTime), 0), EventCategory\nORDER BY time;",
+          "refId": "A"
+        }
+      ],
+      "title": "DDL Events by Category (Last 7 Days)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "PACBEEDECF159CDCA"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 8 },
+      "id": 11,
+      "options": {
+        "displayLabels": ["percent"],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "values": ["value", "percent"]
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "PACBEEDECF159CDCA" },
+          "format": "table",
+          "rawSql": "SELECT EventCategory, COUNT(*) AS count\nFROM dbo.DDLAuditEvents\nWHERE EventTime >= DATEADD(HOUR, -24, SYSUTCDATETIME())\n  AND ($ServerName = 'All' OR ServerID IN (SELECT ServerID FROM dbo.Servers WHERE ServerName = '$ServerName'))\nGROUP BY EventCategory\nORDER BY count DESC;",
+          "refId": "A"
+        }
+      ],
+      "title": "Events by Category (24h)",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "PACBEEDECF159CDCA"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": [
+            { "options": { "Critical": { "color": "red", "index": 0 } }, "type": "value" },
+            { "options": { "High": { "color": "orange", "index": 1 } }, "type": "value" },
+            { "options": { "Medium": { "color": "yellow", "index": 2 } }, "type": "value" },
+            { "options": { "Low": { "color": "green", "index": 3 } }, "type": "value" },
+            { "options": { "None": { "color": "blue", "index": 4 } }, "type": "value" }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 8 },
+      "id": 12,
+      "options": {
+        "displayLabels": ["percent"],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "values": ["value", "percent"]
+        },
+        "pieType": "donut",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "PACBEEDECF159CDCA" },
+          "format": "table",
+          "rawSql": "SELECT ISNULL(ImpactSeverity, 'Not Analyzed') AS ImpactSeverity, COUNT(*) AS count\nFROM dbo.DDLAuditEvents\nWHERE EventTime >= DATEADD(DAY, -7, SYSUTCDATETIME())\n  AND ($ServerName = 'All' OR ServerID IN (SELECT ServerID FROM dbo.Servers WHERE ServerName = '$ServerName'))\nGROUP BY ImpactSeverity\nORDER BY count DESC;",
+          "refId": "A"
+        }
+      ],
+      "title": "Impact Severity Distribution (7d)",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "PACBEEDECF159CDCA"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "ImpactSeverity" },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  { "options": { "Critical": { "color": "red", "index": 0 } }, "type": "value" },
+                  { "options": { "High": { "color": "orange", "index": 1 } }, "type": "value" },
+                  { "options": { "Medium": { "color": "yellow", "index": 2 } }, "type": "value" },
+                  { "options": { "Low": { "color": "green", "index": 3 } }, "type": "value" }
+                ]
+              },
+              { "id": "custom.cellOptions", "value": { "type": "color-background" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "SQLCommand" },
+            "properties": [
+              { "id": "custom.width", "value": 300 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "RiskLevel" },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  { "options": { "Critical": { "color": "red", "index": 0 } }, "type": "value" },
+                  { "options": { "High": { "color": "orange", "index": 1 } }, "type": "value" },
+                  { "options": { "Medium": { "color": "yellow", "index": 2 } }, "type": "value" },
+                  { "options": { "Low": { "color": "green", "index": 3 } }, "type": "value" }
+                ]
+              },
+              { "id": "custom.cellOptions", "value": { "type": "color-text" } }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 16 },
+      "id": 20,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "PACBEEDECF159CDCA" },
+          "format": "table",
+          "rawSql": "SELECT TOP 100\n    d.EventTime,\n    s.ServerName,\n    d.DatabaseName,\n    d.EventType,\n    d.EventCategory,\n    d.SchemaName + '.' + d.ObjectName AS ObjectName,\n    d.LoginName,\n    d.HostName,\n    d.ApplicationName,\n    ISNULL(d.ImpactSeverity, '-') AS ImpactSeverity,\n    ISNULL(CAST(d.ImpactScore AS VARCHAR), '-') AS ImpactScore,\n    c.RiskLevel,\n    LEFT(d.SQLCommand, 200) + CASE WHEN LEN(d.SQLCommand) > 200 THEN '...' ELSE '' END AS SQLCommand\nFROM dbo.DDLAuditEvents d\nINNER JOIN dbo.Servers s ON d.ServerID = s.ServerID\nLEFT JOIN dbo.DDLEventCategories c ON d.EventType = c.EventType\nWHERE d.EventTime >= $__timeFrom()\n  AND d.EventTime <= $__timeTo()\n  AND ($ServerName = 'All' OR s.ServerName = '$ServerName')\n  AND ($EventCategory = 'All' OR d.EventCategory = '$EventCategory')\n  AND ($LoginName = 'All' OR d.LoginName = '$LoginName')\nORDER BY d.EventTime DESC;",
+          "refId": "A"
+        }
+      ],
+      "title": "Recent DDL Events",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "PACBEEDECF159CDCA"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 50 },
+              { "color": "red", "value": 100 }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "TotalDDLEvents" },
+            "properties": [
+              { "id": "custom.cellOptions", "value": { "type": "color-background-solid" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "HighImpactChanges" },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "green", "value": null },
+                    { "color": "orange", "value": 1 },
+                    { "color": "red", "value": 5 }
+                  ]
+                }
+              },
+              { "id": "custom.cellOptions", "value": { "type": "color-background-solid" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "SecurityChanges" },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "green", "value": null },
+                    { "color": "yellow", "value": 1 },
+                    { "color": "red", "value": 10 }
+                  ]
+                }
+              },
+              { "id": "custom.cellOptions", "value": { "type": "color-background-solid" } }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 26 },
+      "id": 30,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          { "desc": true, "displayName": "TotalDDLEvents" }
+        ]
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "PACBEEDECF159CDCA" },
+          "format": "table",
+          "rawSql": "SELECT\n    d.LoginName,\n    COUNT(*) AS TotalDDLEvents,\n    COUNT(DISTINCT d.ServerID) AS ServersAffected,\n    COUNT(DISTINCT d.DatabaseName) AS DatabasesAffected,\n    MIN(d.EventTime) AS FirstActivity,\n    MAX(d.EventTime) AS LastActivity,\n    SUM(CASE WHEN d.EventCategory = 'TABLE' THEN 1 ELSE 0 END) AS TableChanges,\n    SUM(CASE WHEN d.EventCategory = 'INDEX' THEN 1 ELSE 0 END) AS IndexChanges,\n    SUM(CASE WHEN d.EventCategory IN ('USER', 'ROLE', 'PERMISSION') THEN 1 ELSE 0 END) AS SecurityChanges,\n    SUM(CASE WHEN d.ImpactSeverity IN ('High', 'Critical') THEN 1 ELSE 0 END) AS HighImpactChanges\nFROM dbo.DDLAuditEvents d\nWHERE d.EventTime >= $__timeFrom()\n  AND d.EventTime <= $__timeTo()\n  AND ($ServerName = 'All' OR d.ServerID IN (SELECT ServerID FROM dbo.Servers WHERE ServerName = '$ServerName'))\nGROUP BY d.LoginName\nORDER BY TotalDDLEvents DESC;",
+          "refId": "A"
+        }
+      ],
+      "title": "DDL Activity by User (SOC 2 CC6.1)",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "PACBEEDECF159CDCA"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Severity" },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  { "options": { "Critical": { "color": "red", "index": 0 } }, "type": "value" },
+                  { "options": { "High": { "color": "orange", "index": 1 } }, "type": "value" },
+                  { "options": { "Medium": { "color": "yellow", "index": 2 } }, "type": "value" },
+                  { "options": { "Low": { "color": "green", "index": 3 } }, "type": "value" }
+                ]
+              },
+              { "id": "custom.cellOptions", "value": { "type": "color-background" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "AnomalyType" },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  { "options": { "HIGH_DDL_VOLUME": { "color": "red", "index": 0 } }, "type": "value" },
+                  { "options": { "HIGH_IMPACT_DDL": { "color": "orange", "index": 1 } }, "type": "value" },
+                  { "options": { "UNUSUAL_SOURCE": { "color": "yellow", "index": 2 } }, "type": "value" },
+                  { "options": { "AFTER_HOURS_DDL": { "color": "purple", "index": 3 } }, "type": "value" },
+                  { "options": { "RAPID_FIRE_DDL": { "color": "red", "index": 4 } }, "type": "value" }
+                ]
+              },
+              { "id": "custom.cellOptions", "value": { "type": "color-text" } }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 26 },
+      "id": 31,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "PACBEEDECF159CDCA" },
+          "format": "table",
+          "rawSql": "EXEC dbo.usp_DetectDDLAnomalies @LookbackDays = 7, @BaselineDays = 30;",
+          "refId": "A"
+        }
+      ],
+      "title": "DDL Anomaly Detection (SOC 2 CC7.3)",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "PACBEEDECF159CDCA"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "ImpactCategory" },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  { "options": { "Critical": { "color": "red", "index": 0 } }, "type": "value" },
+                  { "options": { "Negative": { "color": "orange", "index": 1 } }, "type": "value" },
+                  { "options": { "Neutral": { "color": "yellow", "index": 2 } }, "type": "value" },
+                  { "options": { "Positive": { "color": "green", "index": 3 } }, "type": "value" }
+                ]
+              },
+              { "id": "custom.cellOptions", "value": { "type": "color-background" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "OverallImpactScore" },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "green", "value": null },
+                    { "color": "yellow", "value": 20 },
+                    { "color": "orange", "value": 40 },
+                    { "color": "red", "value": 70 }
+                  ]
+                }
+              },
+              { "id": "custom.cellOptions", "value": { "type": "gauge", "mode": "gradient" } },
+              { "id": "max", "value": 100 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "DeltaCPUPercent" },
+            "properties": [
+              { "id": "unit", "value": "percent" },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "green", "value": null },
+                    { "color": "yellow", "value": 10 },
+                    { "color": "red", "value": 50 }
+                  ]
+                }
+              },
+              { "id": "custom.cellOptions", "value": { "type": "color-text" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "DeltaQueryDurationPercent" },
+            "properties": [
+              { "id": "unit", "value": "percent" },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "green", "value": null },
+                    { "color": "yellow", "value": 20 },
+                    { "color": "red", "value": 100 }
+                  ]
+                }
+              },
+              { "id": "custom.cellOptions", "value": { "type": "color-text" } }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 34 },
+      "id": 40,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          { "desc": true, "displayName": "OverallImpactScore" }
+        ]
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "PACBEEDECF159CDCA" },
+          "format": "table",
+          "rawSql": "SELECT\n    d.EventTime,\n    s.ServerName,\n    d.DatabaseName,\n    d.EventType,\n    d.SchemaName + '.' + d.ObjectName AS ObjectName,\n    d.LoginName,\n    i.OverallImpactScore,\n    i.ImpactCategory,\n    i.DeltaCPUPercent,\n    i.DeltaQueryDurationPercent,\n    i.DeltaErrorCount,\n    i.DeltaBlockingCount,\n    i.ConfidenceLevel,\n    i.ImpactSummary\nFROM dbo.DDLAuditEvents d\nINNER JOIN dbo.Servers s ON d.ServerID = s.ServerID\nINNER JOIN dbo.DDLImpactAnalysis i ON d.DDLEventID = i.DDLEventID\nWHERE d.EventTime >= $__timeFrom()\n  AND d.EventTime <= $__timeTo()\n  AND ($ServerName = 'All' OR s.ServerName = '$ServerName')\n  AND i.OverallImpactScore >= 10\nORDER BY i.OverallImpactScore DESC;",
+          "refId": "A"
+        }
+      ],
+      "title": "DDL Impact Analysis - Cause/Effect Correlation",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "PACBEEDECF159CDCA"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 44 },
+      "id": 50,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.8,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "horizontal",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "PACBEEDECF159CDCA" },
+          "format": "table",
+          "rawSql": "SELECT TOP 10 LoginName, COUNT(*) AS DDLEvents\nFROM dbo.DDLAuditEvents\nWHERE EventTime >= $__timeFrom()\n  AND EventTime <= $__timeTo()\n  AND ($ServerName = 'All' OR ServerID IN (SELECT ServerID FROM dbo.Servers WHERE ServerName = '$ServerName'))\nGROUP BY LoginName\nORDER BY DDLEvents DESC;",
+          "refId": "A"
+        }
+      ],
+      "title": "Top 10 DDL Users",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "mssql",
+        "uid": "PACBEEDECF159CDCA"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 44 },
+      "id": 51,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.8,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "horizontal",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "PACBEEDECF159CDCA" },
+          "format": "table",
+          "rawSql": "SELECT TOP 10 DatabaseName, COUNT(*) AS DDLEvents\nFROM dbo.DDLAuditEvents\nWHERE EventTime >= $__timeFrom()\n  AND EventTime <= $__timeTo()\n  AND ($ServerName = 'All' OR ServerID IN (SELECT ServerID FROM dbo.Servers WHERE ServerName = '$ServerName'))\nGROUP BY DatabaseName\nORDER BY DDLEvents DESC;",
+          "refId": "A"
+        }
+      ],
+      "title": "Top 10 Databases by DDL Activity",
+      "type": "barchart"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["sql-monitor", "audit", "ddl", "compliance", "soc2"],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "All"
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "PACBEEDECF159CDCA"
+        },
+        "definition": "SELECT 'All' AS ServerName UNION ALL SELECT ServerName FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Server",
+        "multi": false,
+        "name": "ServerName",
+        "options": [],
+        "query": "SELECT 'All' AS ServerName UNION ALL SELECT ServerName FROM dbo.Servers WHERE IsActive = 1 ORDER BY ServerName",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "All"
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "PACBEEDECF159CDCA"
+        },
+        "definition": "SELECT 'All' AS EventCategory UNION ALL SELECT DISTINCT EventCategory FROM dbo.DDLEventCategories ORDER BY EventCategory",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Category",
+        "multi": false,
+        "name": "EventCategory",
+        "options": [],
+        "query": "SELECT 'All' AS EventCategory UNION ALL SELECT DISTINCT EventCategory FROM dbo.DDLEventCategories ORDER BY EventCategory",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "All"
+        },
+        "datasource": {
+          "type": "mssql",
+          "uid": "PACBEEDECF159CDCA"
+        },
+        "definition": "SELECT 'All' AS LoginName UNION ALL SELECT DISTINCT LoginName FROM dbo.DDLAuditEvents WHERE EventTime >= DATEADD(DAY, -30, SYSUTCDATETIME()) ORDER BY LoginName",
+        "hide": 0,
+        "includeAll": false,
+        "label": "User",
+        "multi": false,
+        "name": "LoginName",
+        "options": [],
+        "query": "SELECT 'All' AS LoginName UNION ALL SELECT DISTINCT LoginName FROM dbo.DDLAuditEvents WHERE EventTime >= DATEADD(DAY, -30, SYSUTCDATETIME()) ORDER BY LoginName",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "DDL Audit & Change Tracking",
+  "uid": "ddl-audit-tracking",
+  "version": 1,
+  "weekStart": ""
+}
